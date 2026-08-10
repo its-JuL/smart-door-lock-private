@@ -1,0 +1,25 @@
+.search--form {
+    width: 15rem !important;
+}
+
+.table-data:nth-child(1) {
+    width: 5% !important;
+}
+
+.table-data:nth-child(2),
+.table-data:nth-child(3),
+.table-data:nth-child(4) {
+    overflow-wrap: break-word;
+    padding: 0 10px;
+    width: 30% !important;
+}
+
+.table-data:nth-child(5) {
+    width: 5% !important;
+}
+
+@media only screen and (max-width: 576px) {
+    .search--form {
+        width: 100% !important;
+    }
+}

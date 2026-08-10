@@ -1,0 +1,111 @@
+.serach--form {
+    width: 350px !important;
+}
+
+.input-group-prepend {
+    background: white !important;
+    border-radius: 1px solid grey !important;
+}
+
+input:active,
+input {
+    border: none !important;
+}
+
+.form-icons {
+    cursor: pointer;
+    width: 25px !important;
+}
+
+.card-active {
+    background: rgb(var(--color-blue-3)) !important;
+    color: rgb(var(--color-neutral-7)) !important;
+}
+
+.table-row:first-child {
+    border-top-left-radius: 13px !important;
+    border-top-right-radius: 13px !important;
+}
+
+.table-row:last-child {
+    border-bottom-left-radius: 13px !important;
+    border-bottom-right-radius: 13px !important;
+}
+
+.table-data:nth-child(1) {
+    overflow-wrap: break-word;
+    width: 25% !important;
+}
+
+.table-data:nth-child(2) {
+    width: 35% !important;
+}
+
+.table-data:nth-child(3) {
+    width: 15% !important;
+}
+
+.table-data:nth-child(4) {
+    width: 15% !important;
+}
+
+/* .table-data:nth-child(2),
+.table-data:nth-child(3) {
+    overflow-wrap: break-word;
+    padding: 0 10px;
+    width: 20% !important;
+} */
+
+.table-row:nth-child(even) {
+    background: rgb(var(--color-neutral-5)) !important;
+}
+
+.table-row:nth-child(odd) {
+    background: rgb(var(--color-neutral-7)) !important;
+}
+
+.image {
+    width: 1.6rem;
+}
+
+
+@media only screen and (max-width: 720px) {
+    input {
+        font-size: 0.8rem !important;
+    }
+
+    h3 {
+        font-size: 1.3rem !important;
+    }
+
+    h5 {
+        font-size: 1rem !important;
+    }
+
+    .serach--form {
+        width: 275px !important;
+    }
+
+    .table-data {
+        font-size: 1rem;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .serach--form {
+        width: 200px !important;
+    }
+
+
+    .table-data {
+        font-size: .8rem;
+    }
+
+    .table-data:nth-child(2) {
+        width: 30% !important;
+    }
+
+    .image {
+        width: 1.2rem;
+    }
+}

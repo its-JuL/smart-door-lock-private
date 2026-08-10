@@ -1,0 +1,46 @@
+<h3 class="fw-bold text-neutral-2 card-number" data-id="{{id}}"></h3>
+<div
+    class="card-info d-flex flex-column-reverse flex-md-row justify-content-between align-items-start align-items-md-start mt-2">
+
+    <div class="accessable-room me-5">
+
+        <div class="accessable-table-container bg-neutral-6 shadow-c-1 p-4 px-5 mt-4">
+            <div class="row bg-neutral-7 p-2 rounded-10">
+                <div class="col-6">
+                    <p class="text-center fw-bold text-neutral-2">Room ID</p>
+                </div>
+                <div class="col-6">
+                    <p class="text-center fw-bold text-neutral-2">Name</p>
+                </div>
+            </div>
+        </div>
+        
+        <p class="text-center mt-3 pointer py-2 rounded-13 bg-neutral-6" id="load-more-accessable-room">Load More</p>
+    </div>
+    <img src="" alt="" class="card-icon mb-2 mb-sm-0">
+</div>
+
+
+<h2 class="fw-bolder mt-5 text-neutral-2 mb-3">Available Room</h2>
+<form class="serach__form d-flex justify-content-between mb-3">
+    <input type="text" class="rounded-10 me-3 border-dark p-3 text-neutral-2" id="searchForm">
+    <button type="button" class="bg-blue-4 text-blue-1 fw-bold text-center" id="searchBtn">Search</button>
+</form>
+<!-- Building Filter -->
+<div class="building-filter d-flex bg-neutral-6 rounded-13 p-2 mb-3">
+    <p class="building-list-item px-4 py-1 rounded-10 fw-bold text-neutral-7 bg-blue-4 me-2" data-id="all" id="building-all" onclick="buildingSelectorHandler('all')">All</p>
+    <div class="d-flex building-container">
+    </div>
+    <p class="px-4 py-1 rounded-10 fw-bold text-neutral-7 bg-neutral-3 me-2 pointer" id="loadMoreBuilding">More</p>
+</div>
+<div class="table-header d-flex justify-content-between bg-neutral-7 py-2 rounded-13 mb-3 px-3">
+    <p class="table-data fw-bold text-center text-neutral-2">No</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Room ID</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Room Name</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Action</p>
+</div>
+
+<div class="request-room bg-neutral-7 border rounded-10 p-2">
+    
+</div>
+<p class="text-center mt-3 pointer py-2 rounded-13 bg-neutral-6" id="load-more">Load More</p>

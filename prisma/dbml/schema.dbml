@@ -1,0 +1,259 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Role {
+  id String [pk]
+  name String [unique, not null]
+  user User [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table User {
+  id String [pk]
+  username String [unique, not null]
+  accountIsVerified Boolean [not null, default: false]
+  email String [unique, not null]
+  emailIsVerified Boolean [not null, default: false]
+  password String [not null]
+  token String [unique]
+  tokenExpiredAt DateTime
+  role Role [not null]
+  roleId String [not null]
+  profil Profil
+  card Card [not null]
+  pinCredential pin_credentials
+  fingerprintMappings fingerprint_mappings [not null]
+  faceRecognition face_recognitions
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  passwordUpdatedAt DateTime
+  Building Building [not null]
+  buildingId String
+}
+
+Table Profil {
+  id String [pk]
+  full_name String
+  photo String [default: '/image/illustration-user.png']
+  user User [not null]
+  userId String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Card {
+  id String [pk]
+  card_number String [unique, not null]
+  card_name String [default: 'Kartu Saya']
+  pin String
+  card_status CARD_STATUS [not null, default: 'UNREGISTER']
+  type CARD_TYPE [not null, default: 'card_id']
+  banned Boolean [not null, default: false]
+  isTwoStepAuth Boolean [not null, default: true]
+  user User
+  userId String
+  room Room [not null]
+  records Rooms_Records [not null]
+  roomRequest Room_Request [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table pin_credentials {
+  id String [pk]
+  pinHash String [not null]
+  userId String [unique, not null]
+  roomId String [not null]
+  isActive Boolean [not null, default: true]
+  expiresAt DateTime
+  user User [not null]
+  room Room [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table fingerprint_mappings {
+  id String [pk]
+  deviceId String [not null]
+  fingerId Int [not null]
+  userId String [not null]
+  roomId String [not null]
+  isActive Boolean [not null, default: true]
+  user User [not null]
+  room Room [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (deviceId, fingerId) [unique]
+  }
+}
+
+Table face_recognitions {
+  id String [pk]
+  embeddingVector String [not null]
+  photoUrl String
+  userId String [unique, not null]
+  roomId String [not null]
+  isActive Boolean [not null, default: true]
+  user User [not null]
+  room Room [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Room {
+  id String [pk]
+  ruid String [unique, not null]
+  name String
+  isActive Boolean [not null, default: false]
+  card Card [not null]
+  pinCredentials pin_credentials [not null]
+  fingerprintMappings fingerprint_mappings [not null]
+  faceRecognitions face_recognitions [not null]
+  records Rooms_Records [not null]
+  roomRequest Room_Request [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  device Device
+  Building Building
+  buildingId String
+}
+
+Table Building {
+  id String [pk]
+  name String [not null]
+  operator User [not null]
+  rooms Room [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Device {
+  id String [pk]
+  device_id String [unique, not null]
+  pin String [not null, default: '$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW']
+  lastOnline DateTime
+  firmwareVersion String
+  deviceType DEVICE_TYPE [default: 'SINGLE_NETWORK']
+  deviceLastGateway String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  roomId String [unique]
+  room Room
+  Gateway_Spot Gateway_Spot
+  gateway_SpotId String
+}
+
+Table Gateway_Device {
+  id String [pk]
+  gateway_short_id String [unique, not null]
+  pin String [not null]
+  lastOnline DateTime
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  Gateway_Spot Gateway_Spot
+}
+
+Table Gateway_Spot {
+  id String [pk]
+  name String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  nodeDevice Device [not null]
+  gatewayDevice Gateway_Device [not null]
+  gateway_DeviceId String [unique, not null]
+}
+
+Table Api_Key {
+  id String [pk]
+  secret String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table Room_Request {
+  id String [pk]
+  card Card [not null]
+  room Room [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  roomId String [not null]
+  cardId String [not null]
+}
+
+Table Rooms_Records {
+  id String [pk]
+  unregisteredCard String
+  room Room
+  roomId String
+  Card Card
+  cardId String
+  isSuccess Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table BuildingToUser {
+  buildingId String [ref: > Building.id]
+  operatorId String [ref: > User.id]
+}
+
+Table CardToRoom {
+  roomId String [ref: > Room.id]
+  cardId String [ref: > Card.id]
+}
+
+Enum CARD_STATUS {
+  REGISTER
+  UNREGISTER
+}
+
+Enum CARD_TYPE {
+  card_id
+  card_atm
+  card_driver
+  card_emoney
+  card_studentid
+}
+
+Enum DEVICE_TYPE {
+  SINGLE_NETWORK
+  MULTI_NETWORK
+}
+
+Ref: User.roleId > Role.id
+
+Ref: Profil.userId - User.id [delete: Cascade]
+
+Ref: Card.userId > User.id
+
+Ref: pin_credentials.userId - User.id [delete: Cascade]
+
+Ref: pin_credentials.roomId > Room.id
+
+Ref: fingerprint_mappings.userId > User.id [delete: Cascade]
+
+Ref: fingerprint_mappings.roomId > Room.id
+
+Ref: face_recognitions.userId - User.id [delete: Cascade]
+
+Ref: face_recognitions.roomId > Room.id
+
+Ref: Room.buildingId > Building.id
+
+Ref: Device.roomId - Room.id [delete: Set Null]
+
+Ref: Device.gateway_SpotId > Gateway_Spot.id
+
+Ref: Gateway_Spot.gateway_DeviceId - Gateway_Device.id
+
+Ref: Room_Request.cardId > Card.id [delete: Cascade]
+
+Ref: Room_Request.roomId > Room.id [delete: Cascade]
+
+Ref: Rooms_Records.roomId > Room.id [delete: Set Null]
+
+Ref: Rooms_Records.cardId > Card.id [delete: Set Null]

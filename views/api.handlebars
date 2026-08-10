@@ -1,0 +1,46 @@
+<h3 class="fw-bold text-neutral-2 mt-3">API KEY List</h3>
+
+<div class="table-action mt-3 d-flex justify-content-between">
+    <p class="bg-blue-4 fw-bold text-neutral-7 px-4 py-2 rounded-15 pointer" id="generate-button">Genrate</p>
+    <form class="serach--form">
+        <div class="input-group shadow-c-1 rounded-13">
+            <input type="text" class="form-control rounded-13" placeholder="Search API Secret" name="api"
+                id="api">
+            <div class="input-group-prepend p-2 rounded-13">
+                <img src="/image/icon_search.svg" alt="Icon search card" class="form-icons" id="search-button">
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="api-list mt-3">
+    <div class="table-header d-flex justify-content-between bg-neutral-7 py-2 rounded-13 mb-3 px-3">
+        <p class="table-data fw-bold text-center text-neutral-2">No</p>
+        <p class="table-data fw-bold text-center text-neutral-2">API ID</p>
+        <p class="table-data fw-bold text-center text-neutral-2">API Key</p>
+        <p class="table-data fw-bold text-center text-neutral-2">Action</p>
+    </div>
+
+    <div class="table-content bg-neutral-7 rounded-13 shadow api-container">
+        {{#each apiListData}}
+            <div class="table-row d-flex py-2 py-md-2 justify-content-between px-3 api--list-item" data-id="{{this.id}}" id="api-template-{{this.id}}">
+                <span class="table-data text-center text-neutral-2"> {{inc @index}} </span>
+                <p class="table-data text-center text-neutral-2" data-id="{{this.id}}">
+                    {{this.id}}</p>
+                <p class="table-data text-center text-neutral-2" data-key="{{this.secret}}">
+                    {{this.secret}}</p>
+                <div class="table-data pointer d-flex justify-content-around">
+                    <span class="hover-tool" data-hover="Delete">
+                        <img src="/image/icon_delete.svg" alt="Delete" class="image" onclick="deleteToggle('{{this.id}}','{{this.id}}')">
+                    </span>
+
+                    <span class="hover-tool copy" data-hover="Copy" id="copy-{{this.id}}" onclick=copyHandler("{{this.id}}","{{this.secret}}")>
+                        <img src="/image/icon_copy.svg" alt="Copy" class="image">
+                    </span>
+                </div>
+            </div>
+        {{/each}}
+    </div>
+
+    <p class="text-center mt-4 pointer py-2 rounded-13 bg-neutral-6 mb-5" id="showMore">Show More</p>
+</div>

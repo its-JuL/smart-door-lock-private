@@ -1,0 +1,65 @@
+<h3 class="fw-bold text-neutral-2 mt-3 mb-4">Hardware List</h3>
+
+
+<div class="d-flex justify-content-end">
+
+<form class="search--form">
+    <div class="input-group shadow-c-1 rounded-13">
+        <input type="text" class="form-control rounded-13" placeholder="Search Hardware" name="api"
+            id="hw">
+        <div class="input-group-prepend p-2 rounded-13">
+            <img src="/image/icon_search.svg" alt="Icon search card" class="form-icons">
+        </div>
+    </div>
+</form>
+</div>
+
+<div class="api-list mt-3">
+    <div class="table-header d-flex justify-content-between bg-neutral-7 py-2 rounded-13 mb-3 px-3">
+        <p class="table-data text-center fw-bold text-neutral-2">No</p>
+        <p class="table-data text-center fw-bold text-neutral-2 hover-tool pointer"
+            data-hover="Device Unique ID">
+            DUID
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor"
+                class="bi bi-question-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                <path
+                    d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z" />
+            </svg>
+        </p>
+        <p class="table-data text-center fw-bold text-neutral-2 hover-tool pointer" data-hover="Single network refers to devices directly connected to cloud services to exchange data. Multi network refers to devices connected to Gateway Hardware to exchange data.">
+            Type
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor"
+                class="bi bi-question-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                <path
+                    d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z" />
+            </svg>
+        </p>
+        <p class="table-data text-center fw-bold text-neutral-2 hover-tool pointer"
+            data-hover="The first time the device is registered to system">
+            Register Time
+   
+        </p>
+        <p class="table-data text-center fw-bold text-neutral-2">Action</p>
+    </div>
+
+    <div class="table-content bg-neutral-7 rounded-13 shadow hw-container">
+        {{#each hardwareList}}
+            <div class="table-row d-flex py-1 py-md-2 justify-content-between px-3 hardware--list-item" id="hw-{{this.id}}" data-id="{{this.id}}">
+                <p class="table-data text-center text-neutral-2">{{inc @index}}</p>
+                <p class="table-data text-center text-neutral-2" data-duid="{{this.device_id}}">
+                    {{this.device_id}}</p>
+                <p class="table-data text-center text-neutral-2">{{this.deviceType}}</p>
+                <p class="table-data text-center text-neutral-2">
+                    {{days this.createdAt}}</p>
+                <div class="table-data pointer d-flex justify-content-around">
+                    <span class="hover-tool" data-hover="Delete" onclick='deleteHandler("{{this.id}}", "{{this.device_id}}")'>
+                        <img src="/image/icon_delete.svg" alt="Delete" class="image">
+                    </span>
+                </div>
+            </div>
+        {{/each}}
+    </div>
+    <p class="text-center mt-4 pointer py-2 rounded-13 bg-neutral-6 mb-5" id="showMore">Show More</p>
+</div>

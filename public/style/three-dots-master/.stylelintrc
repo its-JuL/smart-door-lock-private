@@ -1,0 +1,16 @@
+{
+  "ignoreFiles": [
+    "dist/**",
+    "docs/**"
+  ],
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-recommended-scss"
+  ],
+  "rules": {
+    "color-function-notation": "legacy",
+    "number-leading-zero": "never",
+    "number-max-precision": 6,
+    "string-quotes": "single"
+  }
+}

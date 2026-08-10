@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartdoorlock
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: doorlock_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: smardoorlock_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: secret123
+    ports:
+      - "5672:5672"   # Port untuk koneksi kode backend
+      - "15672:15672" # Port untuk dashboard web
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia
+
+volumes:
+  postgres_data:
+  rabbitmq_data:

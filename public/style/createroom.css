@@ -1,0 +1,33 @@
+.card-form {
+    width: auto;
+}
+
+.form-group {
+    width: 28em !important;
+}
+
+label {
+    white-space: nowrap;
+}
+
+.card-form .form-label {
+    width: 12rem !important;
+}
+
+input[type=text]:disabled {
+    background: rgb(var(--color-neutral-6)) !important;
+}
+
+@media only screen and (max-width: 576px) {
+    .form-group {
+        width: 100% !important;
+    }
+
+    .card-form .form-label {
+        width: 12rem !important;
+    }
+
+    .choose {
+        font-size: 0.75rem;
+    }
+}

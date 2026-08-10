@@ -1,0 +1,33 @@
+<h3 class="fw-bold text-neutral-2 mt-3 mb-4">Change Pin</h3>
+
+<form
+    class="card-change-pin align-items-center flex-column bg-neutral-6 shadow-c-1 p-4 p-sm-5 pb-5 rounded-13 d-flex mb-5">
+    <img src="/image/icon_card_id.svg" alt="Ikon kartu" class="card-icon mb-3">
+    <small data-id="{{id}}" id="card-id">Card ID: Load card ID</small>
+
+    <div class="form-group mt-5 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+        <label for="card-name" class="fw-bold text-neutral-2 me-4">Card Name</label>
+        <input type="text" class="form-control rounded-13 shadow-c-1" name="cardName" disabled
+            id="card-name">
+    </div>
+
+    <div class="form-group mt-3 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+        <label for="current-pin" class="fw-bold text-neutral-2 me-4">Current Pin</label>
+        <input type="password"  pattern="[0-9]*" inputmode="numeric" class="form-control rounded-13 shadow-c-1" name="currentPin" maxlength="6"
+            id="current-pin">
+    </div>
+
+    <div class="form-group mt-3 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+        <label for="card-number" class="fw-bold text-neutral-2 me-4">New Pin</label>
+        <input type="password"  pattern="[0-9]*" inputmode="numeric"  class="form-control rounded-13 shadow-c-1" name="newPin" id="new-pin" maxlength="6">
+    </div>
+
+    <div class="form-group mt-3 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between">
+        <label for="card-number" class="fw-bold text-neutral-2 me-4">Confirm Pin</label>
+        <input type="password" pattern="[0-9]*" inputmode="numeric" class="form-control rounded-13 shadow-c-1" name="confirmPin" maxlength="6"
+            id="confirm-pin">
+    </div>
+    <p class="text-danger-1 fw-bold mt-3" id="is-new-pin-match"></p>
+
+    <button class="btn p-2 mt-4 rounded-13 bg-blue-3 text-neutral-7 fw-bold" id="save" disabled> Change Pin</button>
+</form>

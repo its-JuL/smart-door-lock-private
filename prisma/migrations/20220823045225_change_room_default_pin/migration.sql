@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Room" ALTER COLUMN "pin" SET DEFAULT '$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW';

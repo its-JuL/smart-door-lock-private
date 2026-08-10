@@ -1,0 +1,35 @@
+.buildinginfo {
+    min-height: 100px !important;
+}
+
+.buildinginfo__items {
+    height: auto !important;
+}
+
+.buildinginfo__card {
+    height: 70px !important;
+}
+
+.buildinginfo__card:nth-child(2) {
+    min-height: auto !important;
+}
+
+.form__input {
+    flex: 3 !important;
+}
+
+input[type=text] {
+    width: 100%;
+}
+
+.form__action {
+    flex: 2 !important;
+}
+
+#ui-id-2 {
+    background: rgb(var(--color-neutral-6)) !important;
+    border-radius: 10px !important;
+    max-height: 300px !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}

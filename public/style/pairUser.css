@@ -1,0 +1,66 @@
+.card--pair-id {
+    width: 60%;
+}
+
+.btn-pair {
+    transition: transform ease-in;
+}
+
+.btn-pair:active {
+    transform: scale(1.1);
+}
+
+.btn-pair:hover {
+    background: rgb(var(--color-blue-4)) !important;
+    color: rgb(var(--color-blue-2)) !important;
+}
+
+#username {
+    border: 3px solid rgb(var(--color-blue-4));
+}
+
+#username:active,
+#username:focus {
+    background: rgb(var(--color-neutral-5)) !important;
+}
+
+.ui-menu-item {
+    color: rgb(var(--color-neutral-2)) !important;
+    font-family: "Source Sans Pro", Arial;
+    font-weight: bold !important;
+    padding: 5px 0 !important;
+}
+
+.ui-menu-item-wrapper {
+    background: rgb(var(--color-neutral-6)) !important;
+    border: none !important;
+    color: rgb(var(--color-neutral-2)) !important;
+    font-family: "Source Sans Pro", Arial;
+    font-weight: bold !important;
+    outline: none !important;
+    padding: 7px 7px !important;
+
+}
+
+.ui-menu-item-wrapper:hover {
+    background: rgb(var(--color-blue-4)) !important;
+    color: rgb(var(--color-neutral-5)) !important;
+    font-family: "Source Sans Pro", Arial;
+    font-weight: bold !important;
+    outline: 0 !important;
+    padding: 7px 7px !important;
+
+}
+
+#ui-id-1,
+.ui-menu,
+.ui-widget,
+.ui-widget-content,
+.ui-autocomplete,
+.ui-front {
+    background: rgb(var(--color-neutral-6)) !important;
+    border-radius: 10px !important;
+    max-height: 300px !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}

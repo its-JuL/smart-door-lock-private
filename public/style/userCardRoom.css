@@ -1,0 +1,69 @@
+.accessable-room {
+    width: 70%;
+}
+
+.accessable-table-container {
+    border-radius: 13px !important;
+    height: 20em !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.col-12.room-item {
+    height: 45px !important;
+    margin-bottom: 0px !important;
+    padding: 10px !important;
+}
+
+.room-item:nth-child(odd) {
+    background: rgb(var(--color-neutral-7));
+}
+
+.room-item:nth-child(even) {
+    background: rgb(var(--color-neutral-4));
+}
+
+.building-filter {
+    cursor: grab;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    touch-action: pan-x;
+    user-select: none;
+}
+
+.building-filter::-webkit-scrollbar {
+    height: 0px !important;
+    width: 3px;
+}
+
+.building-list-item {
+    white-space: nowrap;
+}
+
+
+@media only screen and (max-width: 576px) {
+
+    .accessable-room {
+        width: 100%;
+    }
+
+    .accessable-table-container {
+        width: 100% !important;
+    }
+
+    .table-data:nth-child(1) {
+        width: 10% !important;
+    }
+
+    .table-data:nth-child(2) {
+        width: 35% !important;
+    }
+
+    .table-data:nth-child(3) {
+        width: 45% !important;
+    }
+
+    .table-data:nth-child(4) {
+        width: 20% !important;
+    }
+}

@@ -1,0 +1,83 @@
+.pageinfo__image {
+    width: 10rem;
+}
+
+.pageinfo__link {
+    width: 12rem;
+}
+
+.pageinfo__description {
+    width: 20rem;
+}
+
+.buildinginfo__items {
+    flex: 1 !important;
+    height: 285px;
+}
+
+.buildinginfo_description {
+    max-width: 28rem;
+}
+
+.buildinginfo__card {
+    height: 130px;
+}
+
+.buildinginfo__icon {
+    width: 40px;
+}
+
+.table-data {
+    flex: 1;
+    width: auto !important;
+}
+
+.serach__form {
+    height: 35px;
+    width: 100% !important;
+}
+
+input[type=text] {
+    border: 1px rgb(var(--color-neutral-2)) solid !important;
+    flex: 4 !important;
+}
+
+input[type=text]:focus {
+    /* background: rgb(var(--color-neutral-5)); */
+    border: 2px rgb(var(--color-blue-4)) solid !important;
+}
+
+input[type=text]:disabled {
+    background: rgb(var(--color-neutral-5));
+}
+
+button[type=button] {
+    all: unset;
+    border-radius: 10px !important;
+    flex: 1 !important;
+}
+
+@media only screen and (max-width: 960px) {
+    .pageinfo__image {
+        margin: auto;
+    }
+
+    .pageinfo__link {
+        margin-top: 40px !important;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .buildinginfo_description {
+        max-width: 15rem;
+    }
+
+    .pageinfo__description {
+        width: 15rem;
+    }
+
+    button[type=button] {
+        font-size: 0.8rem;
+    }
+
+}

@@ -1,0 +1,1552 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.5.25
+-- Dumped by pg_dump version 9.5.25
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- Name: CARD_STATUS; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."CARD_STATUS" AS ENUM (
+    'REGISTER',
+    'UNREGISTER'
+);
+
+
+ALTER TYPE public."CARD_STATUS" OWNER TO postgres;
+
+--
+-- Name: CARD_TYPE; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."CARD_TYPE" AS ENUM (
+    'card_id',
+    'card_atm',
+    'card_driver',
+    'card_emoney',
+    'card_studentid'
+);
+
+
+ALTER TYPE public."CARD_TYPE" OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: Api_Key; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Api_Key" (
+    id text NOT NULL,
+    secret text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public."Api_Key" OWNER TO postgres;
+
+--
+-- Name: Card; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Card" (
+    id text NOT NULL,
+    card_number text NOT NULL,
+    pin text NOT NULL,
+    card_status public."CARD_STATUS" DEFAULT 'UNREGISTER'::public."CARD_STATUS" NOT NULL,
+    "userId" text,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    type public."CARD_TYPE" DEFAULT 'card_id'::public."CARD_TYPE" NOT NULL,
+    card_name text DEFAULT 'Kartu Saya'::text,
+    "isTwoStepAuth" boolean DEFAULT true NOT NULL
+);
+
+
+ALTER TABLE public."Card" OWNER TO postgres;
+
+--
+-- Name: Device; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Device" (
+    id text NOT NULL,
+    device_id text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    "roomId" text,
+    pin text DEFAULT '$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW'::text NOT NULL,
+    "lastOnline" timestamp(3) without time zone
+);
+
+
+ALTER TABLE public."Device" OWNER TO postgres;
+
+--
+-- Name: Profil; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Profil" (
+    id text NOT NULL,
+    full_name text,
+    photo text DEFAULT '/image/illustration-user.png'::text,
+    "userId" text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public."Profil" OWNER TO postgres;
+
+--
+-- Name: Role; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Role" (
+    id text NOT NULL,
+    name text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public."Role" OWNER TO postgres;
+
+--
+-- Name: Room; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Room" (
+    id text NOT NULL,
+    ruid text NOT NULL,
+    name text,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    "isActive" boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public."Room" OWNER TO postgres;
+
+--
+-- Name: Room_Request; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Room_Request" (
+    id text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    "roomId" text NOT NULL,
+    "cardId" text NOT NULL
+);
+
+
+ALTER TABLE public."Room_Request" OWNER TO postgres;
+
+--
+-- Name: Rooms_Records; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Rooms_Records" (
+    id text NOT NULL,
+    "roomId" text,
+    "cardId" text,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    "isSuccess" boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public."Rooms_Records" OWNER TO postgres;
+
+--
+-- Name: Token; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Token" (
+    id text NOT NULL,
+    token text,
+    "expiredAt" timestamp(3) without time zone NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    "userId" text NOT NULL
+);
+
+
+ALTER TABLE public."Token" OWNER TO postgres;
+
+--
+-- Name: User; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."User" (
+    id text NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
+    "roleId" text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT now() NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    email text NOT NULL,
+    "isVerified" boolean DEFAULT false NOT NULL,
+    "passwordUpdatedAt" timestamp(3) without time zone
+);
+
+
+ALTER TABLE public."User" OWNER TO postgres;
+
+--
+-- Name: _CardToRoom; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_CardToRoom" (
+    "A" text NOT NULL,
+    "B" text NOT NULL
+);
+
+
+ALTER TABLE public."_CardToRoom" OWNER TO postgres;
+
+--
+-- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public._prisma_migrations (
+    id character varying(36) NOT NULL,
+    checksum character varying(64) NOT NULL,
+    finished_at timestamp with time zone,
+    migration_name character varying(255) NOT NULL,
+    logs text,
+    rolled_back_at timestamp with time zone,
+    started_at timestamp with time zone DEFAULT now() NOT NULL,
+    applied_steps_count integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public._prisma_migrations OWNER TO postgres;
+
+--
+-- Data for Name: Api_Key; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Api_Key" (id, secret, "createdAt", "updatedAt") FROM stdin;
+cl9xxy39x0000cklku2klje55	WCPaDR1F2cwSUMPWuXDm13JMYU-NeWO1	2022-12-08 03:24:32.243	2022-12-08 03:24:32.272
+cle6qot83108687nrp5qu7b88zr	qakVSZmMo-O4ZN5JrAtLRc5dUAs3d_0i	2023-02-16 06:47:03.411	2023-02-16 06:47:03.412
+\.
+
+
+--
+-- Data for Name: Card; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Card" (id, card_number, pin, card_status, "userId", "createdAt", "updatedAt", type, card_name, "isTwoStepAuth") FROM stdin;
+clbkah0721006k8p5goxzv8nm	2f3e9d79	$2b$10$ybX2cqMM1bxOg.Uo8GgCi.rs3OdJu3vIQWMlDixDC/B.Bcv8fltjm	REGISTER	29996aa8-47c4-4d66-b9b6-9b83ecdc3d7f	2022-12-12 04:22:44.798	2022-12-12 04:41:56.294	card_emoney	Kartu Saya	f
+clbygke367801l5p5ximv7nhl	04389052ed2880	$2b$10$t0HHBrZ0U5mrlDzf1yrrfuSpKi6zcZg9/3ecGHHFxRwpjDpHPISua	REGISTER	27bbb0c3-1a56-456c-bfb4-0096ad269a44	2022-12-22 02:22:06.93	2022-12-22 02:31:45.867	card_id	Kartu Saya	f
+clbvr84s02819x7p5v2ygonbg	efa0d5c8	$2b$10$jJF3d0zbGTDkEVAMhGbofOYF67s83JkbugLPqkSg5R08sfmePwtPm	REGISTER	598e6a1c-6224-43ba-9c00-8bd2080c1cd8	2022-12-20 04:57:12.24	2022-12-20 05:03:01.973	card_id	Kartu Saya	t
+clbvrl9gv3308x7p5h48e9riq	2f53943f	$2b$10$DhXlVTae9a7Ox22E2Y079.BwGPFoEQ3oqSvZPMocMK4ukXMGha2sW	REGISTER	52fa16f1-3e2a-4149-a6bb-ff6ef615ac6a	2022-12-20 05:07:24.847	2022-12-20 05:10:18.456	card_id	Kartu Saya	f
+clbyo1fod9467l5p5leujm6q9	a0353420	$2b$10$e3H4eIh/.hb5D8CBJOSg1u/s5s2QEVYPlQAJLYwmM3nBYCoqva1Ce	REGISTER	bd917730-5ea3-455b-b773-bd24ea7fd699	2022-12-22 05:51:19.453	2022-12-22 06:04:20.483	card_id	Security Service	f
+clbyo3dq610026lfp5e00qi2we	90baac20	$2b$10$EH7S4sLOBeeLYDe0nkod5unjofSAnNWXP.i6yZUo5.ok0RgR6HBZW	REGISTER	bd917730-5ea3-455b-b773-bd24ea7fd699	2022-12-22 05:52:50.238	2022-12-22 06:04:31.879	card_id	Cleaning Service 	f
+clbysydcx11765l5p5cdravoah	a069d420	$2b$10$jdt1S4.uNUzjDXTKA1xgheo/aiwb4VkxvgDJ3KkgRqDVBSGvvmY4O	REGISTER	51d69dae-7249-4ba8-84e8-ec1dc564fe82	2022-12-22 08:08:54.561	2022-12-22 08:10:48.972	card_id	Kartu Saya	f
+clbwzqp063440l5p5qpclftcf	ef78d1e3	$2b$10$92aRRbTgnW0IReoWMcCv8ezPSvYBBgMNW2Y1E6pvfFMtdL.WevBd2	REGISTER	b69227a9-23ae-40c6-a0b5-b16b18df6e79	2022-12-21 01:43:21.366	2022-12-21 01:48:39.9	card_id	Kartu Saya	f
+clchb8aiv52807lfp5xix6n5se	2f75e3a4	$2b$10$Yva8AcpT6z3aacBBKcy.P.jDJric8KZdqTjrWh0bIH6uF/GiqOCw2	REGISTER	9ce7bd15-3481-4a05-9cb1-e6f89eb61dc4	2023-01-04 07:00:21.703	2023-01-04 07:03:22.391	card_id	Kartu Saya	f
+clbvpmyhv1014x7p54tde9iyh	0f577066	$2b$10$TR7TZbcahfiHdADoe2OmgekGopXLgx0tcjPLL2bTQTottjJNxdjIS	REGISTER	c101f65b-abfd-41e3-99a7-2d969f272bc7	2022-12-20 04:12:44.707	2023-01-06 04:14:32.025	card_id	Kartu Saya	f
+\.
+
+
+--
+-- Data for Name: Device; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Device" (id, device_id, "createdAt", "updatedAt", "roomId", pin, "lastOnline") FROM stdin;
+clegpyvas124319nrp5s4axllwb	9fvCj	2023-02-23 06:24:34.804	2023-02-23 06:24:34.805	\N	$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW	2023-02-23 06:24:34.804
+clbvoe30n0634x7p5uefsqn07	Czf_d	2022-12-20 03:37:51.047	2023-03-01 05:09:15.073	clbvp5b4a0832x7p5i9xiyf8t	$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW	2023-03-01 05:09:15.072
+clbysan3o11415l5p5n8zr0nqy	eis1s	2022-12-22 07:50:27.444	2023-02-21 07:34:44.601	clbkac7ll1096k7p5o1scf6vu	$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW	2023-02-21 07:34:44.6
+cle6ql3md107847nfp55yk502u0	ddMIx	2023-02-16 06:44:10.261	2023-02-17 06:39:08.386	cle6y1kfu109127nfp5a3xjeq8c	$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW	2023-02-17 06:39:08.385
+\.
+
+
+--
+-- Data for Name: Profil; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Profil" (id, full_name, photo, "userId", "createdAt", "updatedAt") FROM stdin;
+clbkafln80968k8p5vjwv6n8z	evan	/storage/avatar-Screenshot-(153)-1670820229509-113830653.png	29996aa8-47c4-4d66-b9b6-9b83ecdc3d7f	2022-12-12 04:21:39.284	2022-12-12 04:43:49.915
+clbmfckn20905evp5ygyqyk95	tuying	/storage/avatar-12-1670948131206-690789100.png	81c054df-5087-438e-b8bf-384602726585	2022-12-13 16:14:48.446	2022-12-13 16:15:34.399
+clblprnlg0831evp584ieq8kk	indra hermawan	/storage/avatar-16709051639647660845820436143678-1670905178986-457913779.jpeg	ae7962d2-3f28-4395-9f60-7b9ab665f156	2022-12-13 04:18:42.1	2022-12-14 18:07:19.868
+clbq96hlu02489zp5l0pjcb61	indrah13	/storage/avatar-computer-science-1671179710145-428743602.jpeg	84cb5b99-6523-4dab-a40f-de710fdfdc4c	2022-12-16 08:33:11.586	2022-12-16 08:35:10.204
+clbvpcza60886x7p54slna81f	Ega Rahmaputri	/image/illustration-user.png	c101f65b-abfd-41e3-99a7-2d969f272bc7	2022-12-20 04:04:59.166	2022-12-20 04:04:59.167
+clbvr0ii32178x7p5ugtxxigd	NINING LATIA	/image/illustration-user.png	6c6b2850-b022-4be4-aba0-4aa9309f43aa	2022-12-20 04:51:16.779	2022-12-20 04:51:16.78
+clbvrbh972916x7p5vrhhw8bc	Siska	/image/illustration-user.png	598e6a1c-6224-43ba-9c00-8bd2080c1cd8	2022-12-20 04:59:48.379	2022-12-20 04:59:48.38
+clbvrnz7n3346x7p53cx0g4fa	Afhlala	/image/illustration-user.png	52fa16f1-3e2a-4149-a6bb-ff6ef615ac6a	2022-12-20 05:09:31.523	2022-12-20 05:09:31.523
+clbvrvxxm3776x7p5bdkkemsq	EgaOperator	/image/illustration-user.png	4886c90a-62e6-4839-a340-d960af782385	2022-12-20 05:15:43.114	2022-12-20 05:15:43.115
+clbwzvq4p3710lfp5ovbpvxhu	Zainalnurarifin	/image/illustration-user.png	b69227a9-23ae-40c6-a0b5-b16b18df6e79	2022-12-21 01:47:16.105	2022-12-21 01:47:16.106
+clbygqw2m7865l5p5b7kmt8ya	Akub	/image/illustration-user.png	27bbb0c3-1a56-456c-bfb4-0096ad269a44	2022-12-22 02:27:10.174	2022-12-22 02:27:10.175
+clbvzst0q0416lfp5ulze5hj4	Akun layanan gedung Q	/image/illustration-user.png	bd917730-5ea3-455b-b773-bd24ea7fd699	2022-12-20 08:57:13.706	2022-12-22 05:55:29.854
+clbvnvzrv0578x7p55i3fmb3i	Aulia Fachrudin 	/storage/avatar-ei_1664681970964-removebg-preview-1671506847460-341762868.png	51d69dae-7249-4ba8-84e8-ec1dc564fe82	2022-12-20 03:23:47.035	2022-12-22 08:10:33.803
+clchbae3x52066l5p5syzub5s5	dewililiana	/image/illustration-user.png	9ce7bd15-3481-4a05-9cb1-e6f89eb61dc4	2023-01-04 07:01:59.66	2023-01-04 07:01:59.662
+clbeimr0f0058ugp5f823x3p4	Dimas Aulia Fachrudin 	/storage/avatar-ei_1664681970964-removebg-preview-1672816922300-476496997.png	9f9d1508-c294-4c33-96f3-e921e9c57c0d	2022-12-08 03:24:32.703	2023-01-04 07:22:02.328
+clchbswul53809lfp5n29adoz5	Saddam	/storage/avatar-FB_IMG_1667008392825-1672816927973-602391923.jpeg	5329b4f7-fe0a-467f-a3bc-6c6ce0276b38	2023-01-04 07:16:23.756	2023-01-04 07:22:07.99
+cldz7ucgt95290nfp5gn7077z9	dads	/image/illustration-user.png	dfd2fcd0-69e2-49f1-8bc6-f316c6ccb61e	2023-02-11 00:25:05.691	2023-02-11 00:25:05.694
+cle6qtzkt108085nfp5m0os0z0f	muchtaramien	/image/illustration-user.png	e988b8b1-7dbb-4bd4-a57d-744cba422bac	2023-02-16 06:51:04.916	2023-02-16 06:51:04.925
+cle6qvczb108713nrp5xsyo191t	FransNBN	/image/illustration-user.png	950d64fe-3dfd-429a-a5c7-fdc7ebfe8566	2023-02-16 06:52:08.933	2023-02-16 06:52:08.951
+\.
+
+
+--
+-- Data for Name: Role; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Role" (id, name, "createdAt", "updatedAt") FROM stdin;
+clbeimqvs0030ugp59zbal53f	USER	2022-12-08 03:24:32.536	2022-12-08 03:24:32.536
+clbeimqy30037ugp5e5y6xs9t	ADMIN	2022-12-08 03:24:32.619	2022-12-08 03:24:32.62
+clbeimqz90044ugp5avhzc2kz	ADMIN TEKNIS	2022-12-08 03:24:32.661	2022-12-08 03:24:32.661
+clbeimqzy0051ugp56hlsec3d	OPERATOR	2022-12-08 03:24:32.686	2022-12-08 03:24:32.687
+\.
+
+
+--
+-- Data for Name: Room; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Room" (id, ruid, name, "createdAt", "updatedAt", "isActive") FROM stdin;
+clbvp5b4a0832x7p5i9xiyf8t	se5AB	Ruang Direktur 	2022-12-20 03:59:01.258	2022-12-20 03:59:01.258	t
+clbkac7ll1096k7p5o1scf6vu	T0ofv	EMBEDDED 1	2022-12-12 04:19:01.113	2022-12-22 08:07:14.286	t
+cle6y1kfu109127nfp5a3xjeq8c	0cvUA	EMBEDDED 2	2023-02-16 10:12:55.866	2023-02-16 10:12:55.876	t
+\.
+
+
+--
+-- Data for Name: Room_Request; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Room_Request" (id, "createdAt", "updatedAt", "roomId", "cardId") FROM stdin;
+\.
+
+
+--
+-- Data for Name: Rooms_Records; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Rooms_Records" (id, "roomId", "cardId", "createdAt", "updatedAt", "isSuccess") FROM stdin;
+clbkak73m1290k8p59f2ftgbh	clbkac7ll1096k7p5o1scf6vu	clbkah0721006k8p5goxzv8nm	2022-12-12 04:25:13.714	2022-12-12 04:25:13.715	t
+clbkau0a11349k8p565457cgc	clbkac7ll1096k7p5o1scf6vu	clbkah0721006k8p5goxzv8nm	2022-12-12 04:32:51.433	2022-12-12 04:32:51.434	t
+clbvptwpf1314xep5h7xqcz81	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:18:08.979	2022-12-20 04:18:08.98	t
+clbvqa0ix1314x7p59cijv9pk	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:30:40.425	2022-12-20 04:30:40.426	t
+clbvqermh1373x7p50tqtclau	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:34:22.169	2022-12-20 04:34:22.169	f
+clbvqeww51429xep58dphyhyg	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:34:28.997	2022-12-20 04:34:28.997	t
+clbvqh6a51474xep5yn6znakf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:36:14.477	2022-12-20 04:36:14.478	t
+clbvqhcfq1432x7p5fc935qhd	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:36:22.454	2022-12-20 04:36:22.455	t
+clbvqhktd1519xep5c2wmegpr	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:36:33.313	2022-12-20 04:36:33.313	t
+clbvqqgxx1489x7p5spucie5h	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:43:28.197	2022-12-20 04:43:28.198	t
+clbvqqpi31578xep55hkq5siz	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:43:39.291	2022-12-20 04:43:39.292	t
+clbvqqxec1534x7p59ooy59rd	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:43:49.524	2022-12-20 04:43:49.525	t
+clbvqr4ez1623xep5dwmbgj82	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:43:58.619	2022-12-20 04:43:58.619	t
+clbvqrb8t1579x7p5y52lkpts	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:44:07.469	2022-12-20 04:44:07.47	t
+clbvqri731668xep57u55spip	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:44:16.479	2022-12-20 04:44:16.479	t
+clbvqrozl1624x7p5tmhzwbcp	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:44:25.281	2022-12-20 04:44:25.282	t
+clbvqrvjl1713xep5pzp1nmil	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:44:33.777	2022-12-20 04:44:33.777	t
+clbvqs2k51669x7p5opxjrbbe	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:44:42.869	2022-12-20 04:44:42.87	t
+clbvqs90p1758xep5h3kbehdq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:44:51.241	2022-12-20 04:44:51.242	t
+clbvqsfl61714x7p55a64tza7	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:44:59.754	2022-12-20 04:44:59.755	t
+clbvqskxz1803xep5lnp6479w	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:45:06.695	2022-12-20 04:45:06.696	t
+clbvqsrmp1759x7p5e0vf9gs7	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:45:15.361	2022-12-20 04:45:15.362	t
+clbvqsy6i1848xep5044kt8w1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:45:23.85	2022-12-20 04:45:23.85	t
+clbvqt4tf1804x7p50y2gvfpw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:45:32.451	2022-12-20 04:45:32.452	t
+clbvqtbmg1893xep5asyj1qe3	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:45:41.272	2022-12-20 04:45:41.273	t
+clbvqtivk1849x7p5q5acvk55	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:45:50.672	2022-12-20 04:45:50.673	t
+clbvqtpzu1938xep5c4hg5lxu	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:45:59.898	2022-12-20 04:45:59.898	t
+clbvqtvc61894x7p5tgcksikf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:46:06.822	2022-12-20 04:46:06.823	t
+clbvqu1dd1983xep5jfjvneq5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:46:14.641	2022-12-20 04:46:14.642	t
+clbvqvvzn2040xep502yquh8o	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:47:40.979	2022-12-20 04:47:40.98	t
+clbvqw7nx1963x7p5ahpn6624	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:47:56.109	2022-12-20 04:47:56.11	t
+clbvqwdu02085xep5fgzoz399	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:48:04.104	2022-12-20 04:48:04.105	t
+clbvqwl1a2008x7p5bbtnqfo5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:48:13.438	2022-12-20 04:48:13.439	t
+clbvqwv6m2130xep5l0stanqq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:48:26.59	2022-12-20 04:48:26.591	t
+clbvqx1022053x7p51vl3fovt	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:48:34.13	2022-12-20 04:48:34.131	t
+clbvqxge82175xep5hd7enoav	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:48:54.08	2022-12-20 04:48:54.08	t
+clbvqxxcu2220xep5v5kh5zgi	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:49:16.062	2022-12-20 04:49:16.062	t
+clbvqyai42110x7p5u8u6wy9s	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:49:33.1	2022-12-20 04:49:33.1	t
+clbvqyq3d2155x7p5imzcsbuz	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:49:53.305	2022-12-20 04:49:53.305	t
+clbvr789x2805x7p50kj6p69v	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:56:30.117	2022-12-20 04:56:30.118	t
+clbvr8gts2860x7p5omami0vw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:57:27.856	2022-12-20 04:57:27.856	t
+clbvr9vhv2681xep5h2aa61mn	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:58:33.523	2022-12-20 04:58:33.523	t
+clbvratb92905x7p5497koyxe	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 04:59:17.349	2022-12-20 04:59:17.35	t
+clbvrici83258x7p58xzxmpgd	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-20 05:05:08.816	2022-12-20 05:05:08.816	t
+clbvrp8wz3614x7p56zg751l1	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-20 05:10:30.755	2022-12-20 05:10:30.756	t
+clbvrpoaw3229xep55dpljov2	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-20 05:10:50.696	2022-12-20 05:10:50.696	t
+clbvrr1so3274xep5dhd7kkec	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-20 05:11:54.84	2022-12-20 05:11:54.841	t
+clbvrsd8g3507xep542u8zhfs	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-20 05:12:56.32	2022-12-20 05:12:56.32	t
+clbvr3np92681x7p5ww7jo7gq	clbvp5b4a0832x7p5i9xiyf8t	\N	2022-12-20 04:53:43.485	2022-12-20 04:53:43.486	t
+clbvr432h2548xep5m38noim6	clbvp5b4a0832x7p5i9xiyf8t	\N	2022-12-20 04:54:03.401	2022-12-20 04:54:03.401	t
+clbvsali34509x7p5c2c0aje6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 05:27:06.843	2022-12-20 05:27:06.844	f
+clbvsavav4554x7p5ky3z1ndr	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 05:27:19.543	2022-12-20 05:27:19.544	t
+clbvyr5d0019969p5y2xgvo4p	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-20 08:27:56.772	2022-12-20 08:27:56.772	t
+clbvzat600133l5p5pfxaghz5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 08:43:14.088	2022-12-20 08:43:14.089	f
+clbvzb0q30116lfp5w229705f	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 08:43:23.883	2022-12-20 08:43:23.884	t
+clbw1vwro0858lfp5pmwlpzwf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 09:55:37.764	2022-12-20 09:55:37.764	f
+clbw1w3az0889l5p5z6un7aoc	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 09:55:46.235	2022-12-20 09:55:46.236	f
+clbw1wc2v0936l5p5uvuc3qsl	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-20 09:55:57.607	2022-12-20 09:55:57.608	t
+clbwx567f2710l5p5lvc0cyy4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 00:30:37.995	2022-12-21 00:30:37.995	f
+clbwx5dnb2648lfp5u8mrhaki	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 00:30:47.639	2022-12-21 00:30:47.639	t
+clbwzbt3b3357l5p5wo58oh52	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 01:31:46.823	2022-12-21 01:31:46.824	t
+clbwzfj2g3402l5p5piwnne5o	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 01:34:40.456	2022-12-21 01:34:40.457	t
+clbwzhwae3470lfp5fa8ilsem	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 01:36:30.902	2022-12-21 01:36:30.903	t
+clbwzib8c3515lfp5dfdihemx	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 01:36:50.268	2022-12-21 01:36:50.268	t
+clbwzskgs3579lfp5c51v514o	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 01:44:48.796	2022-12-21 01:44:48.796	t
+clbwzz0su3757l5p5ojtl1mz6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 01:49:49.902	2022-12-21 01:49:49.902	t
+clbx04f4m3987lfp5qkcu5bgq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 01:54:01.75	2022-12-21 01:54:01.75	t
+clbx07xka4199lfp5ok7zw9tm	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 01:56:45.61	2022-12-21 01:56:45.61	t
+clbx092q14467lfp5t466emd7	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2022-12-21 01:57:38.953	2022-12-21 01:57:38.954	t
+clbx0hj4w4512lfp5oafu39t3	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 02:04:13.472	2022-12-21 02:04:13.472	t
+clbx0hp5q4309l5p5hsxwq0eq	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 02:04:21.278	2022-12-21 02:04:21.279	t
+clbx0i0q44557lfp5cbrc4ofa	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 02:04:36.268	2022-12-21 02:04:36.268	t
+clbx0ktep4602lfp5rgw0uoe6	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-21 02:06:46.753	2022-12-21 02:06:46.754	t
+clbx0vd594428l5p5us5u70m9	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 02:14:58.893	2022-12-21 02:14:58.894	t
+clbx20vp24663l5p5tlo5p4v0	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 02:47:15.83	2022-12-21 02:47:15.831	t
+clbx2aqt35099lfp5aurznrk4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 02:54:56.055	2022-12-21 02:54:56.056	t
+clbx2schh5218lfp50z1sefry	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 03:08:37.301	2022-12-21 03:08:37.301	t
+clbx3699p5263lfp5fnlqk0vr	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 03:19:26.317	2022-12-21 03:19:26.317	t
+clbx3hd8e4929l5p5o8mcih1y	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 03:28:04.67	2022-12-21 03:28:04.67	t
+clbx56bc85098l5p543fwfwto	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2022-12-21 04:15:28.232	2022-12-21 04:15:28.233	t
+clbx579ct5495lfp5pnl5l3dm	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 04:16:12.317	2022-12-21 04:16:12.318	t
+clbx8xgxg5289l5p5dhnvp8e6	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2022-12-21 06:00:34.036	2022-12-21 06:00:34.037	f
+clbx8xl435768lfp59xpdaviu	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2022-12-21 06:00:39.459	2022-12-21 06:00:39.459	t
+clbx9698v5346l5p5k7df37uy	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 06:07:23.983	2022-12-21 06:07:23.983	t
+clbxc484r5933lfp5d6pd3wm3	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 07:29:48.075	2022-12-21 07:29:48.076	t
+clbxcdpzv5990lfp5rix2qz0j	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 07:37:11.131	2022-12-21 07:37:11.132	t
+clbxcokmw6035lfp5zv471wbg	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 07:45:37.4	2022-12-21 07:45:37.401	t
+clbxcy3kg5547l5p5m9cm08m8	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 07:53:01.84	2022-12-21 07:53:01.841	t
+clbxf5yck5736l5p52h97hghf	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 08:55:07.556	2022-12-21 08:55:07.557	t
+clbxf7o406276lfp5t4rsegq7	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-21 08:56:27.6	2022-12-21 08:56:27.601	t
+clbxg9tyr5920l5p5s8jhbfsl	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-21 09:26:08.115	2022-12-21 09:26:08.116	t
+clbxijjdr6622lfp56dn9ddpw	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-21 10:29:40.191	2022-12-21 10:29:40.191	t
+clbydnl6l7958lfp5kpnksp9j	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 01:00:37.245	2022-12-22 01:00:37.246	t
+clbydqs8a8003lfp50czpw6sk	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 01:03:06.346	2022-12-22 01:03:06.346	t
+clbyds7f17568l5p5of7axan4	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-22 01:04:12.685	2022-12-22 01:04:12.686	t
+clbyfqg6c7661l5p5vial273i	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 01:58:49.956	2022-12-22 01:58:49.957	t
+clbygbp1d7730l5p5p53dfjzm	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 02:15:21.217	2022-12-22 02:15:21.217	t
+clbygg33l7775l5p5inxqtwsf	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 02:18:46.065	2022-12-22 02:18:46.065	t
+clbygl5498172lfp5rxvzh9qf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 02:22:41.961	2022-12-22 02:22:41.962	t
+clbygowu27854l5p5f403c3xr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-22 02:25:37.85	2022-12-22 02:25:37.851	t
+clbygvgj68435lfp5lakplj6o	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 02:30:43.314	2022-12-22 02:30:43.315	t
+clbygxtyf8663lfp5fnx7lakd	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 02:32:34.023	2022-12-22 02:32:34.023	t
+clbygy39r8381l5p520wgbyqs	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 02:32:46.095	2022-12-22 02:32:46.096	t
+clbyh89hi8736lfp51rtru28e	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 02:40:40.71	2022-12-22 02:40:40.711	t
+clbyi9d1y8829lfp5gfsiq6zw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 03:09:31.606	2022-12-22 03:09:31.606	t
+clbyim2mo8524l5p5am8b7xsk	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 03:19:24.624	2022-12-22 03:19:24.625	t
+clbyjzilq8879l5p5ygsr50rq	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 03:57:51.47	2022-12-22 03:57:51.471	t
+clbyk6tzl8924l5p54qicj9x9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 04:03:32.817	2022-12-22 04:03:32.817	t
+clbyk9wiz9211lfp5gwb1v1f4	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 04:05:56.075	2022-12-22 04:05:56.076	t
+clbykj0d38981l5p5co21zjp5	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 04:13:00.951	2022-12-22 04:13:00.951	t
+clbykmubs9268lfp5xbzxll6f	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 04:15:59.752	2022-12-22 04:15:59.753	t
+clbyl6uyx9092l5p5odl7tn53	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 04:31:33.705	2022-12-22 04:31:33.705	t
+clbylu7x19423lfp5rma8gypo	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 04:49:43.573	2022-12-22 04:49:43.574	t
+clbyr9ww210809l5p538kz2im4	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-22 07:21:53.858	2022-12-22 07:21:53.858	t
+clbyt166612040l5p5my2nwkjf	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2022-12-22 08:11:05.214	2022-12-22 08:11:05.215	t
+clbytcs6c12418lfp55t13gkit	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2022-12-22 08:20:06.948	2022-12-22 08:20:06.949	t
+clbytcypa12109l5p5lgq3i5fn	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2022-12-22 08:20:15.406	2022-12-22 08:20:15.407	t
+clbytstjx12499lfp53wm4fe63	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 08:32:35.229	2022-12-22 08:32:35.23	t
+clbytt52912190l5p5jxd4lqj6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 08:32:50.145	2022-12-22 08:32:50.146	t
+clbytthsx12544lfp59eoa6415	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-22 08:33:06.657	2022-12-22 08:33:06.658	t
+clbyxbfbq12770l5p5oc2092v8	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-22 10:11:02.102	2022-12-22 10:11:02.103	t
+clbyxrpe313419lfp5kwnibcpt	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 10:23:41.643	2022-12-22 10:23:41.644	t
+clbzptr0h16561lfp5fsm7upk1	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:29:06.305	2022-12-22 23:29:06.306	t
+clbzptxn116221l5p54nn6ptw7	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:29:14.893	2022-12-22 23:29:14.894	t
+clbzpu2xw16606lfp55xv1peql	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:29:21.764	2022-12-22 23:29:21.764	t
+clbzqh01416687lfp5b7cwa1bf	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:47:11.08	2022-12-22 23:47:11.081	t
+clbzqh66g16314l5p5gej9taz7	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:47:19.048	2022-12-22 23:47:19.048	t
+clbzqwexe16768lfp5x5a22ht4	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:59:10.226	2022-12-22 23:59:10.227	t
+clbzqwk7n16383l5p5k6cqq02b	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:59:17.075	2022-12-22 23:59:17.076	t
+clbzqwpse16813lfp53tisi73o	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:59:24.302	2022-12-22 23:59:24.303	t
+clbzqx13g16858lfp5fvmh5unw	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:59:38.956	2022-12-22 23:59:38.957	f
+clbzqx3na16440l5p500z4xiir	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-22 23:59:42.262	2022-12-22 23:59:42.263	t
+clbzqzdob16915lfp5sh9zeir8	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-23 00:01:28.571	2022-12-23 00:01:28.572	t
+clbzs8uay17199lfp50jqq3fxf	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-23 00:36:49.642	2022-12-23 00:36:49.643	t
+clbzt2zes17292lfp5x16cgyrw	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-23 01:00:15.94	2022-12-23 01:00:15.941	f
+clbzty7jy16949l5p5lm09cenr	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-23 01:24:32.83	2022-12-23 01:24:32.83	t
+clbzusboc17231l5p58byrdxtd	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 01:47:57.852	2022-12-23 01:47:57.853	f
+clbzw5ze518205lfp5kqoo9og8	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 02:26:34.733	2022-12-23 02:26:34.733	t
+clbzw762p18252lfp5u2jixiyf	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-23 02:27:30.049	2022-12-23 02:27:30.049	t
+clbzxt4iy18189l5p5wwknduis	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-23 03:12:34.09	2022-12-23 03:12:34.091	t
+clbzxw14218731lfp5lfz3soi1	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-23 03:14:49.634	2022-12-23 03:14:49.635	t
+clbzya1l118258l5p5kpa62exi	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-23 03:25:43.429	2022-12-23 03:25:43.43	t
+clbzyh67118877lfp5crvaxilv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 03:31:15.997	2022-12-23 03:31:15.997	f
+clbzyhg9f18367l5p5yztk5veq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 03:31:29.043	2022-12-23 03:31:29.044	t
+clbzzdkq119022lfp5lr9s8j1x	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-23 03:56:27.817	2022-12-23 03:56:27.817	t
+clbzzzdz319103lfp5pn82q8z9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 04:13:25.503	2022-12-23 04:13:25.504	t
+clc01jupl18642l5p56cd4i9ff	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-23 04:57:19.929	2022-12-23 04:57:19.929	t
+clc037pw818795l5p575undee5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 05:43:53.048	2022-12-23 05:43:53.049	t
+clc03s19619412lfp5kql9gu5q	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 05:59:40.89	2022-12-23 05:59:40.89	t
+clc03umml19457lfp5url5xj8y	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-23 06:01:41.901	2022-12-23 06:01:41.902	t
+clc03vvqc19502lfp526droqtw	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2022-12-23 06:02:40.356	2022-12-23 06:02:40.357	t
+clc045syt18912l5p54m1ry75j	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-23 06:10:23.333	2022-12-23 06:10:23.333	t
+clc06tljg19343l5p59ze9mf2m	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-23 07:24:52.684	2022-12-23 07:24:52.684	t
+clc08pwr219565l5p5bt0b49ml	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2022-12-23 08:17:59.822	2022-12-23 08:17:59.822	t
+clc436efx28981l5p54h1vk5zk	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-26 00:53:56.253	2022-12-26 00:53:56.254	f
+clc5ox2t532258lfp5kr2fi801	clbvp5b4a0832x7p5i9xiyf8t	clbyo3dq610026lfp5e00qi2we	2022-12-27 03:50:19.001	2022-12-27 03:50:19.002	t
+clc5oxcm332303lfp5ncprod30	clbvp5b4a0832x7p5i9xiyf8t	clbyo3dq610026lfp5e00qi2we	2022-12-27 03:50:31.707	2022-12-27 03:50:31.707	t
+clc5p5nxr32360lfp52kv69pz6	clbvp5b4a0832x7p5i9xiyf8t	clbyo3dq610026lfp5e00qi2we	2022-12-27 03:56:59.631	2022-12-27 03:56:59.632	f
+clc5p5sgf31515l5p52pa8cng4	clbvp5b4a0832x7p5i9xiyf8t	clbyo3dq610026lfp5e00qi2we	2022-12-27 03:57:05.487	2022-12-27 03:57:05.488	f
+clc5p5vfl32405lfp52h2u9c0g	clbvp5b4a0832x7p5i9xiyf8t	clbyo3dq610026lfp5e00qi2we	2022-12-27 03:57:09.345	2022-12-27 03:57:09.346	t
+clc5p7euk31572l5p5papu3aya	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-27 03:58:21.164	2022-12-27 03:58:21.165	t
+clc5p8j2m32450lfp59a55sn9a	clbvp5b4a0832x7p5i9xiyf8t	clbyo3dq610026lfp5e00qi2we	2022-12-27 03:59:13.294	2022-12-27 03:59:13.295	t
+clc5pef9431641l5p5hjrw0apx	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-27 04:03:48.28	2022-12-27 04:03:48.28	t
+clc5prqcw31698l5p55mle1v97	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-27 04:14:09.2	2022-12-27 04:14:09.2	t
+clc5rui7g31928l5p56k3mbqpa	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-27 05:12:17.836	2022-12-27 05:12:17.837	t
+clc5w3t5733252lfp5m1tzqqmx	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-27 07:11:30.379	2022-12-27 07:11:30.38	t
+clc5xkqas33406lfp54vlkoreq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-27 07:52:39.46	2022-12-27 07:52:39.46	t
+clc5xyi4y33463lfp51s3twtb2	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-27 08:03:22.066	2022-12-27 08:03:22.066	t
+clc5zf9w533604lfp5ukaw87h2	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-27 08:44:24.149	2022-12-27 08:44:24.15	t
+clc604i7e33685lfp5kfkujtf8	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-27 09:04:01.322	2022-12-27 09:04:01.323	t
+clc6059yo32699l5p5uzg6bgob	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2022-12-27 09:04:37.296	2022-12-27 09:04:37.297	t
+clc60h37n33754lfp5iiegh48e	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-27 09:13:48.419	2022-12-27 09:13:48.42	t
+clc60q7dc33811lfp5ub4kcx7y	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-27 09:20:53.712	2022-12-27 09:20:53.712	t
+clc60urmd33856lfp5fjzf0qy0	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-27 09:24:26.581	2022-12-27 09:24:26.582	t
+clc647fvd33032l5p5jpiiuisd	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2022-12-27 10:58:16.729	2022-12-27 10:58:16.729	t
+clc74a9vs35987l5p5dhxnmhxz	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2022-12-28 03:48:15.112	2022-12-28 03:48:15.118	t
+clc74arbi37013lfp5xwbcuhml	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2022-12-28 03:48:37.71	2022-12-28 03:48:37.71	t
+clc74i4sv37058lfp56hrhkrpr	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2022-12-28 03:54:21.775	2022-12-28 03:54:21.776	t
+clc769s5z36116l5p5asdha8ld	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2022-12-28 04:43:51.383	2022-12-28 04:43:51.383	t
+clc769zvd37175lfp5sardmd5t	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2022-12-28 04:44:01.369	2022-12-28 04:44:01.37	t
+clc76ec3n37232lfp5fk4rnewk	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2022-12-28 04:47:23.843	2022-12-28 04:47:23.843	t
+clc76ggch36280l5p57g725xdn	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2022-12-28 04:49:02.657	2022-12-28 04:49:02.657	t
+clc76m8yb36369l5p5viuj26pn	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-28 04:53:33.011	2022-12-28 04:53:33.011	t
+clc76t53w37589lfp5l5uw7lsf	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2022-12-28 04:58:54.619	2022-12-28 04:58:54.62	t
+clc79m7bp37447l5p5y62hst1o	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2022-12-28 06:17:29.749	2022-12-28 06:17:29.75	t
+clc8lm17h39148l5p5jdgudm2b	clbkac7ll1096k7p5o1scf6vu	clbkah0721006k8p5goxzv8nm	2022-12-29 04:41:03.389	2022-12-29 04:41:03.39	t
+clc8lm9g440131lfp5dzubn5bn	clbkac7ll1096k7p5o1scf6vu	clbkah0721006k8p5goxzv8nm	2022-12-29 04:41:14.068	2022-12-29 04:41:14.069	t
+clcaetpla41374l5p56d1gr1c9	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2022-12-30 11:06:36.622	2022-12-30 11:06:36.624	t
+clcfo5gfr48092l5p5osshg34t	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-03 03:26:32.055	2023-01-03 03:26:32.056	t
+clch5gdit51269lfp58fhw2wgn	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 04:18:41.141	2023-01-04 04:18:41.142	t
+clch5gj9y50288l5p5ipc72wmo	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 04:18:48.598	2023-01-04 04:18:48.599	t
+clch5gueb50333l5p53jj4mqui	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 04:19:03.011	2023-01-04 04:19:03.012	f
+clch5h0pt51326lfp565uskpkf	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 04:19:11.201	2023-01-04 04:19:11.201	t
+clchagg8i51605lfp5e95kwcvx	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 06:38:42.738	2023-01-04 06:38:42.739	t
+clchaglzt50600l5p5p65m1qtj	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 06:38:50.201	2023-01-04 06:38:50.202	t
+clchauvnp51738lfp50kbnueb1	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 06:49:55.909	2023-01-04 06:49:55.91	t
+clchav57050729l5p50bloscz9	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 06:50:08.268	2023-01-04 06:50:08.269	t
+clchawjnf51802lfp53cse4ttb	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 06:51:13.659	2023-01-04 06:51:13.66	t
+clchaxuya50838l5p57gsie68a	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 06:52:14.962	2023-01-04 06:52:14.962	f
+clchay17q51931lfp50uzzur9k	clbvp5b4a0832x7p5i9xiyf8t	clbyo1fod9467l5p5leujm6q9	2023-01-04 06:52:23.078	2023-01-04 06:52:23.078	t
+clchbcbpw52365l5p53thmxtqp	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-01-04 07:03:29.876	2023-01-04 07:03:29.876	t
+clchbcop653041lfp5vejhmpdo	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-01-04 07:03:46.698	2023-01-04 07:03:46.699	t
+clchbkr5n53244l5p52wmktk7r	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-01-04 07:10:03.131	2023-01-04 07:10:03.132	t
+clchctc6854288l5p508fcijq0	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-04 07:44:43.232	2023-01-04 07:44:43.232	f
+clchcthv254512lfp5v56ur7y5	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-04 07:44:50.606	2023-01-04 07:44:50.607	t
+clchd44r654613lfp5sy9dy79a	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-04 07:53:06.834	2023-01-04 07:53:06.835	t
+clchdqu2t54453l5p5cxjpdouz	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-04 08:10:46.085	2023-01-04 08:10:46.086	t
+clchhf1c355290lfp5zv0vfaw5	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-04 09:53:34.083	2023-01-04 09:53:34.084	t
+clchl645l55282l5p51frapals	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-04 11:38:36.297	2023-01-04 11:38:36.297	t
+clciatjad57508l5p54nbbxdc0	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-04 23:36:39.397	2023-01-04 23:36:39.397	t
+clcibba2457781lfp5q584mbvb	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-04 23:50:27.244	2023-01-04 23:50:27.245	t
+clcicyg1j57934lfp5xgyi0ykh	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-05 00:36:27.703	2023-01-05 00:36:27.703	t
+clcidzlma57769l5p57r23u0l6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-05 01:05:21.202	2023-01-05 01:05:21.203	t
+clcie67u358063lfp5wyddtbcn	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-05 01:10:29.931	2023-01-05 01:10:29.932	t
+clcig89cw58088l5p5nhvs8gf1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-05 02:08:04.448	2023-01-05 02:08:04.449	t
+clcigu5a258477lfp51aect6kg	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-05 02:25:05.594	2023-01-05 02:25:05.595	t
+clcij2wox58388l5p5k6wumu70	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-05 03:27:53.601	2023-01-05 03:27:53.602	t
+clcimtkia58994lfp51kvk91tk	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-05 05:12:36.37	2023-01-05 05:12:36.37	t
+clcipbhsx58979l5p5z4bcvyuq	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-05 06:22:31.906	2023-01-05 06:22:31.906	t
+clcippoco59048l5p50wo3xse0	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-05 06:33:33.576	2023-01-05 06:33:33.576	t
+clciqrfif59165l5p5vz7srk0g	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-05 07:02:55.047	2023-01-05 07:02:55.047	f
+clciqrov059391lfp5l410sjnc	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-05 07:03:07.164	2023-01-05 07:03:07.165	t
+clciqx34k59341l5p57exerkn7	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-05 07:07:18.932	2023-01-05 07:07:18.933	t
+clcir3n1359625lfp5l9eg78ze	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-05 07:12:24.663	2023-01-05 07:12:24.664	t
+clcis3ol259470l5p5ybq4kqlj	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-05 07:40:26.294	2023-01-05 07:40:26.294	t
+clciuewiv59898lfp5c716wijo	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-05 08:45:09.031	2023-01-05 08:45:09.031	t
+clciuzm1159721l5p5fwbgk782	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-05 09:01:15.205	2023-01-05 09:01:15.206	t
+clcivro1d59814l5p5qyw0d0vp	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-05 09:23:04.177	2023-01-05 09:23:04.178	t
+clciwm8me60190lfp59ws0af7p	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-05 09:46:50.534	2023-01-05 09:46:50.535	t
+clcjq38y962227lfp5yv86fci4	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-05 23:31:52.976	2023-01-05 23:31:52.977	t
+clcjsn28c62208l5p5yjhirip8	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-06 00:43:16.62	2023-01-06 00:43:16.62	t
+clcjsschh62529lfp5tusd8ctv	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-06 00:47:23.189	2023-01-06 00:47:23.19	t
+clcjsuiyh62265l5p59zr8rszy	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-06 00:49:04.889	2023-01-06 00:49:04.889	t
+clcjsvc1862310l5p5djohuttb	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 00:49:42.572	2023-01-06 00:49:42.573	t
+clcjt3c1q62598lfp5y8zu9nr9	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 00:55:55.838	2023-01-06 00:55:55.838	t
+clcjtfr2962391l5p54wl955cv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-06 01:05:35.169	2023-01-06 01:05:35.169	t
+clcjtj4nh62436l5p5vonb5iyv	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 01:08:12.749	2023-01-06 01:08:12.75	t
+clcjtuxpd62505l5p56hlmmt7q	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-06 01:17:23.617	2023-01-06 01:17:23.618	t
+clcjvg3q962658l5p5jn9jyafl	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-06 02:01:50.817	2023-01-06 02:01:50.818	t
+clcjvmuzu62835lfp52b5o095e	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 02:07:06.09	2023-01-06 02:07:06.09	t
+clcjw3gpz62763l5p5nlv5rr2e	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-06 02:20:00.743	2023-01-06 02:20:00.744	t
+clcjz4g7e63012l5p5gww7cpna	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-06 03:44:45.578	2023-01-06 03:44:45.578	t
+clcjz6ugg63057l5p5j6dxampt	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-06 03:46:37.36	2023-01-06 03:46:37.36	t
+clcjz97yo63174lfp5j4x5kiz8	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-06 03:48:28.176	2023-01-06 03:48:28.177	t
+clcjzfhqw63114l5p50b2fa13p	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-06 03:53:20.792	2023-01-06 03:53:20.793	t
+clcjzfqn563231lfp58i1db6oj	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 03:53:32.321	2023-01-06 03:53:32.322	t
+clcjzk5zy63276lfp5elpbsvbu	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 03:56:58.846	2023-01-06 03:56:58.847	f
+clcjzr85363333lfp5on0uguke	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-06 04:02:28.215	2023-01-06 04:02:28.215	t
+clcjzu0tm63378lfp5znspeb4x	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-06 04:04:38.698	2023-01-06 04:04:38.698	t
+clck0582c63435lfp5d0ozthup	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 04:13:21.3	2023-01-06 04:13:21.301	t
+clcjzk9uk63183l5p5zd2ud5bm	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 03:57:03.836	2023-01-06 03:57:03.837	t
+clck0av3l63353l5p5n08fodx8	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-06 04:17:44.433	2023-01-06 04:17:44.434	t
+clck7j8h364186l5p50hj6b1o8	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 07:40:12.327	2023-01-06 07:40:12.328	t
+clck8w78n64376l5p5o4hl2592	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 08:18:16.871	2023-01-06 08:18:16.872	t
+clck9bc9j64539lfp51638lqsr	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 08:30:03.223	2023-01-06 08:30:03.224	t
+clcka16zm64576l5p5f3ib8190	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-06 08:50:09.442	2023-01-06 08:50:09.443	t
+clckaadfv64719lfp55lmdq6m3	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-06 08:57:17.707	2023-01-06 08:57:17.708	t
+clcl9im4e1188nrp5398yiuun	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-07 01:23:28.766	2023-01-07 01:23:28.766	t
+clcogs2n95592nrp52dfpk70o	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-09 07:10:05.925	2023-01-09 07:10:05.926	t
+clcogsean5465nfp51cv7jhdf	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-09 07:10:21.023	2023-01-09 07:10:21.024	t
+clcr5sq2d9004nrp562y0zsrk	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-11 04:25:59.029	2023-01-11 04:25:59.029	t
+clcr6mce09097nrp5k0i6j85x	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-11 04:49:00.984	2023-01-11 04:49:00.984	f
+clcr6mgal9011nfp53ayuxthv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-11 04:49:06.045	2023-01-11 04:49:06.046	t
+clcr6n6459142nrp53d1keqim	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-11 04:49:39.509	2023-01-11 04:49:39.509	t
+clcr7j92i9116nfp56gyxlbi2	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-11 05:14:36.33	2023-01-11 05:14:36.331	t
+clcr9g7qp9391nrp58xaplups	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-11 06:08:13.873	2023-01-11 06:08:13.873	f
+clcr9gad99281nfp5iftyzxnf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-11 06:08:17.277	2023-01-11 06:08:17.278	t
+clcrae95y9496nrp538gxqajx	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-11 06:34:42.022	2023-01-11 06:34:42.023	t
+clcrd04od9721nrp5unngte9f	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-11 07:47:41.869	2023-01-11 07:47:41.87	t
+clcrf0wmj9898nrp5kalnyvsq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-11 08:44:17.323	2023-01-11 08:44:17.324	t
+clcrg8p999782nfp56nels5o1	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-11 09:18:20.637	2023-01-11 09:18:20.638	t
+clcrgh2mp10039nrp5skd3n8sm	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-11 09:24:51.217	2023-01-11 09:24:51.217	t
+clcrhl0vt10144nrp52t7yno93	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-11 09:55:55.193	2023-01-11 09:55:55.194	t
+clcsb6jxf11903nfp5p4q8l26j	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-11 23:44:28.527	2023-01-11 23:44:28.527	t
+clcsbd4ou12205nrp55i52lmnq	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-11 23:49:35.358	2023-01-11 23:49:35.358	t
+clcsdzuuv12140nfp5jr5vgxey	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-12 01:03:14.935	2023-01-12 01:03:14.936	t
+clcse9awd12442nrp562gk7r9d	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-12 01:10:35.629	2023-01-12 01:10:35.63	t
+clcsk4lir12883nrp5l5za1aw2	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-12 03:54:53.811	2023-01-12 03:54:53.812	t
+clcsns60d13448nrp5kl2ca9kv	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-12 05:37:12.301	2023-01-12 05:37:12.302	t
+clcsnxyat13493nrp5vcf00c8f	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-12 05:41:42.245	2023-01-12 05:41:42.245	t
+clcsqqdqr13718nrp52bp5iq00	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-12 06:59:47.859	2023-01-12 06:59:47.86	t
+clcsqxoi513372nfp5rie0f5o6	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-12 07:05:28.397	2023-01-12 07:05:28.398	t
+clcsuek3e13645nfp52hpae8ds	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-12 08:42:34.682	2023-01-12 08:42:34.682	t
+clcsukuaq14039nrp5xc2ckejw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-12 08:47:27.842	2023-01-12 08:47:27.843	t
+clcsv3nn513738nfp5x1u08ssn	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-12 09:02:05.681	2023-01-12 09:02:05.682	t
+clcsvv3o614168nrp5ttu7dun2	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-12 09:23:26.166	2023-01-12 09:23:26.167	t
+clctq5d1i16325nrp51jy1u3n1	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-12 23:31:13.35	2023-01-12 23:31:13.351	t
+clctsccuc16124nfp507ljezle	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-13 00:32:38.916	2023-01-13 00:32:38.917	t
+clctsuynt16205nfp5zf75p5k1	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-13 00:47:07.001	2023-01-13 00:47:07.002	t
+clcttetj516286nfp543sfn1ag	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-13 01:02:33.473	2023-01-13 01:02:33.473	t
+clctu1hh616675nrp59zzbgls7	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-13 01:20:10.938	2023-01-13 01:20:10.938	t
+clctuziss16780nrp510ldarh8	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-13 01:46:38.956	2023-01-13 01:46:38.957	t
+clctwtyhz16599nfp5etpk1x8z	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-13 02:38:18.599	2023-01-13 02:38:18.6	t
+clctxe3vs16758nfp533cnp9kl	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-13 02:53:58.696	2023-01-13 02:53:58.697	t
+clctxefru17073nrp5dypscaez	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-13 02:54:14.106	2023-01-13 02:54:14.106	t
+clctynx2s16889nfp5poanekru	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-13 03:29:36.052	2023-01-13 03:29:36.053	t
+clcu11zcu17472nrp5z8ri6cc0	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-13 04:36:31.422	2023-01-13 04:36:31.423	t
+clcu7dnkv17862nrp545o2l3nj	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-13 07:33:33.727	2023-01-13 07:33:33.728	t
+clcu9qgpw17769nfp5vigx5l3u	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-13 08:39:30.596	2023-01-13 08:39:30.597	t
+clcualkhk18111nrp58og479wc	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-13 09:03:41.816	2023-01-13 09:03:41.817	t
+clcuf3p4w18468nrp5y1osh9nh	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-13 11:09:46.112	2023-01-13 11:09:46.113	t
+clcy0lfpo26912nfp5v998axc0	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-15 23:34:44.172	2023-01-15 23:34:44.173	t
+clcy39r6g27510nrp5c6puzvnf	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-16 00:49:38.008	2023-01-16 00:49:38.009	t
+clcy3iwqh27567nrp5tzyj6w1e	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 00:56:45.113	2023-01-16 00:56:45.114	t
+clcy4loqs27221nfp5pkosj21h	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-16 01:26:54.34	2023-01-16 01:26:54.34	t
+clcy5gldx27744nrp53539aqdr	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-16 01:50:56.325	2023-01-16 01:50:56.326	t
+clcya4wnq28113nrp5wmtwndf7	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-16 04:01:49.142	2023-01-16 04:01:49.142	t
+clcyadduv27650nfp5so2j6gms	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-16 04:08:24.679	2023-01-16 04:08:24.679	t
+clcyaxm9a28218nrp55bu4400w	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 04:24:08.686	2023-01-16 04:24:08.687	t
+clcydk0nb28431nrp5112s3lz1	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-16 05:37:32.999	2023-01-16 05:37:33	t
+clcydm3zj27923nfp522xepn5q	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 05:39:10.639	2023-01-16 05:39:10.639	t
+clcydyv4d27992nfp52t799zqq	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 05:49:05.677	2023-01-16 05:49:05.677	t
+clcyei38m28061nfp5tuy3m3s9	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 06:04:02.662	2023-01-16 06:04:02.663	t
+clcyga9vs28214nfp59jexb0ip	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 06:53:57.256	2023-01-16 06:53:57.257	t
+clcyidz6i28994nrp56zvoyfaa	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 07:52:49.242	2023-01-16 07:52:49.242	t
+clcyjcilq29099nrp55l3xtmi4	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 08:19:40.718	2023-01-16 08:19:40.719	t
+clcykvc4d28690nfp54j4y1lbf	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-16 09:02:18.397	2023-01-16 09:02:18.397	t
+clcykvlxy29252nrp5p6s2bwa5	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-16 09:02:31.126	2023-01-16 09:02:31.127	t
+clcykynha29297nrp5orkmrcae	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 09:04:53.086	2023-01-16 09:04:53.086	t
+clcyl96r428759nfp5k5qcbc4s	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 09:13:04.624	2023-01-16 09:13:04.625	t
+clcylt74q28828nfp5ri9m55p6	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-16 09:28:38.234	2023-01-16 09:28:38.235	t
+clcyn6hp929522nrp5w646qm8u	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-16 10:06:58.077	2023-01-16 10:06:58.078	t
+clcypazay29083nfp5ak4hd98e	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-16 11:06:26.746	2023-01-16 11:06:26.746	t
+clczg4rmi30868nfp58iaumn6v	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-16 23:37:26.498	2023-01-16 23:37:26.499	t
+clczgju5s31631nrp5bw37cmfl	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-16 23:49:09.616	2023-01-16 23:49:09.616	t
+clcziy9t231832nrp59dxtrth8	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-17 00:56:22.31	2023-01-17 00:56:22.31	t
+clczjdo7331901nrp5ekwoeamo	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-17 01:08:20.799	2023-01-17 01:08:20.8	t
+clczl4rnj31249nfp5z2gl1igm	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-17 01:57:24.607	2023-01-17 01:57:24.608	t
+clczlnkgq31318nfp555laqngu	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-17 02:12:01.754	2023-01-17 02:12:01.755	t
+clczmdkr532150nrp5qwt3ufwy	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-17 02:32:15.185	2023-01-17 02:32:15.186	t
+clczn95j231471nfp5njfoqxsi	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-17 02:56:48.446	2023-01-17 02:56:48.446	t
+clczvmax832843nrp5ro2ewf3m	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-17 06:50:58.892	2023-01-17 06:50:58.893	t
+clczvv0ff32900nrp5hetlca7r	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-17 06:57:45.195	2023-01-17 06:57:45.196	t
+clczw2nhq32092nfp5deup20is	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-17 07:03:41.678	2023-01-17 07:03:41.679	t
+cld02wiug33269nrp5lz4ghjhs	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-17 10:14:53.032	2023-01-17 10:14:53.033	t
+cld0vccnv35412nrp5ep6krfdl	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-17 23:31:00.763	2023-01-17 23:31:00.764	t
+cld12dhxg35877nrp5ov5mcz6p	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-18 02:47:51.556	2023-01-18 02:47:51.556	t
+cld12pigv35934nrp5cxmnwez9	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 02:57:12.127	2023-01-18 02:57:12.127	t
+cld13y7vc36063nrp5z8vz6iv4	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 03:31:57.912	2023-01-18 03:31:57.912	t
+cld18omfg35523nfp526s2j4t3	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-18 05:44:28.3	2023-01-18 05:44:28.301	t
+cld19hyky35604nfp5392y3s75	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-18 06:07:17.074	2023-01-18 06:07:17.075	t
+cld1avliu36620nrp5vhrpst3o	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-18 06:45:52.95	2023-01-18 06:45:52.95	t
+cld1b199735791nfp5r5kg0qdb	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-18 06:50:16.987	2023-01-18 06:50:16.987	t
+cld1bay6w35848nfp5erzvxqur	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 06:57:49.208	2023-01-18 06:57:49.209	t
+cld1coys436797nrp5aqsjn2ly	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-18 07:36:42.772	2023-01-18 07:36:42.772	t
+cld1epx7y36974nrp5ge0j6yur	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-18 08:33:26.638	2023-01-18 08:33:26.638	t
+cld1i4cka37284nrp5g933ocej	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-18 10:08:38.554	2023-01-18 10:08:38.554	t
+cld1iy6uc36511nfp52bjo5b83	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 10:31:50.82	2023-01-18 10:31:50.82	t
+cld1jp49x36604nfp5sg3s62xd	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 10:52:47.205	2023-01-18 10:52:47.205	t
+cld1k5bam36685nfp593me9si9	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 11:05:22.798	2023-01-18 11:05:22.799	t
+cld1l3es637521nrp54fj2rogb	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 11:31:53.622	2023-01-18 11:31:53.623	t
+cld1ld8vl36814nfp52xxjbewk	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 11:39:32.529	2023-01-18 11:39:32.529	t
+cld2bch5j38623nfp5iiqcyx76	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-18 23:46:46.615	2023-01-18 23:46:46.615	t
+cld2e904q39554nrp5jhf9e5h1	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-19 01:08:03.434	2023-01-19 01:08:03.435	t
+cld2ejza739611nrp59mugjdch	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-19 01:16:35.551	2023-01-19 01:16:35.552	t
+cld2gwoi839052nfp5u5uftxd6	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 02:22:27.344	2023-01-19 02:22:27.345	t
+cld2jtovh39289nfp5afvivbad	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-19 03:44:06.701	2023-01-19 03:44:06.701	t
+cld2kmj2w40064nrp58omucv1t	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 04:06:32.216	2023-01-19 04:06:32.217	t
+cld2lonnr39466nfp50u4efdi2	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 04:36:11.079	2023-01-19 04:36:11.079	t
+cld2m364h40205nrp5euo01p4v	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 04:47:28.193	2023-01-19 04:47:28.194	t
+cld2m91ol39547nfp55wesikbc	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 04:52:02.373	2023-01-19 04:52:02.374	t
+cld2oybs739760nfp5o6mchu6k	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-19 06:07:41.095	2023-01-19 06:07:41.096	t
+cld2rs9yb41099nrp5wc1oc58w	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 07:26:57.635	2023-01-19 07:26:57.636	t
+cld2rvlgb40473nfp5b1n9yh98	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 07:29:32.507	2023-01-19 07:29:32.508	t
+cld2t1ztq40590nfp5mdfx3wwb	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-19 08:02:30.686	2023-01-19 08:02:30.687	t
+cld2t8n4141240nrp5jt3zvmff	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 08:07:40.801	2023-01-19 08:07:40.802	t
+cld2tf2be40659nfp5xla48yb5	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 08:12:40.442	2023-01-19 08:12:40.443	t
+cld2ufqwg41369nrp5wzqeswh8	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 08:41:11.92	2023-01-19 08:41:11.92	t
+cld2v029h40812nfp5i1w28o81	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 08:56:59.765	2023-01-19 08:56:59.765	t
+cld2v1fcw40857nfp5dyb069ba	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 08:58:03.392	2023-01-19 08:58:03.392	t
+cld2vsdqi40950nfp5t30lyc8h	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-19 09:19:01.002	2023-01-19 09:19:01.003	t
+cld2xwteh41654nrp5r6p6y2ty	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-19 10:18:27.161	2023-01-19 10:18:27.162	t
+cld3qj6pu43842nrp5rb4oolo0	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-19 23:39:40.098	2023-01-19 23:39:40.099	t
+cld3thf2v43459nfp57isjc5h3	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-20 01:02:16.471	2023-01-20 01:02:16.471	t
+cld3tonf043516nfp52hd1zukw	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-20 01:07:53.868	2023-01-20 01:07:53.869	t
+cld45jez044496nfp5d4y7nfcq	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-20 06:39:45.036	2023-01-20 06:39:45.036	f
+cld45jn7t45073nrp5mq5ky7iu	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-20 06:39:55.721	2023-01-20 06:39:55.721	t
+cld4730u245252nrp5mk4anbj3	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-20 07:22:59.45	2023-01-20 07:22:59.451	f
+cld47334e44679nfp5ez8axaz2	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-20 07:23:02.414	2023-01-20 07:23:02.415	t
+cld49yik444944nfp5t6wrs9hz	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-20 08:43:27.988	2023-01-20 08:43:27.989	t
+cld4dt8nf45229nfp53y1ieoe4	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-20 10:31:20.331	2023-01-20 10:31:20.332	t
+cld9g6ymp58174nrp53s3mv9fh	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-23 23:36:50.642	2023-01-23 23:36:50.642	t
+cld9glwe958243nrp51m6fyclf	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-23 23:48:27.585	2023-01-23 23:48:27.586	t
+cld9i48hv58396nrp5behftk13	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-24 00:30:42.691	2023-01-24 00:30:42.692	t
+cld9ivrh157761nfp5k6nlq0a7	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 00:52:06.997	2023-01-24 00:52:07.004	t
+cld9j1d3658501nrp5br871go7	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-24 00:56:28.29	2023-01-24 00:56:28.29	t
+cld9kvtc357926nfp5t8m8571y	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 01:48:08.643	2023-01-24 01:48:08.644	f
+cld9kvvmo58678nrp556r39ic5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 01:48:11.616	2023-01-24 01:48:11.616	t
+cld9lczef58759nrp5d4zqk22w	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-24 02:01:29.655	2023-01-24 02:01:29.655	t
+cld9m56rz58864nrp58mps03dk	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-24 02:23:25.583	2023-01-24 02:23:25.584	f
+cld9m58zm58043nfp5lwzq0tup	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-24 02:23:28.45	2023-01-24 02:23:28.451	t
+cld9n2sqr58136nfp5r9acax5h	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 02:49:33.699	2023-01-24 02:49:33.7	f
+cld9n2uyo58993nrp5td7twoz4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 02:49:36.576	2023-01-24 02:49:36.577	t
+cld9qepfl59371nrp5us74u517	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-24 04:22:48.129	2023-01-24 04:22:48.13	t
+cld9qx4yl58535nfp5uwtbfcxz	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 04:37:08.061	2023-01-24 04:37:08.062	t
+cld9rr4gq58628nfp5vbwou0sn	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-24 05:00:27.098	2023-01-24 05:00:27.099	t
+cld9rtpnn58673nfp5ykcpigke	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-24 05:02:27.875	2023-01-24 05:02:27.876	t
+cld9ueqx259716nrp5q64ayq9i	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-24 06:14:48.518	2023-01-24 06:14:48.519	t
+cld9umkbq59773nrp5y64f95ik	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 06:20:53.222	2023-01-24 06:20:53.223	t
+cld9vapy159854nrp5xblmve4b	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-24 06:39:40.249	2023-01-24 06:39:40.249	t
+cld9vua4q59955nrp5hpxjvn9f	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-24 06:54:52.874	2023-01-24 06:54:52.874	f
+cld9vugfu59013nfp5j40otanl	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-24 06:55:01.05	2023-01-24 06:55:01.05	t
+cld9xw0wk59202nfp5cra7qw3i	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 07:52:13.46	2023-01-24 07:52:13.461	t
+cld9zf67959343nfp5078a83xo	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-24 08:35:06.405	2023-01-24 08:35:06.406	t
+clda2zpq060468nrp51xgstamq	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-24 10:15:03.672	2023-01-24 10:15:03.673	t
+clda3dx2p60537nrp50uihe7hv	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-24 10:26:06.385	2023-01-24 10:26:06.385	t
+cldaw3fql61536nfp5l0sq3zad	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-24 23:49:46.221	2023-01-24 23:49:46.221	t
+clday3pqm61713nfp5fnq58nz2	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-25 00:45:58.414	2023-01-25 00:45:58.414	t
+cldaz6yg361830nfp5w02hhosx	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-25 01:16:29.283	2023-01-25 01:16:29.284	t
+cldb2qenb63030nrp5dd63spc4	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-25 02:55:35.591	2023-01-25 02:55:35.592	t
+cldb5ezjh62295nfp5h5o315ut	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-25 04:10:41.645	2023-01-25 04:10:41.645	t
+cldb6ias263327nrp5ufzk4dgf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-25 04:41:15.794	2023-01-25 04:41:15.795	t
+cldb6w40p63396nrp5tx7iawe2	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-25 04:52:00.217	2023-01-25 04:52:00.218	t
+cldb854c262508nfp5xrktyl8o	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-25 05:27:00.146	2023-01-25 05:27:00.146	t
+cldbdrpeh63921nrp5x4pk74y5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-25 08:04:31.961	2023-01-25 08:04:31.962	t
+cldbe7dip63990nrp5606ngu8i	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-25 08:16:43.057	2023-01-25 08:16:43.058	t
+cldbfx16z64143nrp5f9da2gsk	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-25 09:04:39.755	2023-01-25 09:04:39.755	t
+cldbgv29464248nrp56lesgyzv	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-25 09:31:07.432	2023-01-25 09:31:07.433	t
+cldbiafq564389nrp5jg1rwchj	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-25 10:11:04.349	2023-01-25 10:11:04.349	t
+cldbidfpk63249nfp5mxfipw1x	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-25 10:13:24.296	2023-01-25 10:13:24.297	t
+cldbjou7k63378nfp5kqqapgli	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-25 10:50:15.92	2023-01-25 10:50:15.92	t
+cldcbj42m65271nfp5furb6tl9	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-25 23:49:38.014	2023-01-25 23:49:38.014	t
+cldcd35z166534nrp5h1ldqtk7	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 00:33:13.213	2023-01-26 00:33:13.214	t
+cldcdr6xw66627nrp5qcmg115b	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-26 00:51:54.212	2023-01-26 00:51:54.213	t
+cldcdx7af65472nfp5yssm5ep9	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-26 00:56:34.599	2023-01-26 00:56:34.6	t
+cldcei63965529nfp5zz69h7qt	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-26 01:12:52.821	2023-01-26 01:12:52.822	t
+cldceiw6x66708nrp5odsxa7z0	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-26 01:13:26.649	2023-01-26 01:13:26.65	t
+cldcelvoz66753nrp502oenywk	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-26 01:15:45.971	2023-01-26 01:15:45.972	t
+cldceuc9j65600nfp58jg6sxbv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 01:22:20.695	2023-01-26 01:22:20.695	t
+cldcfd0iq65681nfp5ae1vuagb	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 01:36:51.938	2023-01-26 01:36:51.938	t
+cldci36li65894nfp568czvbee	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 02:53:12.102	2023-01-26 02:53:12.103	t
+cldci3cjk67050nrp590acbxsv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 02:53:19.808	2023-01-26 02:53:19.809	t
+cldck9w8f66083nfp5623rz5th	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 03:54:24.495	2023-01-26 03:54:24.495	t
+cldcke49y66128nfp50mxsrc2v	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-26 03:57:41.542	2023-01-26 03:57:41.543	t
+cldckt5dx66197nfp5nd9zr8yl	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-26 04:09:22.821	2023-01-26 04:09:22.821	t
+cldckyumk67299nrp58zz2ipgn	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-26 04:13:48.812	2023-01-26 04:13:48.813	t
+cldckzsih67344nrp5p20c4vva	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 04:14:32.729	2023-01-26 04:14:32.729	t
+cldcmw4xg67509nrp5at0f7f4j	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-26 05:07:41.428	2023-01-26 05:07:41.428	t
+cldcnxfgz66522nfp57a08w5tf	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-26 05:36:41.363	2023-01-26 05:36:41.364	t
+cldco2rx167742nrp5qdo0enup	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 05:40:50.773	2023-01-26 05:40:50.774	t
+cldco8hu467799nrp5fr8ee8q1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 05:45:17.644	2023-01-26 05:45:17.645	t
+cldcotr6q68078nrp5ts8809vy	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-26 06:01:49.538	2023-01-26 06:01:49.539	t
+cldcqpzot68255nrp5lihqkccu	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-26 06:54:53.165	2023-01-26 06:54:53.166	t
+cldctzr9s67180nfp5bsu34s39	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-26 08:26:27.664	2023-01-26 08:26:27.664	t
+cldcuiluw68564nrp54q77qpai	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-01-26 08:41:07.112	2023-01-26 08:41:07.112	t
+cldcv0xno67297nfp528oxxgbx	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-26 08:55:22.212	2023-01-26 08:55:22.213	t
+cldcwax9i68729nrp5acqxamea	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-26 09:31:07.878	2023-01-26 09:31:07.879	t
+cldcwj5tu67438nfp5yv4r7a0n	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-26 09:37:32.226	2023-01-26 09:37:32.226	t
+cldcwplgs68798nrp5gq9qm9sx	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-26 09:42:32.428	2023-01-26 09:42:32.429	t
+clddqaedq69483nfp53v99ajij	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-26 23:30:31.886	2023-01-26 23:30:31.887	t
+clddtefxe71039nrp5koemvwpk	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 00:57:39.362	2023-01-27 00:57:39.362	t
+clddtkwnw69756nfp5vz1zubwk	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-27 01:02:40.988	2023-01-27 01:02:40.988	t
+clddttyal69813nfp5r18enq8c	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 01:09:43.005	2023-01-27 01:09:43.006	t
+clddtz5pc69858nfp5ln9b6qc5	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-27 01:13:45.888	2023-01-27 01:13:45.889	t
+cldduqrjk69951nfp5jvtmme2e	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 01:35:13.904	2023-01-27 01:35:13.904	t
+cldduuzhd69996nfp59prryuho	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 01:38:30.817	2023-01-27 01:38:30.818	t
+cldduxawh70041nfp5s3jpqgt5	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-27 01:40:18.929	2023-01-27 01:40:18.93	t
+clddwzxal71372nrp5u2mgwfke	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 02:38:20.493	2023-01-27 02:38:20.493	t
+clddxofqz71453nrp5055876bi	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-27 02:57:24.155	2023-01-27 02:57:24.156	t
+clddxqhzw71498nrp5e12807ng	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 02:59:00.38	2023-01-27 02:59:00.381	t
+clddyhumt71591nrp5eg0pr4g6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 03:20:16.469	2023-01-27 03:20:16.469	t
+clddzcu6d70398nfp518s7k8hh	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-27 03:44:22.213	2023-01-27 03:44:22.214	t
+clde19ffk70563nfp5gh0uhics	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-27 04:37:42.368	2023-01-27 04:37:42.369	t
+clde1gdnz70620nfp5huvptk1x	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-27 04:43:06.671	2023-01-27 04:43:06.672	t
+clde1rbcg70677nfp5xz1zl7dc	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 04:51:36.88	2023-01-27 04:51:36.881	t
+clde20cg270734nfp5gvteognw	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 04:58:38.21	2023-01-27 04:58:38.211	t
+clde48uvm70935nfp5qyiecjwa	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 06:01:14.578	2023-01-27 06:01:14.579	t
+clde4e5s672044nrp5hngxc6el	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 06:05:21.99	2023-01-27 06:05:21.99	t
+clde5iw0o72161nrp5nea3aesl	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-27 06:37:02.232	2023-01-27 06:37:02.233	f
+clde5j2yp71064nfp5edm5urbb	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-27 06:37:11.233	2023-01-27 06:37:11.234	t
+clde5njf272218nrp5c4jty46v	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 06:40:39.182	2023-01-27 06:40:39.182	t
+clde77ndw72359nrp5wr523rkw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 07:24:17.06	2023-01-27 07:24:17.061	t
+clde8ar1g72464nrp579b67n8k	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 07:54:41.38	2023-01-27 07:54:41.38	t
+clde92znt71361nfp5b0a8n1xc	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 08:16:38.921	2023-01-27 08:16:38.921	f
+clde931w272569nrp5tjnn4x58	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-27 08:16:41.81	2023-01-27 08:16:41.811	t
+clde96jrp71406nfp5nrr9z66r	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 08:19:24.949	2023-01-27 08:19:24.95	t
+cldec6vpb71643nfp534ke9qw3	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-27 09:43:39.263	2023-01-27 09:43:39.263	t
+cldi8ter777750nrp598nafu5g	clbkac7ll1096k7p5o1scf6vu	clbysydcx11765l5p5cdravoah	2023-01-30 03:20:16.627	2023-01-30 03:20:16.628	t
+cldi9dv8777873nrp5zrsgsh5u	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-30 03:36:11.095	2023-01-30 03:36:11.095	t
+cldi9myea76863nfp5oeeq23ul	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-30 03:43:15.106	2023-01-30 03:43:15.107	t
+cldic5gvh77004nfp58k5z8j7h	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-30 04:53:38.093	2023-01-30 04:53:38.094	f
+cldic5nyp78050nrp50et6bdvk	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-30 04:53:47.281	2023-01-30 04:53:47.281	t
+cldid15bd77099nfp589qh6o3u	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-01-30 05:18:16.105	2023-01-30 05:18:16.105	t
+cldidgffd77156nfp5sukidrhi	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-30 05:30:09.049	2023-01-30 05:30:09.05	t
+cldigkq9p77309nfp5kqvi3ja9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-30 06:57:28.573	2023-01-30 06:57:28.573	t
+cldigompt77354nfp57mys9qo6	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-30 07:00:30.593	2023-01-30 07:00:30.594	t
+cldih3qtq78303nrp522zywzsm	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-30 07:12:15.758	2023-01-30 07:12:15.759	t
+cldiitcfk77644nfp5ep0eos1r	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-30 08:00:09.776	2023-01-30 08:00:09.777	t
+cldilv36d77807nfp5wxw9pshi	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-30 09:25:29.941	2023-01-30 09:25:29.942	t
+cldjghl2379838nrp5gmgx0ttw	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-30 23:42:48.027	2023-01-30 23:42:48.028	f
+cldjghpdq78932nfp51edthf74	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-30 23:42:53.63	2023-01-30 23:42:53.631	t
+cldjgi0av78977nfp5j80v7tzy	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-30 23:43:07.783	2023-01-30 23:43:07.784	t
+cldji046q79058nfp508458rhf	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-31 00:25:12.242	2023-01-31 00:25:12.242	t
+cldjiczns79115nfp57x86gc7q	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 00:35:12.903	2023-01-31 00:35:12.904	t
+cldjjf0ah80003nrp5de954bat	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-31 01:04:46.649	2023-01-31 01:04:46.65	t
+cldjkh81w79232nfp5paqx50gb	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-31 01:34:29.636	2023-01-31 01:34:29.636	t
+cldjkoen679277nfp58ucxk2ii	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 01:40:04.77	2023-01-31 01:40:04.771	t
+cldjlrezk79346nfp52dmzndop	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-31 02:10:24.8	2023-01-31 02:10:24.8	t
+cldjm2cyw80156nrp5czj0nsqq	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-31 02:18:55.4	2023-01-31 02:18:55.4	f
+cldjm2f7z79403nfp5lklqq8h1	clbvp5b4a0832x7p5i9xiyf8t	clbygke367801l5p5ximv7nhl	2023-01-31 02:18:58.319	2023-01-31 02:18:58.32	t
+cldjn02sv80237nrp5g6os95fo	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 02:45:08.527	2023-01-31 02:45:08.528	t
+cldjnczth80341nrp5lnmyvdi0	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 02:55:11.189	2023-01-31 02:55:11.19	t
+cldjphdqu80446nrp54exuvm0h	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 03:54:35.094	2023-01-31 03:54:35.094	f
+cldjphh8u79667nfp5sy65y4vm	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 03:54:39.63	2023-01-31 03:54:39.631	t
+cldjqf32f79993nfp5ahyh0kju	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 04:20:47.559	2023-01-31 04:20:47.56	t
+cldjrhyan80794nrp5ege6o2qv	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-31 04:51:00.959	2023-01-31 04:51:00.959	t
+cldjrivfw80074nfp5xdbr4qrt	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-01-31 04:51:43.916	2023-01-31 04:51:43.916	t
+cldjrjhvo80839nrp5m2emsyyn	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-31 04:52:12.996	2023-01-31 04:52:12.996	t
+cldjrwwbp80896nrp5niucg0qn	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-31 05:02:38.245	2023-01-31 05:02:38.246	t
+cldjrz29f80143nfp5zful08me	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-31 05:04:19.251	2023-01-31 05:04:19.252	t
+cldjx09a081097nrp52ke0orfl	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-01-31 07:25:13.08	2023-01-31 07:25:13.08	t
+cldk04hvk81336nrp5j7xeu0br	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-31 08:52:29.696	2023-01-31 08:52:29.697	f
+cldk04od380510nfp54e4os91o	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-01-31 08:52:38.103	2023-01-31 08:52:38.103	t
+cldmiouai82493nfp5wvwa1bz6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 03:07:44.346	2023-02-02 03:07:44.347	t
+cldmj9f8w82550nfp54eusw0d2	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 03:23:44.624	2023-02-02 03:23:44.625	t
+cldmkctwy83358nrp5sflfwyfr	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 03:54:23.218	2023-02-02 03:54:23.219	t
+cldmln1ef82679nfp5bmzaburj	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 04:30:19.095	2023-02-02 04:30:19.095	t
+cldmlucve82724nfp5ggv18i17	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-02 04:36:00.554	2023-02-02 04:36:00.555	t
+cldmmnx5582793nfp5gx04b6mz	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 04:58:59.849	2023-02-02 04:58:59.849	t
+cldmop5x783559nrp5tdy8c7yq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 05:55:57.115	2023-02-02 05:55:57.116	t
+cldmoqmqt82910nfp51pcnlwrm	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 05:57:05.573	2023-02-02 05:57:05.573	t
+cldmrqenz83075nfp5n1uuu57d	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-02 07:20:53.951	2023-02-02 07:20:53.952	t
+cldmsb74483132nfp5lnxioxy1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 07:37:03.94	2023-02-02 07:37:03.94	t
+cldmtnllv83213nfp5plwpxzlr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-02 08:14:42.211	2023-02-02 08:14:42.212	t
+cldmup4ov83784nrp51pd5km3l	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-02 08:43:53.215	2023-02-02 08:43:53.216	t
+cldnz5yji83977nrp5aan99svu	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 03:36:43.038	2023-02-03 03:36:43.039	t
+cldnzm32i84034nrp5g9kl9duh	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 03:49:15.402	2023-02-03 03:49:15.403	t
+cldnzucrg84079nrp58a97tn0m	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 03:55:41.212	2023-02-03 03:55:41.212	t
+cldnzydmc84124nrp59ih1u73y	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 03:58:48.948	2023-02-03 03:58:48.949	t
+cldo103h083660nfp5dznrzvcl	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 04:28:08.724	2023-02-03 04:28:08.724	t
+cldo1x6wt83763nfp5v1u6uhgx	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 04:53:52.829	2023-02-03 04:53:52.83	t
+cldo1zui984258nrp54tx4ably	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 04:55:56.721	2023-02-03 04:55:56.722	t
+cldo2h6cm84315nrp5bscz9tzn	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 05:09:25.222	2023-02-03 05:09:25.222	t
+cldo2jyh783832nfp5aoauyzup	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 05:11:34.987	2023-02-03 05:11:34.988	t
+cldo3sxzp83925nfp57nipquqd	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 05:46:33.877	2023-02-03 05:46:33.878	t
+cldo3ylog83970nfp58purrzi4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 05:50:57.856	2023-02-03 05:50:57.857	t
+cldo45wth84408nrp5rzwhve4a	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 05:56:38.885	2023-02-03 05:56:38.886	t
+cldo6eo0j84513nrp5scw9wfxl	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 06:59:26.611	2023-02-03 06:59:26.612	t
+cldo6f5at84123nfp5i7sws2dt	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-03 06:59:49.013	2023-02-03 06:59:49.014	t
+cldo7qr7884654nrp53yu8y7ey	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 07:36:50.228	2023-02-03 07:36:50.229	t
+cldo7sx0684699nrp5sr4y51zw	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 07:38:31.062	2023-02-03 07:38:31.062	t
+cldo8vawm84389nfp52sffuiq7	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 08:08:22.006	2023-02-03 08:08:22.007	t
+cldo9kptt84911nrp5is37aswv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-03 08:28:07.745	2023-02-03 08:28:07.746	t
+cldoc3c1n85040nrp5iufnfiru	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 09:38:35.579	2023-02-03 09:38:35.58	f
+cldoc3j3z84685nfp5k26e8qus	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-03 09:38:44.735	2023-02-03 09:38:44.736	t
+cldti6ki285383nrp50rigkxyi	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 00:27:55.082	2023-02-07 00:27:55.083	t
+cldticmav85428nrp5vax8puya	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 00:32:37.351	2023-02-07 00:32:37.352	t
+cldtjk2cr85480nrp5qv5krh0e	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 01:06:24.363	2023-02-07 01:06:24.364	t
+cldtlq9h285590nrp5ln7y1be3	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 02:07:12.758	2023-02-07 02:07:12.758	f
+cldtlqgec85272nfp5nf55rxf2	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 02:07:21.732	2023-02-07 02:07:21.734	t
+cldtmkrmz85659nrp5iu6bwq9x	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 02:30:55.979	2023-02-07 02:30:55.98	t
+cldtn6e3985365nfp57t0rrmxf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 02:47:44.853	2023-02-07 02:47:44.854	t
+cldtnatnu85728nrp5lui1s9pr	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 02:51:11.658	2023-02-07 02:51:11.659	t
+cldtnlkvq85773nrp532j4tt42	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 02:59:33.494	2023-02-07 02:59:33.494	t
+cldtnry9v85818nrp57amjdkhx	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 03:04:30.787	2023-02-07 03:04:30.788	t
+cldto98e185875nrp5hjjw7hpa	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 03:17:57.049	2023-02-07 03:17:57.05	t
+cldtq5ie985762nfp548fjwpaw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 04:11:02.625	2023-02-07 04:11:02.626	t
+cldtqtw8t86178nrp57qwemu5o	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 04:30:00.317	2023-02-07 04:30:00.317	t
+cldtqvvsc86223nrp50xh50nd1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-07 04:31:33.036	2023-02-07 04:31:33.037	t
+cldtr6bfv86268nrp54dnukouu	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 04:39:39.883	2023-02-07 04:39:39.884	t
+cldtricfp86325nrp527be0vnt	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 04:49:01.045	2023-02-07 04:49:01.045	t
+cldtrm65186370nrp5xooixrzf	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 04:51:59.509	2023-02-07 04:51:59.509	t
+cldtsklom85925nfp5ridrb5ep	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 05:18:45.958	2023-02-07 05:18:45.958	f
+cldtskwbo86449nrp5d9kcy14c	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 05:18:59.748	2023-02-07 05:18:59.748	f
+cldtskyn085980nfp53i3ypxfq	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 05:19:02.748	2023-02-07 05:19:02.749	f
+cldtsl4b286494nrp5uo3tc4qq	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 05:19:10.094	2023-02-07 05:19:10.094	t
+cldtubxiu86097nfp573iv0id8	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 06:08:00.63	2023-02-07 06:08:00.631	t
+cldtut01386599nrp5fzf7gd6l	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 06:21:17.031	2023-02-07 06:21:17.032	t
+cldtv39mq86166nfp50v2w6txl	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 06:29:16.034	2023-02-07 06:29:16.034	t
+cldtzhpkn86561nfp51ms22eln	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-07 08:32:28.343	2023-02-07 08:32:28.343	t
+clduxsdmo88389nrp5djia0vak	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-08 00:32:33.024	2023-02-08 00:32:33.024	t
+clduxz4aj88434nrp5sss4uz3w	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 00:37:47.515	2023-02-08 00:37:47.515	t
+cldv32ees88704nrp57grkgxbk	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 03:00:18.676	2023-02-08 03:00:18.677	f
+cldv32h8888187nfp5v9brzgtf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 03:00:22.328	2023-02-08 03:00:22.329	t
+cldv4y47788300nfp59w4tss6y	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 03:52:58.051	2023-02-08 03:52:58.052	t
+cldv5il9988357nfp58q1zoyp8	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-08 04:08:53.277	2023-02-08 04:08:53.278	t
+cldv66ucq88454nfp5am53n5k2	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 04:27:44.81	2023-02-08 04:27:44.81	t
+cldv6bf6488931nrp55k150wrj	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 04:31:18.412	2023-02-08 04:31:18.412	t
+cldv6c3o088976nrp5x1ia22y7	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 04:31:50.16	2023-02-08 04:31:50.161	t
+cldv6joic89021nrp5mpnat6yv	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-08 04:37:43.764	2023-02-08 04:37:43.764	t
+cldv6mv0o88523nfp5nk6t4twt	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 04:40:12.168	2023-02-08 04:40:12.169	t
+cldv7mvy688662nfp51fap85xw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 05:08:12.99	2023-02-08 05:08:12.991	t
+cldv7scln88707nfp57t2iou0x	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 05:12:27.851	2023-02-08 05:12:27.852	t
+cldv7w8eb89194nrp5amsygvj1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 05:15:29.027	2023-02-08 05:15:29.028	t
+cldv99zah89312nrp5wkp5cyru	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 05:54:10.025	2023-02-08 05:54:10.033	t
+cldv9ivbw89369nrp51hd6pc9o	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 06:01:04.796	2023-02-08 06:01:04.797	t
+cldv9jy3y89414nrp5udz6di06	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 06:01:55.054	2023-02-08 06:01:55.054	t
+cldv9lssk88840nfp5ntmwha6c	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 06:03:21.476	2023-02-08 06:03:21.477	t
+cldv9ni0x89459nrp525b7u16u	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-08 06:04:40.833	2023-02-08 06:04:40.834	t
+cldvaeyxt88909nfp523nvmguh	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-02-08 06:26:02.465	2023-02-08 06:26:02.465	t
+cldvaw9wo88966nfp5b7svl55a	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-08 06:39:29.832	2023-02-08 06:39:29.833	t
+cldvdfeok89807nrp5za59vebq	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-08 07:50:21.716	2023-02-08 07:50:21.716	t
+cldvfckx089284nfp5hh7waemf	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-08 08:44:09.06	2023-02-08 08:44:09.061	t
+cldvg164u89988nrp5kr7q6lkh	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-08 09:03:16.302	2023-02-08 09:03:16.303	t
+cldwdcccj90564nfp55p8b1peb	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-09 00:35:44.899	2023-02-09 00:35:44.9	t
+cldwdzlsh91179nrp5di8wdcuq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 00:53:50.225	2023-02-09 00:53:50.225	f
+cldwfqkr191286nrp59cfx3nur	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 01:42:48.205	2023-02-09 01:42:48.206	t
+cldwg25ji91331nrp5vnwcp2hs	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 01:51:48.366	2023-02-09 01:51:48.366	t
+cldwgk8mo90773nfp5atmzm86m	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 02:05:52.176	2023-02-09 02:05:52.177	f
+cldwgke3r91400nrp559p4h3cj	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 02:05:59.27	2023-02-09 02:05:59.271	t
+cldwguip590830nfp5rm7bt9gf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 02:13:51.785	2023-02-09 02:13:51.785	t
+cldwgyywi90875nfp5qxg5hzpb	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 02:17:19.41	2023-02-09 02:17:19.411	t
+cldwhcosd90920nfp5j2k863r2	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 02:27:59.485	2023-02-09 02:27:59.486	t
+cldwhjqkj90965nfp5mxodfrj1	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 02:33:28.387	2023-02-09 02:33:28.387	t
+cldwjp9u391082nfp5ld2wr2gd	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 03:33:45.867	2023-02-09 03:33:45.867	t
+cldwk75qv91139nfp53kdnb0r1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 03:47:40.375	2023-02-09 03:47:40.376	t
+cldwlm9d391256nfp5c7461qyf	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 04:27:24.519	2023-02-09 04:27:24.52	f
+cldwlmgnm91625nrp57agml7fd	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 04:27:33.97	2023-02-09 04:27:33.971	t
+cldwlu5bf91670nrp5eflgkn6k	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 04:33:32.523	2023-02-09 04:33:32.524	t
+cldwm6aic91715nrp5xvvqu79f	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 04:42:59.124	2023-02-09 04:42:59.125	t
+cldwmfdlr91760nrp5zcxztzpm	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 04:50:03.039	2023-02-09 04:50:03.04	t
+cldwmubbw91361nfp5yy083oym	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 05:01:39.932	2023-02-09 05:01:39.932	t
+cldwnb4ln91418nfp509xkfxk3	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 05:14:44.363	2023-02-09 05:14:44.364	t
+cldwo0i7b91877nrp5v6rwx3xx	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 05:34:28.391	2023-02-09 05:34:28.391	t
+cldwqgrub91572nfp55czanvtv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 06:43:06.611	2023-02-09 06:43:06.612	f
+cldwqguq092028nrp5t88w2t7c	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 06:43:10.344	2023-02-09 06:43:10.345	t
+cldwsf6wf91677nfp569kb671j	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-09 07:37:52.047	2023-02-09 07:37:52.048	t
+cldwt2mn991734nfp5nlhqj429	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 07:56:05.541	2023-02-09 07:56:05.542	t
+cldwtltis91791nfp5r42l93pr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-09 08:11:00.916	2023-02-09 08:11:00.917	t
+cldwu6b1j92217nrp5de4rwvo9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-09 08:26:56.743	2023-02-09 08:26:56.744	t
+cldxu3rp093531nrp5l1p6mdmg	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-10 01:12:44.532	2023-02-10 01:12:44.533	t
+cldxxn74i93684nrp5n0irq7le	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-10 02:51:49.842	2023-02-10 02:51:49.843	f
+cldy090t093825nrp5ib1zdkrr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-10 04:04:47.316	2023-02-10 04:04:47.317	t
+cldy0oo8s93315nfp551dp7eq8	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-10 04:16:57.532	2023-02-10 04:16:57.532	t
+cldy2q44n93480nfp532e3pvo9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-10 05:14:04.007	2023-02-10 05:14:04.008	t
+cldy2t62994040nrp5ok2bfb9y	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-10 05:16:26.481	2023-02-10 05:16:26.481	t
+cldy2xhn193537nfp54hia1dxj	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-10 05:19:48.109	2023-02-10 05:19:48.109	t
+cldy30p7793582nfp54uh2hb16	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-10 05:22:17.875	2023-02-10 05:22:17.876	t
+cldy72uih93825nfp5ee7ntxz0	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-10 07:15:56.537	2023-02-10 07:15:56.538	f
+cldy72xk994361nrp5rzuwgqsw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-10 07:16:00.489	2023-02-10 07:16:00.49	t
+cle2310ix99670nfp5vjqngxmh	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 00:33:37.257	2023-02-13 00:33:37.258	t
+cle24l4z2100245nrp5pnuzn1kb	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 01:17:15.758	2023-02-13 01:17:15.759	t
+cle24r519100290nrp5b1mxn55l	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-13 01:21:55.773	2023-02-13 01:21:55.773	t
+cle24ynr399775nfp5dheyltz6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 01:27:46.623	2023-02-13 01:27:46.624	t
+cle28bbv1100455nrp5bfdyh78s	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-13 03:01:36.589	2023-02-13 03:01:36.589	t
+cle28quxd99964nfp561nlsdpl	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-13 03:13:41.137	2023-02-13 03:13:41.138	t
+cle2afaj0100057nfp5j7d2zx37	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-13 04:00:40.716	2023-02-13 04:00:40.717	t
+cle2c9g92100439nfp5axm418lz	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 04:52:07.43	2023-02-13 04:52:07.431	t
+cle2cfrms100484nfp59cqtr6y6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 04:57:02.116	2023-02-13 04:57:02.116	t
+cle2ci52j100529nfp5w6gjtiwt	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 04:58:52.843	2023-02-13 04:58:52.844	t
+cle2cni6l100574nfp57cjbw1s5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 05:03:03.117	2023-02-13 05:03:03.118	t
+cle2crj2a100903nrp584cu4nfw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 05:06:10.882	2023-02-13 05:06:10.882	t
+cle2ctdqa100619nfp53m6rjdo9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 05:07:37.282	2023-02-13 05:07:37.282	t
+cle2imy16100856nfp5vl0dn1vm	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 07:50:34.698	2023-02-13 07:50:34.699	t
+cle2jh56v101176nrp5x0lbzer6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-13 08:14:03.655	2023-02-13 08:14:03.655	t
+cle2l56jq101269nrp5x6h386ol	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-13 09:00:44.774	2023-02-13 09:00:44.775	t
+cle3jxbwm102196nfp52f16yms9	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-14 01:14:25.03	2023-02-14 01:14:25.031	t
+cle3kfbtf102253nfp5bwzket0k	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 01:28:24.723	2023-02-14 01:28:24.723	t
+cle3kgozb102656nrp51mswtdma	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 01:29:28.439	2023-02-14 01:29:28.44	t
+cle3ky8cl102310nfp5m7pwgi1t	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 01:43:06.693	2023-02-14 01:43:06.694	f
+cle3kybul102355nfp563mnpktp	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 01:43:11.229	2023-02-14 01:43:11.23	t
+cle3lxdlu102779nrp5bg5w42uv	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-14 02:10:26.466	2023-02-14 02:10:26.467	t
+cle3nnllk102585nfp56l8c2fj5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 02:58:49.496	2023-02-14 02:58:49.497	t
+cle3o5psz102933nrp5t4x3ajdw	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-02-14 03:12:54.755	2023-02-14 03:12:54.755	t
+cle3p8iog102678nfp5qxba7no9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 03:43:05.104	2023-02-14 03:43:05.105	t
+cle3p9mr3102723nfp59gakmv87	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 03:43:57.039	2023-02-14 03:43:57.039	t
+cle3shgu7103134nrp5kxc2nt7a	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-14 05:14:01.471	2023-02-14 05:14:01.471	t
+cle3sj11h102876nfp52rmu3vqz	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-02-14 05:15:14.309	2023-02-14 05:15:14.31	t
+cle3t8poj103203nrp5mcev1ziw	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 05:35:12.643	2023-02-14 05:35:12.643	t
+cle3tczp0103248nrp5wpa7z4hp	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 05:38:32.244	2023-02-14 05:38:32.244	t
+cle3to572103293nrp5qk3gcyjv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 05:47:12.59	2023-02-14 05:47:12.591	t
+cle3tytab102981nfp57yhjq0zw	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-14 05:55:30.371	2023-02-14 05:55:30.371	t
+cle3u28p3103350nrp5a85fpeki	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-14 05:58:10.311	2023-02-14 05:58:10.311	t
+cle3uijyp103407nrp540eazvwx	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-14 06:10:51.409	2023-02-14 06:10:51.41	t
+cle3usqpd103062nfp5voi84at8	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 06:18:46.705	2023-02-14 06:18:46.706	t
+cle3xy2dq103581nrp5np2smw27	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 07:46:53.966	2023-02-14 07:46:53.967	t
+cle3ylfa4103662nrp5f72wdqa4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 08:05:03.772	2023-02-14 08:05:03.773	t
+cle3zz5g9103325nfp59ny1cncp	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 08:43:43.833	2023-02-14 08:43:43.833	f
+cle4146tt103803nrp5wrb9yumg	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-14 09:15:38.513	2023-02-14 09:15:38.514	t
+cle41fnde103889nrp5ah6ig8uj	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-14 09:24:33.17	2023-02-14 09:24:33.17	t
+cle41mfxw103934nrp5gq3plvke	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-14 09:29:50.132	2023-02-14 09:29:50.133	t
+cle4y05be104595nfp5vtdv4ztu	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 00:36:17.258	2023-02-15 00:36:17.259	t
+cle4y1enr105047nrp5z2382eh4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 00:37:16.023	2023-02-15 00:37:16.024	t
+cle4z8244105128nrp5efomg1gb	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 01:10:25.972	2023-02-15 01:10:25.973	t
+cle51upq7104772nfp5wisfkxm9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 02:24:02.239	2023-02-15 02:24:02.24	t
+cle52i3b2105281nrp55p1fu4sc	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 02:42:12.926	2023-02-15 02:42:12.926	t
+cle531wp1105338nrp57hbsadpv	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 02:57:37.477	2023-02-15 02:57:37.478	t
+cle53ghmt105395nrp59merzot2	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-15 03:08:57.797	2023-02-15 03:08:57.798	t
+cle53i9a5104889nfp5whzec6rb	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 03:10:20.285	2023-02-15 03:10:20.286	t
+cle5457vd105464nrp599c7d9vr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 03:28:11.545	2023-02-15 03:28:11.546	t
+cle54tvlv104970nfp5s1354w3q	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-15 03:47:22.051	2023-02-15 03:47:22.051	t
+cle54v6sc105533nrp59qcxic98	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 03:48:23.196	2023-02-15 03:48:23.197	t
+cle55qmqf105590nrp56c4k68eq	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 04:12:50.199	2023-02-15 04:12:50.2	t
+cle579vb1105683nrp5nvpzv5nl	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 04:55:47.389	2023-02-15 04:55:47.389	t
+cle57efro105728nrp5876mbyw4	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 04:59:20.532	2023-02-15 04:59:20.532	t
+cle59fylg105833nrp5ak6vz2ws	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 05:56:30.82	2023-02-15 05:56:30.821	t
+cle59l8gw105878nrp5je5id654	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 06:00:36.896	2023-02-15 06:00:36.897	t
+cle59nt9w105219nfp5h90pltfr	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 06:02:37.172	2023-02-15 06:02:37.172	t
+cle59o699105923nrp5v2cfjn04	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 06:02:53.997	2023-02-15 06:02:53.998	t
+cle5cqw04105360nfp5gu06hbrf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 07:28:59.524	2023-02-15 07:28:59.525	t
+cle5e3vcg106136nrp5xg171xba	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 08:07:04.816	2023-02-15 08:07:04.816	t
+cle5euj2w105477nfp5b2bg3dhx	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-15 08:27:48.632	2023-02-15 08:27:48.632	t
+cle5frkqy106241nrp52vk2iqvx	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-15 08:53:30.442	2023-02-15 08:53:30.442	t
+cle5g94nz106298nrp5dy4ay5qh	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-15 09:07:09.407	2023-02-15 09:07:09.408	t
+cle6dknz1107504nrp52ulzatf1	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-16 00:39:54.973	2023-02-16 00:39:54.973	t
+cle6ds82k107549nrp5ou3sgup0	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 00:45:47.612	2023-02-16 00:45:47.613	t
+cle6fmdlp107630nrp5ct46mm07	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-16 01:37:14.077	2023-02-16 01:37:14.078	t
+cle6ftd5u107675nrp5olmxzthz	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 01:42:40.098	2023-02-16 01:42:40.099	t
+cle6g3x31106984nfp5iozdmr86	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 01:50:52.477	2023-02-16 01:50:52.478	t
+cle6gbbk2107029nfp5pqftpzft	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 01:56:37.826	2023-02-16 01:56:37.827	t
+cle6gi971107744nrp5dvcmgywd	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 02:02:01.357	2023-02-16 02:02:01.358	t
+cle6h0hir107801nrp57ssnv8lj	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 02:16:11.954	2023-02-16 02:16:11.955	t
+cle6h6s1f107846nrp5943zqlki	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 02:21:05.523	2023-02-16 02:21:05.523	t
+cle6im5uu107927nrp5lufhrrm4	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 03:01:02.886	2023-02-16 03:01:02.887	t
+cle6iqgwb107972nrp5rx56hmzm	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 03:04:23.819	2023-02-16 03:04:23.819	t
+cle6l1cv3108086nrp5b2rbiu73	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 04:08:51.039	2023-02-16 04:08:51.039	t
+cle6lf1st107306nfp5ovlu4x0d	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 04:19:29.885	2023-02-16 04:19:29.886	t
+cle6lh3ff108143nrp5930hupag	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 04:21:05.307	2023-02-16 04:21:05.308	t
+cle6lmxht107351nfp5v5ome33s	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 04:25:37.553	2023-02-16 04:25:37.553	t
+cle6lwufe107396nfp5yh5aoyz6	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 04:33:20.138	2023-02-16 04:33:20.139	t
+cle6lz0h0107441nfp50krwdtf3	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 04:35:01.284	2023-02-16 04:35:01.285	t
+cle6mvr93108248nrp5z2jetjqb	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 05:00:28.983	2023-02-16 05:00:28.984	t
+cle6nefpt108305nrp5p6kszfm1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 05:15:00.497	2023-02-16 05:15:00.498	t
+cle6ocbut108417nrp5c8k6x2im	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 05:41:21.797	2023-02-16 05:41:21.798	t
+cle6plz9q108498nrp5bx6e3iny	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-02-16 06:16:51.662	2023-02-16 06:16:51.663	t
+cle6pqw6m107733nfp5i8my3orj	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 06:20:40.942	2023-02-16 06:20:40.942	t
+cle6r6ayo108868nrp5oqwzb7hn	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 07:00:39.552	2023-02-16 07:00:39.553	t
+cle6sg941108370nfp5z1aj2y0m	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 07:36:23.329	2023-02-16 07:36:23.33	t
+cle6t2p1x109021nrp5fxvkkik1	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 07:53:50.421	2023-02-16 07:53:50.422	t
+cle6tjkoc109090nrp5s16b97el	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 08:06:57.9	2023-02-16 08:06:57.9	t
+cle6u6qwd108525nfp5nulwreh7	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-02-16 08:24:59.053	2023-02-16 08:24:59.054	t
+cle6u9y3v109159nrp54akoo6rj	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 08:27:28.363	2023-02-16 08:27:28.363	t
+cle6umdu6108582nfp5s260zfwk	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 08:37:08.622	2023-02-16 08:37:08.623	t
+cle6uqddj108627nfp5hh9ndrdl	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 08:40:14.647	2023-02-16 08:40:14.648	t
+cle6uqz8a109228nrp5uey2qz2q	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 08:40:42.97	2023-02-16 08:40:42.971	t
+cle6v2wur108684nfp55unk4s7y	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-16 08:49:59.763	2023-02-16 08:49:59.764	t
+cle6wbolh109418nrp5xnsn8d06	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-16 09:24:48.581	2023-02-16 09:24:48.582	t
+cle7tryjj111141nrp5wnief8ba	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 01:01:15.295	2023-02-17 01:01:15.296	t
+cle80ztpr111504nrp5264ywt6w	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 04:23:19.599	2023-02-17 04:23:19.6	t
+cle828rn2110878nfp5xumvf1ox	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 04:58:16.43	2023-02-17 04:58:16.43	t
+cle82btwb110923nfp593fm7y7f	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 05:00:39.323	2023-02-17 05:00:39.324	t
+cle84pa4z111823nrp5g4d3ne6m	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-17 06:07:06.131	2023-02-17 06:07:06.132	t
+cle8750il111164nfp5kicy7huz	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 07:15:19.389	2023-02-17 07:15:19.389	t
+cle8a3h2y112082nrp52n2b2ae8	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 08:38:06.394	2023-02-17 08:38:06.394	t
+cle8coic9112199nrp52r8dglel	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 09:50:27.033	2023-02-17 09:50:27.034	f
+cle8copa0111413nfp5cra47lkr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-17 09:50:36.024	2023-02-17 09:50:36.025	t
+clec2js0n116228nfp5cg789rqp	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 00:17:54.839	2023-02-20 00:17:54.874	t
+clec2yfty117140nrp5p314mluv	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-20 00:29:18.886	2023-02-20 00:29:18.886	t
+clec6lc17116393nfp5o8nl57gg	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 02:11:05.899	2023-02-20 02:11:05.9	t
+clec6qn88116438nfp5jj7vgpwg	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-20 02:15:13.688	2023-02-20 02:15:13.689	t
+clec70n7d116483nfp5fwejgdmy	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-20 02:23:00.217	2023-02-20 02:23:00.218	t
+clec8i09a116576nfp5drghwg9u	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-02-20 03:04:29.902	2023-02-20 03:04:29.903	t
+clec8qicn117401nrp5k5b99eca	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 03:11:06.599	2023-02-20 03:11:06.599	t
+clec9m2y6117482nrp5tp7n0lt8	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 03:35:39.63	2023-02-20 03:35:39.63	t
+clecaksp6117563nrp5tujahtne	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-20 04:02:39.305	2023-02-20 04:02:39.306	t
+clecav1d9117608nrp5ekc0akyl	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-20 04:10:37.101	2023-02-20 04:10:37.101	t
+clecbaxf9117665nrp5yp3tdzeh	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 04:22:58.485	2023-02-20 04:22:58.486	t
+clecbfthw117710nrp56651mm0z	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 04:26:46.676	2023-02-20 04:26:46.676	t
+clecblhp5117755nrp52ntpgpn4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 04:31:11.321	2023-02-20 04:31:11.322	t
+clecc1ymp117800nrp5eo8eh5xf	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 04:43:59.761	2023-02-20 04:43:59.762	t
+cleccfq8u116777nfp5jzxb2nsz	clbvp5b4a0832x7p5i9xiyf8t	clbwzqp063440l5p5qpclftcf	2023-02-20 04:54:42.078	2023-02-20 04:54:42.078	t
+cleccilpg116822nfp5v1bqbm4i	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 04:56:56.164	2023-02-20 04:56:56.165	t
+clecefec0116927nfp5rhzgtrbo	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-20 05:50:25.872	2023-02-20 05:50:25.872	t
+clecep2ir116972nfp5u1wsr1oi	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 05:57:57.123	2023-02-20 05:57:57.123	t
+clecglnj1117089nfp5ser8jn8i	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-20 06:51:16.957	2023-02-20 06:51:16.958	t
+cleck5x05118133nrp5slxke83o	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-20 08:31:01.205	2023-02-20 08:31:01.205	t
+cledgkqis118684nfp51x1bf5lv	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-20 23:38:20.356	2023-02-20 23:38:20.357	t
+cledio8le118801nfp5yja4kkf1	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-21 00:37:02.978	2023-02-21 00:37:02.978	t
+cledmdvl8118978nfp5a3mw9g0a	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-21 02:20:58.028	2023-02-21 02:20:58.028	f
+cledmdyw9119745nrp5qua60sw6	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-21 02:21:02.313	2023-02-21 02:21:02.314	t
+cledn5eed119047nfp5rspysrn9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-21 02:42:22.117	2023-02-21 02:42:22.117	t
+cledqzeo6119975nrp5t390gzb9	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-21 04:29:40.998	2023-02-21 04:29:40.998	t
+cledrdwpg119260nfp50h1dpgl2	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-21 04:40:57.556	2023-02-21 04:40:57.556	t
+cledrnrwr120044nrp5so0w48g7	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-21 04:48:37.899	2023-02-21 04:48:37.9	t
+cledryg82119329nfp54f2hj79r	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-21 04:56:55.97	2023-02-21 04:56:55.971	t
+cledtezgc120149nrp5efsjfid4	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-21 05:37:47.004	2023-02-21 05:37:47.004	t
+cledtijvg120194nrp5c6eiqrbh	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-21 05:40:33.436	2023-02-21 05:40:33.436	t
+cledure06120287nrp57ed44qyn	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-21 06:15:25.35	2023-02-21 06:15:25.351	t
+cleeyv3ra120804nfp5jss2920i	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-22 00:58:03.334	2023-02-22 00:58:03.335	t
+cleez1iy9121714nrp5heda8hs5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-22 01:03:02.961	2023-02-22 01:03:02.962	t
+cleezfnt3120873nfp5p06h6kj6	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-22 01:14:02.439	2023-02-22 01:14:02.44	t
+cleezhqlo121783nrp5ezxzj2in	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-22 01:15:39.372	2023-02-22 01:15:39.372	t
+cleezlrb2120918nfp5d7zkhlve	clbvp5b4a0832x7p5i9xiyf8t	clbvrl9gv3308x7p5h48e9riq	2023-02-22 01:18:46.91	2023-02-22 01:18:46.911	t
+clef001gw120975nfp5xulhry4d	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-22 01:29:53.264	2023-02-22 01:29:53.265	t
+clef59f6q122094nrp5l9zisq8x	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-22 03:57:09.026	2023-02-22 03:57:09.026	t
+clef5oxid121272nfp51vwk56h3	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-22 04:09:12.613	2023-02-22 04:09:12.614	t
+clef64w0c121329nfp5kvrgcvm0	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-22 04:21:37.164	2023-02-22 04:21:37.164	t
+clefbudyl122367nrp58zhih49v	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-22 07:01:24.909	2023-02-22 07:01:24.91	t
+clefcri2c121590nfp58ww34gzz	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-22 07:27:09.876	2023-02-22 07:27:09.877	t
+clefezn89122566nrp5n71abf2k	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-22 08:29:29.049	2023-02-22 08:29:29.05	t
+clegdwgqe123817nrp5lfui1qww	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 00:46:47.222	2023-02-23 00:46:47.223	t
+cleghk8mq123002nfp5ovf96pu9	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 02:29:15.314	2023-02-23 02:29:15.314	f
+cleghlrw3123994nrp5a4br5tel	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 02:30:26.931	2023-02-23 02:30:26.932	t
+cleghpxjj124039nrp5q1xqkkvh	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 02:33:40.879	2023-02-23 02:33:40.88	t
+clegjg7kg123119nfp59whvyld3	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-23 03:22:06.544	2023-02-23 03:22:06.545	t
+clegqmgph123404nfp59qhkgpfk	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 06:42:55.637	2023-02-23 06:42:55.638	t
+clegrvayn124444nrp5ctdzvyws	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 07:17:47.711	2023-02-23 07:17:47.712	t
+clegsqhya124513nrp5id1o1qq7	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 07:42:03.106	2023-02-23 07:42:03.107	t
+clegsqp6w123521nfp5e62eowkd	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-23 07:42:12.488	2023-02-23 07:42:12.489	t
+clegsx2od124558nrp5jhtu2zr4	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-23 07:47:09.901	2023-02-23 07:47:09.902	t
+clehsxsyk124802nfp5xz320nen	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-02-24 00:35:30.14	2023-02-24 00:35:30.141	t
+clem1j143129931nfp50nvfpsoo	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-26 23:47:02.115	2023-02-26 23:47:02.126	t
+clem4w7rq130906nrp5bsoxk8j6	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-02-27 01:21:16.118	2023-02-27 01:21:16.12	t
+clemcc54k130336nfp5iyrcvlpr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-27 04:49:36.5	2023-02-27 04:49:36.5	f
+clemccc0a131203nrp5xf06hlna	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-27 04:49:45.418	2023-02-27 04:49:45.419	t
+clemkeork131512nrp5x8f9k7hl	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-27 08:35:32.192	2023-02-27 08:35:32.193	t
+cleo1hej3132594nfp56kifd55c	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-02-28 09:21:18.542	2023-02-28 09:21:18.544	t
+cleoy3ns5133731nfp5vzg01qcl	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-03-01 00:34:24.677	2023-03-01 00:34:24.677	f
+cleoy3ty3134572nrp50x1mdirz	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-03-01 00:34:32.667	2023-03-01 00:34:32.668	f
+cleoy3zjk133776nfp513qwqxlx	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-03-01 00:34:39.92	2023-03-01 00:34:39.921	t
+clep18m95133917nfp58kwnc7u5	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-03-01 02:02:14.825	2023-03-01 02:02:14.826	t
+clep1dmyz133962nfp54s04cwjn	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-03-01 02:06:09.035	2023-03-01 02:06:09.036	t
+clep265cf134019nfp5a8izv0cr	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-03-01 02:28:19.215	2023-03-01 02:28:19.215	t
+clep41plc134112nfp5r8cfte6q	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-03-01 03:20:51.408	2023-03-01 03:20:51.409	t
+clep4vnl4134181nfp5ram9f50x	clbvp5b4a0832x7p5i9xiyf8t	clbvr84s02819x7p5v2ygonbg	2023-03-01 03:44:08.488	2023-03-01 03:44:08.488	t
+clep5gx5g134299nfp5r07050db	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-03-01 04:00:40.66	2023-03-01 04:00:40.661	t
+clep5znrg134356nfp5lzsyx0qe	clbvp5b4a0832x7p5i9xiyf8t	clchb8aiv52807lfp5xix6n5se	2023-03-01 04:15:14.956	2023-03-01 04:15:14.956	t
+clep62a36135018nrp52h6vhkr5	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-03-01 04:17:17.202	2023-03-01 04:17:17.203	t
+clep6hv9n135075nrp5vmffwgxv	clbvp5b4a0832x7p5i9xiyf8t	clbvpmyhv1014x7p54tde9iyh	2023-03-01 04:29:24.491	2023-03-01 04:29:24.491	t
+\.
+
+
+--
+-- Data for Name: Token; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Token" (id, token, "expiredAt", "createdAt", "updatedAt", "userId") FROM stdin;
+cle6quj25108119nfp5uck3b13w	$2b$10$e3OWWmpHne8tOuQsXvyDWeUewhdDb2YeOuECxKZre2Ika.jM5uLZC	2023-02-16 06:56:30.171	2023-02-16 06:51:30.173	2023-02-16 06:51:30.174	e988b8b1-7dbb-4bd4-a57d-744cba422bac
+cle6qvl6q108144nfp548bp1r9v	$2b$10$Zs/mtYPTW8TiTfRAUAxPD.Hw1rIIY2PKVbaZL5B7Wyduogh8ukk.S	2023-02-16 06:57:19.584	2023-02-16 06:52:19.586	2023-02-16 06:52:19.586	950d64fe-3dfd-429a-a5c7-fdc7ebfe8566
+\.
+
+
+--
+-- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."User" (id, username, password, "roleId", "createdAt", "updatedAt", email, "isVerified", "passwordUpdatedAt") FROM stdin;
+5329b4f7-fe0a-467f-a3bc-6c6ce0276b38	Saddam	$2b$10$D7q1upg6Cn0Ey0IE5K.43uenxk/op/QfuFse6e4rJnBYWPOZFzPT6	clbeimqvs0030ugp59zbal53f	2023-01-04 07:16:23.756	2023-01-04 07:16:51.096	muhammad.sultonysaddamholid.tik19@mhsw.pnj.ac.id	t	2023-01-04 07:16:22.713
+29996aa8-47c4-4d66-b9b6-9b83ecdc3d7f	evan	$2b$10$hAv9P7NErbeoD4FtMWh9h.sEHzsPALFT7vvjzsPpRdYtFzrbDmRRm	clbeimqvs0030ugp59zbal53f	2022-12-12 04:21:39.284	2022-12-12 04:21:39.285	evansetiawanuhuy@gmail.com	f	2022-12-12 04:21:38.283
+81c054df-5087-438e-b8bf-384602726585	tuying	$2b$10$ghijBPbBc/LYDXaOCxjgreHeglec6ZlP04vnVPbz6PBAdcy8Av9ES	clbeimqvs0030ugp59zbal53f	2022-12-13 16:14:48.446	2022-12-13 16:15:33.397	tuying@gmail.com	f	2022-12-13 16:14:47.444
+51d69dae-7249-4ba8-84e8-ec1dc564fe82	auliafachrudin	$2b$10$KtdDl1wZQBeFUEKRkQ/0b.7F0sMd8g0MnABN.ULnZp57Jcar9LnS2	clbeimqvs0030ugp59zbal53f	2022-12-20 03:23:47.035	2023-01-19 10:22:38.697	dimasauliaservice@gmail.com	t	2022-12-20 03:23:46.034
+dfd2fcd0-69e2-49f1-8bc6-f316c6ccb61e	dads	$2b$10$VOtMoRfRY.7opsVLEUfVwurgJzBHuS4zZH9FcGxRYHzgIKyTiwqtG	clbeimqvs0030ugp59zbal53f	2023-02-11 00:25:05.691	2023-02-11 00:25:05.694	operator@mail.com	f	2023-02-11 00:25:04.635
+e988b8b1-7dbb-4bd4-a57d-744cba422bac	muchtaramien	$2b$10$BLJZV27OSFxHQ1UUAnI1QOKaQcpB1sMWtcR17xqzGEXgBFlfdxwq2	clbeimqvs0030ugp59zbal53f	2023-02-16 06:51:04.916	2023-02-16 06:51:04.925	muchtaramien1@gmail.com	f	2023-02-16 06:51:03.878
+950d64fe-3dfd-429a-a5c7-fdc7ebfe8566	FransNBN	$2b$10$AgPFZN6fYySDZgOm1iMjuOYhvcGU/7PsAyrLMQiLEb2698qq0jNmm	clbeimqvs0030ugp59zbal53f	2023-02-16 06:52:08.933	2023-02-16 06:52:08.951	fransdavidson45@gmail.com	f	2023-02-16 06:52:07.925
+ae7962d2-3f28-4395-9f60-7b9ab665f156	indra	$2b$10$g4Ae0tEf.EKjFcSVO4lIeemV/Dm33xqFrJVTetPf4wfGU7FxRwxkq	clbeimqvs0030ugp59zbal53f	2022-12-13 04:18:42.1	2022-12-16 08:50:50.537	indrah13@gmail.com	t	2022-12-16 08:31:25.879
+84cb5b99-6523-4dab-a40f-de710fdfdc4c	indrah13	$2b$10$ZFJcHtP/CeXARBQz0US3OOazXkCuuVgNIk77RjesLxsLHKrfiql6a	clbeimqzy0051ugp56hlsec3d	2022-12-16 08:33:11.586	2022-12-20 03:02:10.975	indra.hermawan@tik.pnj.ac.id	t	2022-12-16 08:33:10.585
+c101f65b-abfd-41e3-99a7-2d969f272bc7	Ega Rahmaputri	$2b$10$6Vb4jT2XY50vA/HdlmL/mOAsvM5vOQTA62qWWxNSL0pnXiByP9RiW	clbeimqvs0030ugp59zbal53f	2022-12-20 04:04:59.166	2022-12-20 04:04:59.167	egarahmaputri24@gmail.com	f	2022-12-20 04:04:58.165
+6c6b2850-b022-4be4-aba0-4aa9309f43aa	NINING LATIA	$2b$10$RZjU9Rr.1z7cnR4F/RYdWeTKbauV2nJ2GlYx6TlAbaz4pelf31vYy	clbeimqvs0030ugp59zbal53f	2022-12-20 04:51:16.779	2022-12-20 04:51:16.78	nining.latianingsih@bisnis.pnj.ac.id	f	2022-12-20 04:51:15.778
+598e6a1c-6224-43ba-9c00-8bd2080c1cd8	Siska	$2b$10$ZMn0r4oI9JacXk0.20UN4.j5.oAZpwf2EujEojZu1NFZvZrneQZPW	clbeimqvs0030ugp59zbal53f	2022-12-20 04:59:48.379	2022-12-20 04:59:48.38	siska08rdt@gmail.com	f	2022-12-20 04:59:47.378
+52fa16f1-3e2a-4149-a6bb-ff6ef615ac6a	Afhlala	$2b$10$NDYwh41h.SHTyF5vM40vReyf9lyv87cZMc.Xzu27lGjNSSXgkv/QK	clbeimqvs0030ugp59zbal53f	2022-12-20 05:09:31.523	2022-12-20 05:09:31.523	larasafifah@gmail.com	f	2022-12-20 05:09:30.522
+4886c90a-62e6-4839-a340-d960af782385	EgaOperator	$2b$10$WRZS9lFx4Wsqk1Trmpo9cOZYFH6QZtYjLUTjCJytDoUgmPJ7GSXFy	clbeimqzy0051ugp56hlsec3d	2022-12-20 05:15:43.114	2022-12-20 05:15:50.865	sekretariat@pnj.ac.id	f	2022-12-20 05:15:42.113
+9f9d1508-c294-4c33-96f3-e921e9c57c0d	dimasaulia	$2b$10$G27I6AtiUmbmguAFUzRLHOwcXa6fDSKZkNDYkCmblnKpG11unx34S	clbeimqy30037ugp5e5y6xs9t	2022-12-08 03:24:32.703	2022-12-20 10:19:40.379	dimasauliafachrudin@gmail.com	t	2022-12-16 08:16:37.777
+b69227a9-23ae-40c6-a0b5-b16b18df6e79	Zainalnurarifin	$2b$10$2ENYH7VI6.dM8E1VN/gcdOYEn9v.JlXcU.EFClsA66brMEmd9Ez2y	clbeimqvs0030ugp59zbal53f	2022-12-21 01:47:16.105	2022-12-21 01:47:16.106	zna@pnj.ac.id	f	2022-12-21 01:47:15.104
+27bbb0c3-1a56-456c-bfb4-0096ad269a44	Akub	$2b$10$3qQjoZn/R.L8MzWQ2M75KOzWR8cBOMrkP8pSfPYzFllUusnLeplaG	clbeimqvs0030ugp59zbal53f	2022-12-22 02:27:10.174	2022-12-22 02:27:10.175	akuboctasupandi24@gmail.com	f	2022-12-22 02:27:09.173
+bd917730-5ea3-455b-b773-bd24ea7fd699	BuildingService	$2b$10$F4wQjN1i3mNxIxvuzRcnhedT6eIUp8P.Ha8qT7vobe8IUrUhhigjC	clbeimqvs0030ugp59zbal53f	2022-12-20 08:57:13.706	2022-12-22 05:55:28.852	cleaningservice@gmail.com	f	2022-12-20 08:57:12.704
+9ce7bd15-3481-4a05-9cb1-e6f89eb61dc4	dewililiana	$2b$10$hdmQmUDQpG6uYYijQ.Pzf.gRjq/TUjdYKZPvVJ/cGu1FQKHr2lP7q	clbeimqvs0030ugp59zbal53f	2023-01-04 07:01:59.66	2023-01-04 07:01:59.662	dewiyanti.liliana@tik.pnj.ac.id	f	2023-01-04 07:01:58.618
+\.
+
+
+--
+-- Data for Name: _CardToRoom; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_CardToRoom" ("A", "B") FROM stdin;
+clbkah0721006k8p5goxzv8nm	clbkac7ll1096k7p5o1scf6vu
+clbvpmyhv1014x7p54tde9iyh	clbvp5b4a0832x7p5i9xiyf8t
+clbvr84s02819x7p5v2ygonbg	clbvp5b4a0832x7p5i9xiyf8t
+clbvrl9gv3308x7p5h48e9riq	clbvp5b4a0832x7p5i9xiyf8t
+clbwzqp063440l5p5qpclftcf	clbvp5b4a0832x7p5i9xiyf8t
+clbygke367801l5p5ximv7nhl	clbvp5b4a0832x7p5i9xiyf8t
+clbysydcx11765l5p5cdravoah	clbkac7ll1096k7p5o1scf6vu
+clchb8aiv52807lfp5xix6n5se	clbvp5b4a0832x7p5i9xiyf8t
+\.
+
+
+--
+-- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public._prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) FROM stdin;
+8af48c83-cb91-4537-8c6e-9011e58daa67	d755aca96ee6f2351310d0c409081911ac5fc6020c7958985e6d37dcd1d3f607	2022-12-08 10:23:01.05484+07	20220802004851_cascade_user_profile	\N	\N	2022-12-08 10:23:00.905957+07	1
+9c5e0c63-ddea-440b-b986-59625f9089b9	bd1e56a80f8efccc0d456e8a2789699496c839c679810081e4c3ed2c57caba65	2022-12-08 10:22:51.385595+07	20220610154448_initial_migrations	\N	\N	2022-12-08 10:22:50.351167+07	1
+85b67bd6-69d8-4827-b16b-f2970481f5c9	c3cbeb06ac6cde939006c732d0ce834afbeb04a932b79c23c1ef3010d9317483	2022-12-08 10:22:54.560934+07	20220615020601_change_behavior_of_last_online_in_room	\N	\N	2022-12-08 10:22:54.478766+07	1
+6d15f26d-d0e1-477f-85b8-4378ee36ea01	a7447ac76729f21d81ba47fb14e98496c05fb44a3680a1a5b8c9f330830bd126	2022-12-08 10:22:51.560499+07	20220611011554_apply_unique_value_in_role	\N	\N	2022-12-08 10:22:51.442663+07	1
+4f49dcbf-b727-4139-879a-88d9231bdc5d	1631f0f1814517bc8a49334c981271e8dfc87ce6a780aaf4f680a6170545c848	2022-12-08 10:22:51.72722+07	20220611023744_username_must_unique	\N	\N	2022-12-08 10:22:51.603605+07	1
+c1f7174e-7110-4f7e-90b8-761f852de96a	8bc8aa265c4bb680057e7830d773704e568ab2a97f022bc0535c19f20aaba2f5	2022-12-08 10:22:58.578847+07	20220706015625_change_card_id_to_cuid	\N	\N	2022-12-08 10:22:57.304394+07	1
+b4c6a719-e08a-43d8-96ef-2005bee05ccd	1c45fe0f2538816f86058079839f986fea4fc09db9de6221dcbba8b6f0f820a6	2022-12-08 10:22:52.118907+07	20220611025614_change_pin_type	\N	\N	2022-12-08 10:22:51.811002+07	1
+f5bcb875-0211-4601-a6e2-81b348b6fa73	3d9775c00f2959aef7b2224f8ef61f588718493ecc5e536d6be8ea8cb97f3e97	2022-12-08 10:22:55.586297+07	20220626004349_change_relation_and_lot_more	\N	\N	2022-12-08 10:22:54.586949+07	1
+ae5470b6-0402-422e-b31d-147d8fbb9b90	d6657752900f46aa5d64b856787768dca4cf96f16ca3426386545e3a09f9098c	2022-12-08 10:22:52.393908+07	20220611045215_change_user_role	\N	\N	2022-12-08 10:22:52.310749+07	1
+ff7c34d3-4b31-4d8f-9b30-f9299abbd5cd	35bdcc7150a3ae5aa875ce158bace5a5b98e1cb8a6ce7c64fed6cf69bec57989	2022-12-08 10:22:52.493886+07	20220611045733_change_user_role	\N	\N	2022-12-08 10:22:52.419884+07	1
+27c75ecf-374f-460a-82f7-d6001d049ec8	eb8cb80ae6a8a2f101d8297476e81fd1823da127385a18f0ef58af72814bcd34	2022-12-08 10:22:52.593935+07	20220611050359_changes_role	\N	\N	2022-12-08 10:22:52.519953+07	1
+656c57d5-3bb0-47ee-a8b2-d53048ae4bd8	702b130e5eca3759bce1db90771a35c30d93d9e231de0443e412dba02b5625a0	2022-12-08 10:22:55.752898+07	20220626004607_add_email_field	\N	\N	2022-12-08 10:22:55.6121+07	1
+7e2077eb-d6c4-4b40-a849-5d832cf61596	dc477b3090993626f1f6341b5e936a31e4893538f14f354c9ad2ffb530979b32	2022-12-08 10:22:52.885672+07	20220615005231_change_relation_beetwen_room_and_user	\N	\N	2022-12-08 10:22:52.620322+07	1
+b3a677fc-4169-4b48-a7aa-e7ab721b1282	80369ff2e6dab37ac8f003c50677442f2e66a222db7a47f4c190dd87cbe93026	2022-12-08 10:22:52.993963+07	20220615010311_change_behavior_of_ruid_must_to_be_unique	\N	\N	2022-12-08 10:22:52.903203+07	1
+9921d634-2de0-47a1-b578-74cfe19bd0dd	d9299a1c2c77ba97321a927095cb8c755bf34e79d1cfd08d09094f0877bdf413	2022-12-08 10:22:54.152647+07	20220615015713_add_create_and_update_time_stamp	\N	\N	2022-12-08 10:22:53.011551+07	1
+073da2fb-7bf9-4064-9d7f-a4d2c3927f24	551c4ebb72518f9d7946ca1710d1316ed676b4ac89c7f1b5800fdc5d70d6232b	2022-12-08 10:22:55.919771+07	20220626092337_add_records_table	\N	\N	2022-12-08 10:22:55.778636+07	1
+7356d4b9-fa71-4c92-ac09-502b36bf0e74	398b5a104ea875571e3f7ec09b40acf52725119ff8575603b70efa8487783213	2022-12-08 10:22:54.252689+07	20220615020232_change_time_stamp	\N	\N	2022-12-08 10:22:54.178758+07	1
+13451c96-a137-478b-a969-f33ebd79c043	989c919c198dea242387ff05761469068af9221bffcb7824e05d975b0c2a28c8	2022-12-08 10:22:54.344397+07	20220615020422_add_update_time_stamp	\N	\N	2022-12-08 10:22:54.278652+07	1
+ae5c46dc-9882-4cf6-ade5-5e91c3b01912	cda8221ca3a7f1ab1acd04c8e891a5ec045f0bc41693a9f3f3495b882c7136c3	2022-12-08 10:22:58.71214+07	20220706041645_default_card_name	\N	\N	2022-12-08 10:22:58.623118+07	1
+eceee00b-7252-4390-986a-84f67ac3b7f9	1d4ddc57ca7d51ef85ca192c9175cd93915084cf71bca0915a7076757496bde4	2022-12-08 10:22:54.452643+07	20220615020533_add_last_online_to_room	\N	\N	2022-12-08 10:22:54.370608+07	1
+f06b1532-8b35-47e6-894d-e4bee301f7b3	465a80dedbbe3d1eaeff280a7bfb2921b61b0d36c0c77514f599d4b6f2e3c2f0	2022-12-08 10:22:56.086467+07	20220626092520_add_date_time_in_records	\N	\N	2022-12-08 10:22:55.93695+07	1
+c6603400-37a8-448f-bd92-d781cb7223de	6b32b8969950f952b72f0ad5a0fd0f61a5d349277818f98224d29830a448f038	2022-12-08 10:22:56.795143+07	20220627092725_add_room_request	\N	\N	2022-12-08 10:22:56.104261+07	1
+11b42801-0c1f-4815-a0d9-08356159c045	853dcbbb6857cc68a7da40ac69734d7521a9bd0f84013cd5c7060224791815d3	2022-12-08 10:23:02.729951+07	20220822071826_relation_change	\N	\N	2022-12-08 10:23:02.655959+07	1
+10d92626-3db7-4341-84cd-ad4dd700229e	f51ad79cdae936994ac9970263e6b29f5d5894993d2fdcf9c1787861c5543d18	2022-12-08 10:22:57.161727+07	20220705064200_add_card_type	\N	\N	2022-12-08 10:22:56.804504+07	1
+fa4835c3-759a-4b18-99c3-9675060b1db7	c6e6ff51d54bc7028288f4227cf30f913412dab58b797d5c025c450e0895dda8	2022-12-08 10:22:58.812249+07	20220707043657_fix_realtion	\N	\N	2022-12-08 10:22:58.738248+07	1
+67dbf2c5-8932-4d87-8cb8-c6cc907afe15	6deb315abf7110b58a973f6529b397a20dd3e527b9efa85f52baffa65dc834b5	2022-12-08 10:22:57.278365+07	20220705065719_add_card_name	\N	\N	2022-12-08 10:22:57.187763+07	1
+78506ab9-ffd6-4801-96ec-6560145e4dd0	93074890f10ef85ed6e8a2a8fe4aec8589a427c30c4ce37f031ebe5c0b1169fa	2022-12-08 10:23:01.47173+07	20220821071027_add_operation_status	\N	\N	2022-12-08 10:23:01.080779+07	1
+8ce8d63c-8ae6-4c64-bcc6-8f7e03b65408	86a8d73c23f58c34650e14e1e5f0a485f659728c9c986f5976a9529a9bf628e8	2022-12-08 10:22:58.979041+07	20220707043918_fix_relations_issue	\N	\N	2022-12-08 10:22:58.838151+07	1
+0bf7db26-7493-4074-9deb-8f423322e482	631858ae535c63ae3e1c7afe98470b4024ca35acc49b753f75cff5c7b1afb515	2022-12-08 10:23:00.888241+07	20220801232735_reinit	\N	\N	2022-12-08 10:22:59.155233+07	1
+4887496e-13f9-4e5b-b93f-442655770180	c363140bf23c608f8d76e1d126a0e39da6a3259e31f3a41c27ca34628d4bf0ab	2022-12-08 10:23:02.405005+07	20220822071239_ondelete_set_to_no_action	\N	\N	2022-12-08 10:23:02.206132+07	1
+d1d9793d-2ba5-41b6-86fd-901a19f41476	dfb3f9c550fe4daad61d27f436ad503b2f78c3fbd9e785dd32b1dee5ad7b4578	2022-12-08 10:23:01.871581+07	20220822070416_on_delete_log_action	\N	\N	2022-12-08 10:23:01.547703+07	1
+eae212f4-545e-4f6c-8b5c-7cbf3926cda7	67c30b0b9c088f9df965444290d2e2be9781c207f0746d3364c0c103c943cd48	2022-12-08 10:23:02.129875+07	20220822070713_ondelete_handler	\N	\N	2022-12-08 10:23:01.947941+07	1
+c53e8641-d8f2-4dab-b3e7-190516bd954b	bd5243493e8e61bf8ca751503a308043d71a2f67055db31f3fdcb62ac166feee	2022-12-08 10:23:02.60489+07	20220822071721_relation_change	\N	\N	2022-12-08 10:23:02.430935+07	1
+2067653f-50ac-43da-9ff5-9bec6ebc974b	20bc9f237a8ce173b4f20ce8851a38f72438163f7eea76574ae6172cf549242c	2022-12-08 10:23:03.238268+07	20220823044229_change_default_room_pin	\N	\N	2022-12-08 10:23:03.100507+07	1
+1f24b819-40c6-41fa-8a30-a37e48222b20	92407b288602ce80bfab4897d6da5b8d3618ecbbbc091bbb2605f1f428146b5b	2022-12-08 10:23:03.063304+07	20220823032715_add_pin_to_room	\N	\N	2022-12-08 10:23:02.756685+07	1
+66e451b3-8137-4fd7-9899-170834db1ee0	efab5c2649af0ed0ffcd978df617f1a8b030718f302b048563a2d81ce507bce3	2022-12-08 10:23:03.388445+07	20220823045225_change_room_default_pin	\N	\N	2022-12-08 10:23:03.264475+07	1
+dd617201-656d-413d-9790-b17fcae46532	41a7b126ad1d749ba45403759092dbda4222db8848c2d1050b0aa5281248c9a2	2022-12-08 10:23:04.088333+07	20220824054352_add_token_table	\N	\N	2022-12-08 10:23:03.41451+07	1
+773f7a05-3337-4de2-83e9-3e80ee2a437b	ff7822fd89eaeff9bdaee02d1d29b74fe7ffa8e472520231105482db8edb4425	2022-12-08 10:23:04.430018+07	20220826032716_add_two_step_auth_for_card	\N	\N	2022-12-08 10:23:04.122901+07	1
+69487003-ee75-4f94-8289-ff82b2a6b633	3148ee01f7a57bfe0cacafe8b9d5d7119ae0b1ba9ea5a82b0cbe6a797e45e32b	2022-12-08 10:23:04.646789+07	20220913034747_add_api_key	\N	\N	2022-12-08 10:23:04.44769+07	1
+6def160e-de30-41c9-b9a4-6dd80925f658	f6749852a88fc917abc4c32a9b241b4a9e5c3ae83863fa4d4d2a962eb898766d	2022-12-08 10:23:04.921737+07	20220913041719_add_timestampt_to_api_key	\N	\N	2022-12-08 10:23:04.664552+07	1
+436d00ae-736c-4392-bd80-e4ee42368372	2bb3b03172f0c19c9d65a8c67950bc96a51b4f2bc2038cd6af3b847c8a138956	2022-12-08 10:23:05.222011+07	20220913064411_add_is_active_for_room	\N	\N	2022-12-08 10:23:04.939457+07	1
+a42b299d-8f0f-4f18-8fa8-b1256abdc5f4	2fd24f621c7f597d4755bcac32f331a3c1c88d501bec9c0cd893a9f8d2fb0c11	2022-12-08 10:23:07.342048+07	20221207051603_fix_default_photo	\N	\N	2022-12-08 10:23:07.256186+07	1
+93d704e4-9427-44a7-a9df-10ccf2b386ce	97611a556faa7113a7eee261923e3d1534fb4710fb1d0b49f36e958876f7e239	2022-12-08 10:23:05.5636+07	20221010050327_add_device	\N	\N	2022-12-08 10:23:05.248085+07	1
+5161dd52-4a64-4578-bd0d-2809116f3496	9ce816c64e4a44aac6dd8f4c14175f034f1f868bc74e67331d496182afcc9785	2022-12-08 10:23:05.713752+07	20221010050636_add_cascade	\N	\N	2022-12-08 10:23:05.631322+07	1
+773097e3-f10f-4685-9b0f-ae3606e87704	9428eab4f0950d5e8d35784f6e5ff3a22501c2c43113bcb57c555a5223670a00	2022-12-08 10:23:05.796889+07	20221010050929_optional_room	\N	\N	2022-12-08 10:23:05.723394+07	1
+3fa2c03f-94ce-48e4-8303-4288f41a0ad4	d57228fc08267b1cb39a0b8653682788ca231a91a02e8dbee7760b40228a5b7b	2022-12-08 10:23:05.938581+07	20221010051128_cascade_room_request	\N	\N	2022-12-08 10:23:05.823147+07	1
+ae900bda-ee12-4cc2-97d2-d5012092187a	8766bee9f4258c2bb2b6ef217b9726014f127df7f7a8294ab14aa646ef85347c	2022-12-08 10:23:06.038674+07	20221010061054_set_null	\N	\N	2022-12-08 10:23:05.964715+07	1
+65cd07aa-49b5-4195-ad46-3abaded08b50	abb07aa9e641aa9ea12e294f6efabe977108c257e4de1968b36ee2d50cea918f	2022-12-08 10:23:06.563637+07	20221012030125_add_pin_to_device	\N	\N	2022-12-08 10:23:06.06479+07	1
+5685705c-7300-48fb-b4b7-888f7fc141a4	9bc181493724038e529edda8b51d1636079da5cfc102e1c214162a59386a42ae	2022-12-08 10:23:06.671925+07	20221012030910_remove_pin_from_room	\N	\N	2022-12-08 10:23:06.589631+07	1
+0f8218bb-e908-43e4-87cd-9612841ba000	d097bd4f1e2da1c3974a047e27197e14ee1eac399f535407ec93e0659df71bab	2022-12-08 10:23:06.772019+07	20221117022921_remove_lastonline_from_room_and_add_it_to_device	\N	\N	2022-12-08 10:23:06.698166+07	1
+f69f2e3f-181f-40e0-9809-74424e286d83	75e12cf564d5c0371b8c270fd6d6518eddb6f1493911e830751fbb350f8d2ee4	2022-12-08 10:23:06.888575+07	20221127105216_add_password_update	\N	\N	2022-12-08 10:23:06.814664+07	1
+7d3656de-1e46-41a6-8e54-2c4c3264418f	65d34d26f230e9f70cf51a6f1fd5f263b102f06fff45b1f3481a9ac37eff76d2	2022-12-08 10:23:07.04691+07	20221127105441_password_update	\N	\N	2022-12-08 10:23:06.94311+07	1
+c979be90-81f0-4c3e-8cad-689a7ca708d8	92c27cb81edc3fb09a8adcc89a41061f14db23fc4b15099ec120b5d2e318612f	2022-12-08 10:23:07.1469+07	20221127105532_password	\N	\N	2022-12-08 10:23:07.07299+07	1
+4b0340b9-08f6-4b9a-a177-ae43d049ff60	110608318866e5ec0f3bb056afb1104ed15df3dbc57e2e4206ac7460bc1ff376	2022-12-08 10:23:07.238551+07	20221207051402_add_default_image	\N	\N	2022-12-08 10:23:07.189031+07	1
+\.
+
+
+--
+-- Name: Api_Key_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Api_Key"
+    ADD CONSTRAINT "Api_Key_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Card_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Card"
+    ADD CONSTRAINT "Card_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Device_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Device"
+    ADD CONSTRAINT "Device_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Profil_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Profil"
+    ADD CONSTRAINT "Profil_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Role_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Role"
+    ADD CONSTRAINT "Role_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Room_Request_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Room_Request"
+    ADD CONSTRAINT "Room_Request_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Room_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Room"
+    ADD CONSTRAINT "Room_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Rooms_Records_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Rooms_Records"
+    ADD CONSTRAINT "Rooms_Records_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Token_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Token"
+    ADD CONSTRAINT "Token_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: User_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."User"
+    ADD CONSTRAINT "User_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public._prisma_migrations
+    ADD CONSTRAINT _prisma_migrations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: Card_card_number_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Card_card_number_key" ON public."Card" USING btree (card_number);
+
+
+--
+-- Name: Device_device_id_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Device_device_id_key" ON public."Device" USING btree (device_id);
+
+
+--
+-- Name: Device_roomId_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Device_roomId_key" ON public."Device" USING btree ("roomId");
+
+
+--
+-- Name: Profil_userId_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Profil_userId_key" ON public."Profil" USING btree ("userId");
+
+
+--
+-- Name: Role_name_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Role_name_key" ON public."Role" USING btree (name);
+
+
+--
+-- Name: Room_ruid_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Room_ruid_key" ON public."Room" USING btree (ruid);
+
+
+--
+-- Name: Token_userId_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Token_userId_key" ON public."Token" USING btree ("userId");
+
+
+--
+-- Name: User_email_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "User_email_key" ON public."User" USING btree (email);
+
+
+--
+-- Name: User_username_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "User_username_key" ON public."User" USING btree (username);
+
+
+--
+-- Name: _CardToRoom_AB_unique; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "_CardToRoom_AB_unique" ON public."_CardToRoom" USING btree ("A", "B");
+
+
+--
+-- Name: _CardToRoom_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_CardToRoom_B_index" ON public."_CardToRoom" USING btree ("B");
+
+
+--
+-- Name: Card_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Card"
+    ADD CONSTRAINT "Card_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: Device_roomId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Device"
+    ADD CONSTRAINT "Device_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES public."Room"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: Profil_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Profil"
+    ADD CONSTRAINT "Profil_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Room_Request_cardId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Room_Request"
+    ADD CONSTRAINT "Room_Request_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES public."Card"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Room_Request_roomId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Room_Request"
+    ADD CONSTRAINT "Room_Request_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES public."Room"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Rooms_Records_cardId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Rooms_Records"
+    ADD CONSTRAINT "Rooms_Records_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES public."Card"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: Rooms_Records_roomId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Rooms_Records"
+    ADD CONSTRAINT "Rooms_Records_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES public."Room"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: Token_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Token"
+    ADD CONSTRAINT "Token_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: User_roleId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."User"
+    ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES public."Role"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: _CardToRoom_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_CardToRoom"
+    ADD CONSTRAINT "_CardToRoom_A_fkey" FOREIGN KEY ("A") REFERENCES public."Card"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _CardToRoom_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_CardToRoom"
+    ADD CONSTRAINT "_CardToRoom_B_fkey" FOREIGN KEY ("B") REFERENCES public."Room"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

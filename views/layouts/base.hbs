@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART DOOR</title>
+
+    <link rel="shortcut icon" href="/image/icon_small_logo.svg" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="/style/three-dots.css">
+    <link rel="stylesheet" href="/style/base.css">
+    <link rel="stylesheet" href="/style/navbar.css">
+    <link rel="stylesheet" href="/style/notify.css">
+    <link rel="stylesheet" href="/style/index.css">
+    {{#if styles}}
+        {{#each styles}}
+            <link rel="stylesheet" href="{{this}}">
+        {{/each}}
+    {{/if}}
+</head>
+
+<body>
+    <section class="section--conatiner">
+        <section class="notify">        
+            <div class="loading" id="loading">
+                <div class="dot-falling"></div>
+            </div>
+        </section>
+
+        <nav class="nav d-flex  bg-blue-1 flex-column justify-content-start align-items-center py-3" id="target--nav">
+            <section class="nav--logo bg-blue-1 p-2 rounded-13">
+                <img src="/image/icon_big_logo.svg" alt="logo perusahaan">
+            </section>
+
+            <span class="nav--user {{user_active}} py-2 d-flex justify-content-start align-items-center mt-5">
+                <a href="/profile"
+                    class="nav--user-profile me-2 d-flex pointer justify-content-center align-items-center bg-blue-3 rounded-circle">
+                    <img src="{{profil_path}}" alt="Profil" id="small-profil">
+                </a>
+                <div class="nav--user-data ms-1">
+                    <a class="fw-bolder text-blue-4 d-block" href="/profile" id="user-container">{{user}}</a>
+                    <a class="fw-normal text-blue-4" href="/api/v1/user/logout">Logout</a>
+                </div>
+            </span>
+
+            <section class="nav--link mt-5 d-flex flex-column align-items-center">
+                <a href="/dashboard/"
+                    class="nav--link-item {{dashboard}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_dashboard.svg" class="nav--link-icon ms" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">Dashboard</p>
+                </a>
+
+                <div class="nav-authentication mt-2">
+                    <button class="nav--link-item nav-authentication-toggle {{authentication}} ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center" type="button" aria-expanded="false" aria-controls="authentication-menu">
+                        <span class="fw-normal">Autentikasi</span>
+                        <span class="nav-authentication-chevron ms-auto me-3" aria-hidden="true">⌄</span>
+                    </button>
+                    <div class="nav-authentication-menu" id="authentication-menu">
+                        <a href="/dashboard/card/list" class="nav-authentication-item {{card}}">Card</a>
+                        <a href="/dashboard/pin/list" class="nav-authentication-item {{pin}}">PIN</a>
+                        <a href="/dashboard/fingerprint/list" class="nav-authentication-item {{fingerprint}}">Fingerprint</a>
+                        <a href="/dashboard/face-recognition" class="nav-authentication-item {{faceRecognition}}">Face Recognition</a>
+                    </div>
+                </div>
+
+                <a href="/dashboard/user/list"
+                    class="nav--link-item {{users}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_user.svg" class="nav--link-icon" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">User</p>
+                </a>
+
+                <a href="/dashboard/room/list"
+                    class="nav--link-item {{room}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_group.svg" class="nav--link-icon" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">Room</p>
+                </a>
+
+                <a href="/dashboard/building/list"
+                    class="nav--link-item {{building}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_building.svg" class="nav--link-icon" alt="Logo Building">
+                    <p class="fw-normal ms-2">Building</p>
+                </a>
+
+                {{!-- <a href=""
+                    class="nav--link-item {{log}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_log.svg" class="nav--link-icon" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">Log</p>
+                </a> --}}
+                <a href="/dashboard/hardware"
+                    class="nav--link-item {{hardware}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_hardware.svg" class="nav--link-icon" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">HARDWARE</p>
+                </a>
+
+                <a href="/dashboard/api"
+                    class="nav--link-item {{api}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_api.svg" class="nav--link-icon" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">API Key</p>
+                </a>
+
+                <a href="/dashboard/gateway/device/list"
+                    class="nav--link-item {{gatewayDevice}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_gateway_device.svg" class="nav--link-icon" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">GATEWAY DEVICE</p>
+                </a>
+
+                <a href="/dashboard/gateway/spot/list"
+                    class="nav--link-item {{gatewaySpot}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                    <img src="/image/icon_gateway_device.svg" class="nav--link-icon" alt="Logo Dashboard">
+                    <p class="fw-normal ms-2">GATEWAY SPOT</p>
+                </a>
+
+            </section>
+        </nav>
+        <main class="main">
+            <section class="nav--support p-3 d-flex justify-content-between bg-light d-md-none d-block">
+                <section class="nav--support-logo bg-blue-2 p-1 rounded-13">
+                    <img src="/image/icon_big_logo.svg" alt="logo perusahaan">
+                </section>
+                <img src="/image/icon_layers.svg" id="nav--toggle" class="nav--link-icon" alt="Humberger menu">
+            </section>
+
+            {{!-- Main section bellow here --}}
+            <section class="main-content px-5 py-3">
+                {{{body}}}
+            </section>
+        </main>
+    </section>
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+    integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+    integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js.cookie.js"></script>
+<script src="/js/util/flash.js"></script>
+<script src="/js/util/navbar.js"></script>
+<script>
+    (() => {
+        const toggle = document.querySelector('.nav-authentication-toggle');
+        const menu = document.querySelector('#authentication-menu');
+        if (!toggle || !menu) return;
+        const setOpen = (open) => {
+            menu.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+        };
+        setOpen(Boolean(menu.querySelector('.bg-neutral-4')));
+        toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    })();
+</script>
+<script src="/js/util/loader.js"></script>
+<script src="/js/util/alert.js"></script>
+<script src="/js/util/toast.js"></script>
+<script src="/js/util/fetcher.js"></script>
+<script src="/js/util/timeformater.js"></script>
+{{#if scripts}}
+    {{#each scripts}}
+        <script src="{{this}}"></script>
+    {{/each}}
+{{/if}}
+
+</html>

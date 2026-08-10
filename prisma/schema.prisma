@@ -1,0 +1,232 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  user      User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id                String     @id @default(uuid())
+  username          String     @unique
+  accountIsVerified Boolean    @default(false)
+  email             String     @unique
+  emailIsVerified   Boolean    @default(false)
+  password          String
+  token             String?    @unique
+  tokenExpiredAt    DateTime?
+  role              Role       @relation(fields: [roleId], references: [id])
+  roleId            String
+  profil            Profil?
+  card              Card[]
+  pinCredential     PinCredential?
+  fingerprintMappings FingerprintMapping[]
+  faceRecognition   FaceRecognition?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  passwordUpdatedAt DateTime?
+  Building          Building[]
+  buildingId        String?
+}
+
+model Profil {
+  id        String   @id @default(cuid())
+  full_name String?
+  photo     String?  @default("/image/illustration-user.png")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Card {
+  id            String          @id @default(cuid())
+  card_number   String          @unique
+  card_name     String?         @default("Kartu Saya")
+  pin           String?
+  card_status   CARD_STATUS     @default(UNREGISTER)
+  type          CARD_TYPE       @default(card_id)
+  banned        Boolean         @default(false)
+  isTwoStepAuth Boolean         @default(true)
+  user          User?           @relation(fields: [userId], references: [id])
+  userId        String?
+  room          Room[]
+  records       Rooms_Records[]
+  roomRequest   Room_Request[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model PinCredential {
+  id        String   @id @default(uuid())
+  pinHash   String   @map("pin_hash")
+  userId    String   @unique @map("user_id")
+  roomId    String   @map("room_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  expiresAt DateTime? @map("expires_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room      Room     @relation(fields: [roomId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("pin_credentials")
+}
+
+model FingerprintMapping {
+  id        String   @id @default(uuid())
+  deviceId  String   @map("device_id")
+  fingerId  Int      @map("finger_id")
+  userId    String   @map("user_id")
+  roomId    String   @map("room_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room      Room     @relation(fields: [roomId], references: [id])
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@unique([deviceId, fingerId])
+  @@map("fingerprint_mappings")
+}
+
+model FaceRecognition {
+  id              String   @id @default(uuid())
+  embeddingVector String   @map("embedding_vector")
+  photoUrl        String?  @map("photo_url")
+  userId          String   @unique @map("user_id")
+  roomId          String   @map("room_id")
+  isActive        Boolean  @default(true) @map("is_active")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room            Room     @relation(fields: [roomId], references: [id])
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("face_recognitions")
+}
+
+model Room {
+  id          String          @id @default(cuid())
+  ruid        String          @unique
+  name        String?
+  isActive    Boolean         @default(false)
+  card        Card[]
+  pinCredentials   PinCredential[]
+  fingerprintMappings FingerprintMapping[]
+  faceRecognitions FaceRecognition[]
+  records     Rooms_Records[]
+  roomRequest Room_Request[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  device      Device?
+  Building    Building?       @relation(fields: [buildingId], references: [id])
+  buildingId  String?
+}
+
+model Building {
+  id        String   @id @default(cuid())
+  name      String
+  operator  User[]
+  rooms     Room[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Device {
+  id                String        @id @default(cuid())
+  device_id         String        @unique
+  pin               String        @default("$2b$10$93H.6AQWHWxlq4IQuT1cgu2oCi7OtgyTjYuWlgcq9beN2xPLSgFUW")
+  lastOnline        DateTime?
+  firmwareVersion   String?
+  deviceType        DEVICE_TYPE?  @default(SINGLE_NETWORK)
+  deviceLastGateway String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  roomId            String?       @unique
+  room              Room?         @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  Gateway_Spot      Gateway_Spot? @relation(fields: [gateway_SpotId], references: [id])
+  gateway_SpotId    String?
+}
+
+model Gateway_Device {
+  id               String        @id @default(cuid())
+  gateway_short_id String        @unique
+  pin              String
+  lastOnline       DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  Gateway_Spot     Gateway_Spot?
+}
+
+model Gateway_Spot {
+  id               String         @id @default(cuid())
+  name             String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  nodeDevice       Device[]
+  gatewayDevice    Gateway_Device @relation(fields: [gateway_DeviceId], references: [id])
+  gateway_DeviceId String         @unique
+}
+
+model Api_Key {
+  id        String   @id @default(cuid())
+  secret    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Room_Request {
+  id        String   @id @default(cuid())
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  roomId    String
+  cardId    String
+}
+
+model Rooms_Records {
+  id               String   @id @default(cuid())
+  unregisteredCard String?
+  room             Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  roomId           String?
+  Card             Card?    @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  cardId           String?
+  isSuccess        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+enum CARD_STATUS {
+  REGISTER
+  UNREGISTER
+}
+
+enum CARD_TYPE {
+  card_id
+  card_atm
+  card_driver
+  card_emoney
+  card_studentid
+}
+
+enum DEVICE_TYPE {
+  SINGLE_NETWORK
+  MULTI_NETWORK
+}

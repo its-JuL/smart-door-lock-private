@@ -1,0 +1,25 @@
+.form-check {
+    margin-bottom: 0 !important;
+}
+
+.form-check-input {
+    height: 1.5rem !important;
+    width: 2.5rem !important;
+}
+
+@media only screen and (max-width: 576px) {
+
+
+    .form-group {
+        width: 100% !important;
+    }
+
+    .choose {
+        font-size: 0.75rem;
+    }
+
+    .form-check-input {
+        height: 1.25rem !important;
+        width: 2.5rem !important;
+    }
+}

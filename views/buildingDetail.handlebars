@@ -1,0 +1,129 @@
+<!-- Heading -->
+<div
+    class="pageinfo px-3 px-lg-5 py-3 py-lg-4 d-flex flex-wrap-reverse justify-content-between bg-blue-1 rounded-15 shadow-c-1">
+    <div class="pageinfo__text d-flex flex-column justify-content-between">
+        <div class="mt-3 mt-sm-0">
+            <h1 class="fw-bold text-blue-4">Building Detail</h1>
+            <p class="pageinfo__description text-blue-3 fw-light">
+                This menu is used to update building data or modify existing data.
+            </p>
+        </div>
+        <a href="/dashboard/building/list" class="pageinfo__link bg-blue-4 text-blue-1 text-center p-2 rounded-10 fw-bold fs-6">
+            Building List
+        </a>
+    </div>
+    <img src="/image/illustration-desk.png" class="pageinfo__image " alt="Ilustrasi Desktop">
+</div>
+
+<form class="serach__form mt-5">
+    <label for="building" class="fw-bold mb-1">Building Name</label>
+    <input type="text" id="buildingName" class="rounded-10 me-3 border-dark p-2 text-neutral-2">
+</form>
+
+<!-- Building Form -->
+<div class="d-flex flex-column flex-sm-row align-items-sm-start gx-5 mt-5 buildinginfo">
+    <!-- ROOM -->
+    <div class="buildinginfo__items d-flex flex-column justify-content-between me-0 me-sm-3">
+        <div
+            class="buildinginfo__card d-flex align-items-center justify-content-between bg-neutral-7 shadow-c-1 p-3 rounded-10">
+            <div class="d-flex align-items-center" >
+                <img src="/image/icon_building_rounded.svg" alt="" class="buildinginfo__icon">
+                <p class="fw-light fs-4 fw-bold text-neutral-2 ms-3">Linked Room</p>
+            </div>
+            <p class="fw-bold fs-2 text-neutral-1" id="linkedRoomCount">0</p>
+        </div>
+
+        <div class="buildinginfo__form mt-3 bg-neutral-7 rounded-10 p-3 mb-4 mb-sm-3">
+            <form class="mb-2">
+                <label for="operator" class="mb-1 d-block">Room Name</label>
+                <div class="d-flex justify-content-between align-items-stretch">
+
+                    <input type="text" class="p-2 form__input me-3 rounded-10 text-neutral-2"
+                        id="roomname">
+
+                    <button type="button"
+                        class="form__action bg-blue-2 text-neutral-7 fw-bold text-center">
+                        Search
+                    </button>
+                </div>
+
+                <label for="operator" class="mb-1 mt-2 d-block">ROOM UNIQUE ID</label>
+                <div class="d-flex justify-content-between align-items-stretch">
+
+                    <input type="text" class="p-2 form__input me-3 rounded-10 text-neutral-2"
+                        id="roomId" disabled>
+
+                    <button type="button" id="roomAddButton"
+                        class="form__action bg-blue-4 text-neutral-7 fw-bold text-center">
+                        Add
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TABEL -->
+        <div
+            class="table-header d-flex justify-content-between bg-neutral-7 py-2 rounded-13 mb-3 px-3 shadow">
+            <p class="table-data fw-bold text-center text-neutral-2">Room Name</p>
+            <p class="table-data fw-bold text-center text-neutral-2">Action</p>
+        </div>
+
+        <div class="table-content bg-neutral-7 rounded-13 shadow-c-1" id="roomList">
+            {{!-- Operator List --}}
+        </div>
+    </div>
+
+    <!-- OPERATOR -->
+    <div
+        class="buildinginfo__items d-flex flex-column justify-content-between ms-0 mt-5 mt-sm-0 ms-sm-3">
+        <div
+            class="buildinginfo__card d-flex align-items-center justify-content-between bg-neutral-7 p-3 rounded-10 shadow-c-1">
+            <div class="d-flex align-items-center">
+                <img src="/image/icon_user_rounded.svg" alt="" class="buildinginfo__icon">
+                <p class="fw-light fs-4 fw-bold text-neutral-2 ms-3">List of operators</p>
+            </div>
+            <p class="fw-bold fs-2 text-neutral-1" id="operatorsCount">0</p>
+        </div>
+
+        <div class="buildinginfo__form mt-3 bg-neutral-7 rounded-10 p-3 mb-4 mb-sm-3">
+            <form class="mb-2">
+                <label for="operator" class="mb-1 d-block">Operator Username</label>
+                <div class="d-flex justify-content-between align-items-stretch">
+
+                    <input type="text" class="p-2 form__input me-3 rounded-10 text-neutral-2"
+                        id="operator">
+
+                    <button type="button"
+                        class="form__action bg-blue-2 text-neutral-7 fw-bold text-center">
+                        Search
+                    </button>
+                </div>
+
+                <label for="operator" class="mb-1 mt-2 d-block">Operator ID</label>
+                <div class="d-flex justify-content-between align-items-stretch">
+
+                    <input type="text" class="p-2 form__input me-3 rounded-10 text-neutral-2"
+                        id="operatorId" disabled>
+
+                    <button type="button" id="operatorAddButton"
+                        class="form__action bg-blue-4 text-neutral-7 fw-bold text-center">
+                        Add
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TABEL -->
+        <div
+            class="table-header d-flex justify-content-between bg-neutral-7 py-2 rounded-13 mb-3 px-3 shadow">
+            <p class="table-data fw-bold text-center text-neutral-2">Operator Username</p>
+            <p class="table-data fw-bold text-center text-neutral-2">Action</p>
+        </div>
+
+        <div class="table-content bg-neutral-7 rounded-13 shadow-c-1" id="operatorList">
+            {{!-- OPERATOR DATA --}}
+        </div>
+    </div>
+
+</div>
+<p class="text-center mt-4 pointer py-2 rounded-13 bg-blue-4 text-neutral-7 fw-bold mb-5" id="save">SAVE DATA</p>

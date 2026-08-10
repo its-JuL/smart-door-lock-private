@@ -1,0 +1,61 @@
+.card-form {
+    flex: 4 !important;
+}
+
+.card-image {
+    flex: 2 !important;
+    margin: 0 auto;
+    width: fit-content;
+}
+
+input[type=text]:disabled {
+    background: rgb(var(--color-neutral-7)) !important;
+    border: 2px rgb(var(--color-blue-4)) solid !important;
+    /* color: rgb(var(--color-neutral-6)) !important; */
+
+}
+
+.card-form-group label {
+    flex: 2 !important;
+}
+
+.card-form-group input,
+#card-type {
+    flex: 8 !important;
+}
+
+input[type=text],
+input[type=password],
+select {
+    all: unset;
+    background: rgb(var(--color-neutral-7)) !important;
+    border-radius: 13px;
+    box-sizing: border-box !important;
+    padding: 5px;
+    width: 100% !important;
+}
+
+input[type=text]:focus,
+input[type=password]:focus,
+#card-type:focus {
+    border: 1px rgb(var(--color-blue-4)) solid !important;
+}
+
+button {
+    all: unset;
+}
+
+.form-check {
+    margin-bottom: 0 !important;
+}
+
+.form-check-input {
+    height: 1.5rem !important;
+    width: 3rem !important;
+}
+
+@media only screen and (max-width: 567px) {
+    .card-image {
+        width: 100% !important;
+    }
+}

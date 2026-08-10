@@ -1,0 +1,287 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;200&family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&display=swap');
+
+:root {
+    --color-blue-4: 4, 117, 123;
+    --color-blue-3: 7, 151, 159;
+    --color-blue-2: 202, 231, 229;
+    --color-blue-1: 213, 238, 235;
+    --color-neutral-1: 0, 0, 0;
+    --color-neutral-2: 116, 116, 116;
+    --color-neutral-3: 191, 191, 191;
+    --color-neutral-4: 236, 237, 239;
+    --color-neutral-5: 237, 238, 240;
+    --color-neutral-6: 226, 226, 226;
+    --color-neutral-7: 250, 251, 255;
+    --color-success-1: 39, 211, 117;
+    --color-success-2: 215, 253, 232;
+    --color-warning-1: 249, 199, 25;
+    --color-warning-2: 254, 250, 163;
+    --color-danger-1: 252, 57, 57;
+    --color-danger-2: 255, 210, 210;
+    --shadowLow: 0px 0px 4px rgba(0, 0, 0, 0.15);
+    --shadowHigh: 0px 0px 10px rgba(0, 0, 0, 0.15);
+    --navHeight: 75px;
+    --navWide: 255px;
+    transition: all 200ms ease-in;
+}
+
+* {
+    /* box-sizing: content-box !important; */
+    margin: 0;
+}
+
+.bg-danger-1 {
+    background: rgb(var(--color-danger-1)) !important;
+}
+
+.bg-danger-2 {
+    background: rgb(var(--color-danger-2)) !important;
+}
+
+.bg-success-1 {
+    background: rgb(var(--color-success-1)) !important;
+}
+
+.bg-success-2 {
+    background: rgb(var(--color-success-2)) !important;
+}
+
+.bg-warning-1 {
+    background: rgb(var(--color-warning-1)) !important;
+}
+
+.bg-warning-2 {
+    background: rgb(var(--color-warning-2)) !important;
+}
+
+.bg-blue-4 {
+    background: rgb(var(--color-blue-4)) !important;
+}
+
+
+.bg-blue-3 {
+    background: rgb(var(--color-blue-3)) !important;
+}
+
+.bg-blue-2 {
+    background: rgb(var(--color-blue-2)) !important;
+}
+
+.bg-blue-1 {
+    background: rgb(var(--color-blue-1)) !important;
+}
+
+.bg-neutral-7 {
+    background: rgb(var(--color-neutral-7)) !important;
+}
+
+.bg-neutral-6 {
+    background: rgb(var(--color-neutral-6)) !important;
+}
+
+.bg-neutral-5 {
+    background: rgb(var(--color-neutral-5)) !important;
+}
+
+.bg-neutral-4 {
+    background: rgb(var(--color-neutral-4)) !important;
+}
+
+.bg-neutral-3 {
+    background: rgb(var(--color-neutral-3)) !important;
+}
+
+.bg-neutral-2 {
+    background: rgb(var(--color-neutral-2)) !important;
+}
+
+.bg-neutral-1 {
+    background: rgb(var(--color-neutral-1)) !important;
+}
+
+.text-blue-4 {
+    color: rgb(var(--color-blue-4)) !important;
+}
+
+.text-blue-3 {
+    color: rgb(var(--color-blue-3)) !important;
+}
+
+.text-blue-2 {
+    color: rgb(var(--color-blue-2)) !important;
+}
+
+.text-blue-1 {
+    color: rgb(var(--color-blue-1)) !important;
+}
+
+
+.text-neutral-7 {
+    color: rgb(var(--color-neutral-7)) !important;
+}
+
+.text-neutral-6 {
+    color: rgb(var(--color-neutral-6)) !important;
+}
+
+.text-neutral-5 {
+    color: rgb(var(--color-neutral-5)) !important;
+}
+
+.text-neutral-4 {
+    color: rgb(var(--color-neutral-4)) !important;
+}
+
+.text-neutral-3 {
+    color: rgb(var(--color-neutral-3)) !important;
+}
+
+.text-neutral-2 {
+    color: rgb(var(--color-neutral-2)) !important;
+}
+
+.text-neutral-1 {
+    color: rgb(var(--color-neutral-1)) !important;
+}
+
+.text-danger-1 {
+    color: rgb(var(--color-danger-1)) !important;
+}
+
+.text-danger-2 {
+    color: rgb(var(--color-danger-2)) !important;
+}
+
+.text-success-1 {
+    color: rgb(var(--color-success-1)) !important;
+}
+
+.text-success-2 {
+    color: rgb(var(--color-success-2)) !important;
+}
+
+.text-warning-1 {
+    color: rgb(var(--color-warning-1)) !important;
+}
+
+.text-warning-2 {
+    color: rgb(var(--color-warning-2)) !important;
+}
+
+.rounded-5 {
+    border-radius: 5px;
+}
+
+.rounded-13 {
+    border-radius: 13px;
+}
+
+.rounded-10 {
+    border-radius: 10px;
+}
+
+.rounded-15 {
+    border-radius: 15px !important;
+}
+
+.rounded-25 {
+    border-radius: 25px;
+}
+
+.rounded-35 {
+    border-radius: 35px;
+}
+
+.fs-72 {
+    font-size: 72px;
+}
+
+.btn:focus,
+.btn:active,
+.btn-primary:active,
+.btn-primary:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.shadow-c-1 {
+    box-shadow: -1px 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.hover-tool {
+    position: relative;
+}
+
+.hover-tool::before {
+    background: rgb(var(--color-blue-4)) !important;
+    border-radius: 7px;
+    bottom: 1.75rem;
+    color: rgb(var(--color-neutral-7)) !important;
+    content: attr(data-hover);
+    font-size: 0.8rem !important;
+    opacity: 0;
+    padding: 5px 10px;
+    position: absolute;
+    right: 50%;
+    transform: translate(50%, 0);
+    transition: visibility 0s, opacity 250ms linear;
+    visibility: hidden;
+    z-index: 3;
+}
+
+.hover-tool:hover:before {
+    opacity: 1;
+    visibility: visible;
+}
+
+input:focus,
+input:active {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 !important;
+}
+
+a {
+    text-decoration: none;
+}
+
+img {
+    display: block;
+    width: 100%;
+}
+
+body {
+    align-items: center;
+    background: rgb(var(--color-neutral-4));
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: rgb(var(--color-blue-2));
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: rgb(var(--color-blue-3));
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--color-blue-4));
+}

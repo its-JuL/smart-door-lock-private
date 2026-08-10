@@ -1,0 +1,23 @@
+<div class="auth--form d-md-block d-none col-md-5 col-lg-6 bg-blue-2"></div>
+<div class="auth--form d-flex justify-content-center align-items-center col-md-7 col-lg-6 bg-neutral-6">
+    <form method="post"
+        class="form--container d-flex flex-column justify-content-between bg-neutral-7 px-5 py-3 rounded-13 shadow-c-1">
+        <div class="d-flex justify-content-between mb-4">
+            <p class="register fw-bolder fs-5 text-neutral-2">Reset Password</p>
+        </div>
+        <div>
+            <div class="input-group">
+                <div class="input-group-prepend d-flex align-items-center">
+                    <img src="/image/icon_lock.svg" alt="">
+                </div>
+                <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password" required>
+            </div>
+            <small class="text-danger-1" id="password--error"></small>
+        </div>
+        <div class="mb-4">
+            <button id="submit"
+                class="btn bg-blue-3 text-neutral-7 fw-bold px-5 rounded-13 py-2 d-block">Reset</button>
+            <a href="/auth/login" class="d-block text-center text-blue-4 mt-2">Login</a>
+        </div>
+    </form>
+</div>

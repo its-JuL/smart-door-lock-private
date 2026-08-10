@@ -1,0 +1,14 @@
+.res404 {
+    height: 100vh !important;
+    width: 100% !important;
+}
+
+.illustration {
+    width: 20rem !important;
+}
+
+@media only screen and (max-width: 576px) {
+    .illustration {
+        width: 15rem !important;
+    }
+}

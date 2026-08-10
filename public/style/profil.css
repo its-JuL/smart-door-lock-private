@@ -1,0 +1,42 @@
+.profil-img-container {
+    aspect-ratio: 9/11 !important;
+    margin: auto;
+    max-width: 70%;
+    object-fit: cover !important;
+    overflow: hidden;
+    width: 16rem;
+}
+
+.form-upload-trigger {
+    margin: auto;
+    max-width: 70%;
+    width: 16rem !important;
+}
+
+.icon-upload {
+    width: 2rem;
+}
+
+.form-header {
+    border-bottom: 2px solid rgb(var(--color-blue-3));
+    padding-bottom: 1rem;
+}
+
+#email {
+    width: 80% !important;
+}
+
+#email-status {
+    text-align: center;
+    width: 20% !important;
+}
+
+.profile-container {
+    margin: 1rem auto !important;
+}
+
+@media only screen and (max-width: 576px) {
+    #email-status {
+        font-size: 0.7rem !important;
+    }
+}

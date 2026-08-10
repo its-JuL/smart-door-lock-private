@@ -1,0 +1,47 @@
+<div class="table-action mt-3 d-flex justify-content-between align-items-center">
+    <h3 class="fw-bolder text-neutral-2">Card List</h3>
+    <form class="serach--form">
+        <div class="input-group shadow-c-1 rounded-13">
+            <input type="text" class="form-control rounded-13" placeholder="Search card number" name="search" id="search">
+            <div class="input-group-prepend p-2 rounded-13" id="search-btn">
+                <img src="/image/icon_search.svg" alt="Icon search card" class="form-icons">
+            </div>
+        </div>
+    </form>
+</div>
+<a href="/dashboard/card/scan">Scan</a>
+<div class="row mt-4">
+    <div class="col-6">
+        <h5 class="pointer text-center bg-neutral-7 shadow-c-1 py-2 rounded-13 fw-normal card-active card-status" data-status="UNPAIR">Unpair</h5>
+    </div>
+    <div class="col-6">
+        <h5 class="pointer text-center bg-neutral-7 shadow-c-1 py-2 rounded-13 fw-normal card-status" data-status="PAIR">Pair</h5>
+    </div>
+</div>
+
+<div class="api-list mt-3">
+    <div class="table-header d-flex justify-content-between bg-neutral-7 py-2 rounded-13 mb-3 px-3">
+        <p class="table-data fw-bold text-center text-neutral-2">Card</p>
+        <p class="table-data fw-bold text-center text-neutral-2">Register</p>
+        <p class="table-data fw-bold text-center text-neutral-2">Action</p>
+        <p class="table-data fw-bold text-center text-neutral-2">Pair</p>
+    </div>
+
+    <div class="table-content bg-neutral-7 rounded-13 shadow data-container">
+        {{#each cardList}}
+            <div class="table-row d-flex py-2 py-md-2 justify-content-between align-items-center px-3 card--list-item" id="action-{{this.card_number}}" data-id="{{this.id}}">
+                <span class="table-data text-center text-neutral-2">{{this.card_number}}</span>
+                <p class="table-data text-center text-neutral-2">
+                    {{days this.createdAt}}</p>
+                <a class=" table-data text-center text-neutral-2 text-danger-1 pointer" onclick="deleteHandler('{{this.card_number}}')">
+                    Delete
+                </a>
+                <a class="table-data pointer text-center d-flex justify-content-around pointer" href="/dashboard/card/pair/?cardId={{this.card_number}}">
+                    Pair to User
+                </a>
+            </div>
+        {{/each}}
+
+    </div>
+</div>
+<p class="text-center mt-4 pointer py-2 rounded-13 bg-neutral-6 mb-5" id="show-more">Show More</p>

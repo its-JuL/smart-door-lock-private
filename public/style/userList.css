@@ -1,0 +1,85 @@
+.input-group-prepend {
+    background: white !important;
+    border-radius: 1px solid grey !important;
+    font-size: 10px !important;
+}
+
+input:active,
+input {
+    border: none !important;
+}
+
+.form-icons {
+    cursor: pointer;
+    width: 25px !important;
+}
+
+#username,
+#roomname,
+#userRole {
+    border: none !important;
+}
+
+.user-profile-picture {
+    aspect-ratio: 1/1;
+    overflow: hidden !important;
+    width: 100px !important;
+}
+
+.search--form-role {
+    position: relative !important;
+}
+
+.form-dropdown {
+    bottom: 150%;
+    display: none;
+    opacity: 0;
+    position: absolute;
+    transition: all .75s ease;
+    width: 94%;
+}
+
+.role {
+    cursor: pointer;
+}
+
+.active-down.form-dropdown {
+    bottom: -150%;
+    display: block !important;
+    opacity: 1;
+    position: absolute;
+    width: 94%;
+}
+
+.role:hover {
+    background: rgb(var(--color-blue-2));
+}
+
+#showMore {
+    cursor: pointer;
+}
+
+.role-icon {
+    width: 2.5rem !important;
+}
+
+@media only screen and (max-width: 720px) {
+    .form-icons {
+        width: 20px !important;
+    }
+
+    #generate-button {
+        font-size: 0.8rem !important;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .user--list-item {
+        height: auto;
+    }
+
+    .room-search {
+        width: 200px !important;
+    }
+
+}

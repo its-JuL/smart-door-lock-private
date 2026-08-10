@@ -1,0 +1,9 @@
+node_modules
+venv/
+.env
+.prod.env
+public/storage/
+!public/storage/.gitignore
+.VSCodeCounter
+*.log
+# Keep environment variables out of version control

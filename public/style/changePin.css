@@ -1,0 +1,56 @@
+.card-change-pin {
+    margin: auto;
+    width: 40em !important;
+}
+
+.card-icon {
+    width: 20em;
+}
+
+
+.form-group {
+    width: 80% !important;
+}
+
+label {
+    white-space: nowrap;
+}
+
+input,
+select {
+    -webkit-appearance: inherit;
+    -moz-appearance: none;
+    border: none;
+    width: 20em !important;
+}
+
+input:active,
+input:disabled,
+input:focus,
+select:active,
+select:disabled,
+select:focus {
+    background: rgb(var(--color-neutral-7)) !important;
+    border: 1.5px solid rgb(var(--color-blue-4)) !important;
+    box-shadow: var(-shadowLow);
+}
+
+@media only screen and (max-width: 576px) {
+    .card-icon {
+        width: 100%;
+    }
+
+    .card-change-pin {
+        width: 100% !important;
+    }
+
+    .form-group {
+        width: 100% !important;
+    }
+
+    input,
+    select {
+        border: none;
+        width: 100% !important;
+    }
+}
