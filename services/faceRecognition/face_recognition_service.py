@@ -18,6 +18,7 @@ from MTCNN.MTCNN import create_mtcnn_net
 from utils.align_trans import Face_alignment
 from face_model import MobileFaceNet
 from facebank_manager import FaceBankManager
+from detection_validation import select_valid_face
 
 # ==================== KONFIGURASI ====================
 MQTT_HOST = "103.197.188.199"
@@ -107,11 +108,17 @@ def process_face(image_bytes):
                 r_model_path=MTCNN_R_PATH,
                 o_model_path=MTCNN_O_PATH,
             )
-            if len(bboxes) == 0:
-                continue  # coba gamma berikutnya
+            face_index, rejection_reason = select_valid_face(
+                bboxes, landmarks, cand.shape[1], cand.shape[0]
+            )
+            if face_index is None:
+                logger.info(f"[FACE] Detection rejected (gamma={gamma}): {rejection_reason}")
+                continue
 
             faces = Face_alignment(cand, default_square=True, landmarks=landmarks)
-            face_img = faces[0] if isinstance(faces, list) else faces
+            face_img = faces[face_index] if isinstance(faces, list) else faces
+            if face_img is None or face_img.size == 0:
+                continue
 
             img_tensor = test_transform(face_img).to(DEVICE).unsqueeze(0)
             with torch.no_grad():

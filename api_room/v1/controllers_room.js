@@ -545,9 +545,9 @@ exports.delete = async (req, res) => {
             }
 
             // INFO: BROADCAST DATA TO GATEWAY
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                `resetroom/${gatewayShortId}/gateway`
+            MQTTConnection.publish(
+                `resetroom/${gatewayShortId}/gateway`,
+                dataToSend
             );
         }
 
@@ -688,9 +688,9 @@ exports.grantAllAccess = async (req, res) => {
                     createdAt: new Date(),
                 };
 
-                MQTTConnection.sendMessage(
-                    JSON.stringify(dataToSend),
-                    `addcard/${updatedRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`
+                MQTTConnection.publish(
+                    `addcard/${updatedRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`,
+                    dataToSend
                 );
             });
         }
@@ -776,9 +776,9 @@ exports.unPairRoomToCard = async (req, res) => {
                 createdAt: new Date(),
             };
 
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                `removecard/${updatedRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`
+            MQTTConnection.publish(
+                `removecard/${updatedRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`,
+                dataToSend
             );
         }
 

@@ -24,103 +24,73 @@ class MQTTConnection {
     constructor() {
         this.client = null;
         this.isConnected = false;
+        this.routes = []; // Menyimpan list topik & callback
     }
 
     static getInstance() {
-        if (!MQTTConnection.instance) {
-            MQTTConnection.instance = new MQTTConnection();
-        }
+        if (!MQTTConnection.instance) MQTTConnection.instance = new MQTTConnection();
         return MQTTConnection.instance;
     }
 
-    // 1. Create connection to MQTT Broker
     static async createConnection() {
-        try {
-            const instance = this.getInstance();
-            const url = `mqtt://${MQTTSettings.host}:${MQTTSettings.port}`;
+        const instance = this.getInstance();
+        if (instance.client) return;
 
-            instance.client = mqtt.connect(url, {
-                username: MQTTSettings.username,
-                password: MQTTSettings.password,
-                clientId: MQTTSettings.clientId,
-                clean: true,
-                connectTimeout: 4000,
-                reconnectPeriod: 2000, // Fitur unggul MQTT: Auto reconnect jika putus
-            });
+        const url = `mqtt://${MQTTSettings.host}:${MQTTSettings.port}`;
+        instance.client = mqtt.connect(url, {
+            username: MQTTSettings.username,
+            password: MQTTSettings.password,
+            clientId: MQTTSettings.clientId,
+            clean: true,
+            reconnectPeriod: 2000,
+        });
 
-            instance.client.on("connect", () => {
-                console.log(" [i]: ✅ Connection to MQTT Broker established");
-                instance.isConnected = true;
-            });
+        instance.client.on("connect", () => {
+            console.log("✅ MQTT Connected to Broker");
+            instance.isConnected = true;
+            // Subscribe ulang otomatis jika reconnect
+            instance.routes.forEach(r => instance.client.subscribe(r.topicPattern, { qos: 1 }));
+        });
 
-            instance.client.on("error", (err) => {
-                console.error(" [e]: ❌ MQTT Connection error:", err.message);
-                instance.isConnected = false;
-            });
-
-            instance.client.on("close", () => {
-                console.log(" [i]: ⚠️ MQTT Connection closed");
-                instance.isConnected = false;
-            });
-
-        } catch (error) {
-            console.error(" [e]: Failed to connect to MQTT:", error);
-        }
-    }
-
-    // 2. Send message (Pengganti channel.publish)
-    static async sendMessage(message, topic, isRaw = false) {
-        try {
-            const instance = this.getInstance();
-                if (!instance.isConnected) {
-                console.warn(" [w]: MQTT not connected, cannot send message");
-                return false;
-            }
-        
-            const payload = {
-                ...JSON.parse(message),
-                messageId: generateCuid(),
-                broadcastTimeAt: new Date(),
-            };
-        
-            // FIX: Jika isRaw true, gunakan topik apa adanya (untuk hardware)
-            const finalTopic = isRaw ? topic : (topic.startsWith(MQTTSettings.baseTopic) 
-                ? topic 
-                : `${MQTTSettings.baseTopic}/${topic}`);
-                
-            instance.client.publish(finalTopic, JSON.stringify(payload), { qos: 1 }, (err) => {
-                if (err) console.error(" [e]: Failed to publish message:", err);
-                else console.log(` [x]: 📤 Sent to "${finalTopic}"`);
-            });
-            return true;
-        } catch (error) {
-            console.error(" [e]: Error in sendMessage:", error);
-            return false;
-        }
-    }
-
-    // 3. Consume message
-    static async consumeMessage({ topic, callbackFn, isRaw = false }) {
-        try {
-            const instance = this.getInstance();
-            if (!instance.isConnected) return;
-
-            // FIX: Jika isRaw true, gunakan topik apa adanya
-            const finalTopic = isRaw ? topic : (topic.startsWith(MQTTSettings.baseTopic) 
-                ? topic 
-                : `${MQTTSettings.baseTopic}/${topic}`);
-                
-            console.log(` [i]: 📥 Subscribing to "${finalTopic}"`);
-            instance.client.subscribe(finalTopic, { qos: 1 });
-            
-            instance.client.on("message", (receivedTopic, messageBuffer) => {
-                if (receivedTopic === finalTopic || receivedTopic.startsWith(finalTopic.replace('/#', '').replace('/+', ''))) {
-                    if (callbackFn) callbackFn(messageBuffer); // Pass Buffer langsung agar bisa handle binary gambar
+        // Single Listener untuk merouting semua pesan
+        instance.client.on("message", (receivedTopic, messageBuffer) => {
+            instance.routes.forEach(route => {
+                if (this.matchTopic(route.topicPattern, receivedTopic)) {
+                    route.callback(receivedTopic, messageBuffer);
                 }
             });
-        } catch (error) {
-            console.error(" [e]: Error in consumeMessage:", error);
+        });
+    }
+
+    static matchTopic(pattern, topic) {
+        if (pattern === topic) return true;
+        const pParts = pattern.split('/');
+        const tParts = topic.split('/');
+        for (let i = 0; i < pParts.length; i++) {
+            if (pParts[i] === '#') return true;
+            if (pParts[i] !== '+' && pParts[i] !== tParts[i]) return false;
         }
+        return pParts.length === tParts.length;
+    }
+
+    static async subscribe(topicPattern, callback) {
+        const instance = this.getInstance();
+        instance.routes.push({ topicPattern, callback });
+        if (instance.isConnected) {
+            instance.client.subscribe(topicPattern, { qos: 1 });
+            console.log(`📥 Subscribed to ${topicPattern}`);
+        }
+    }
+
+    static async publish(topic, payload) {
+        const instance = this.getInstance();
+        if (!instance.isConnected) return false;
+        
+        const finalPayload = typeof payload === 'object' ? JSON.stringify(payload) : payload;
+        instance.client.publish(topic, finalPayload, { qos: 1 }, (err) => {
+            if (err) console.error("❌ Publish error:", err);
+            else console.log(`📤 Sent to ${topic}`);
+        });
     }
 }
 

@@ -160,11 +160,12 @@ exports.updateFingerprintMapping = async (req, res) => {
         fingerId: updated.fingerId
       };
       
-      MQTTConnection.sendMessage(
-        JSON.stringify(payload),
-        `doorlock/${updated.deviceId}/command` // Kirim ke device yang bersangkutan
+      MQTTConnection.publish(
+        `doorlock/${updated.deviceId}/command`, // Kirim ke device yang bersangkutan
+        payload
       );
       console.log(`[MQTT] Sent disable fingerprint command to ${updated.deviceId}`);
+
 }
     // ================================
 
@@ -202,9 +203,9 @@ exports.deleteFingerprintMapping = async (req, res) => {
       fingerId: existing.fingerId
     };
     
-    MQTTConnection.sendMessage(
-      JSON.stringify(payload),
-      `doorlock/${existing.deviceId}/command`
+    MQTTConnection.publish(
+      `doorlock/${existing.deviceId}/command`,
+      payload
     );
     console.log(`[MQTT] Sent delete fingerprint command to ${existing.deviceId}`);
     // ==========================================================

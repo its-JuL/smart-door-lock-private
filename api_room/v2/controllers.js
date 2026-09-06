@@ -119,9 +119,9 @@ exports.createRoom = async (req, res) => {
             };
 
             // INFO: BROADCAST DATA TO GATEWAY
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                `setuproom/${newRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`
+            MQTTConnection.publish(
+                `setuproom/${newRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`,
+                dataToSend
             );
         }
 
@@ -181,9 +181,9 @@ exports.onlineUpdate = async (req, res) => {
                 responsesTime: responsesTime.split(",").slice(0, -1),
             };
 
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                "logger.save"
+            MQTTConnection.publish(
+                "logger.save",
+                JSON.stringify(dataToSend)
             );
         }
 
@@ -510,9 +510,9 @@ exports.deviceDelete = async (req, res) => {
                 gatewayShortId = device?.deviceLastGateway;
             }
 
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                `removeroom/${gatewayShortId}/gateway`
+            MQTTConnection.publish(
+                `removeroom/${gatewayShortId}/gateway`,
+                dataToSend
             );
         }
 
@@ -630,9 +630,9 @@ exports.pairRoomToCard = async (req, res) => {
                 createdAt: new Date(),
             };
 
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                `addcard/${updatedRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`
+            MQTTConnection.publish(
+                `addcard/${updatedRoom.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`,
+                dataToSend
             );
         }
 

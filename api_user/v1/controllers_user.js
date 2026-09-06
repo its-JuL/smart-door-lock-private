@@ -471,9 +471,9 @@ exports.pairUserToCard = async (req, res) => {
                 createdAt: new Date(),
             };
 
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                `updatecard/${data.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`
+            MQTTConnection.publish(
+                `updatecard/${data.device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`,
+                dataToSend
             );
         }
 

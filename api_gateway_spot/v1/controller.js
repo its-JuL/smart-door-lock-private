@@ -24,9 +24,9 @@ exports.gatewaySpotLinktoGatewayDevice = async (req, res) => {
         };
 
         // INFO: BROADCAST DATA TO GATEWAY
-        MQTTConnection.sendMessage(
-            JSON.stringify(dataToSend),
-            `setup/${gatewayShortId}/gateway`
+        MQTTConnection.publish(
+            `setup/${gatewayShortId}/gateway`,
+            dataToSend
         ); // broadcast info to gateway
 
         return resSuccess({
@@ -250,9 +250,9 @@ exports.delete = async (req, res) => {
         };
 
         // INFO: BROADCAST DATA TO GATEWAY
-        MQTTConnection.sendMessage(
-            JSON.stringify(dataToSend),
-            `reset/${data.gatewayDevice.gateway_short_id}/gateway`
+        MQTTConnection.publish(
+            `reset/${data.gatewayDevice.gateway_short_id}/gateway`,
+            dataToSend
         ); // broadcast info to gateway
         return resSuccess({ res, title: "Success delete gateway spot", data });
     } catch (error) {

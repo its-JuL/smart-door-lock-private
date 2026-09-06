@@ -19,7 +19,8 @@ def create_mtcnn_net(image, mini_face, device, p_model_path=None, r_model_path=N
         pnet.eval()
 
         bboxes = detect_pnet(pnet, image, mini_face, device)
-
+        if bboxes is None or len(bboxes) == 0:
+            return np.empty((0, 5)), np.empty((0, 10))
 
     if r_model_path is not None:
         rnet = RNet().to(device)
@@ -27,6 +28,8 @@ def create_mtcnn_net(image, mini_face, device, p_model_path=None, r_model_path=N
         rnet.eval()
 
         bboxes = detect_rnet(rnet, image, bboxes, device)
+        if bboxes is None or len(bboxes) == 0:
+            return np.empty((0, 5)), np.empty((0, 10))
 
     if o_model_path is not None:
         onet = ONet().to(device)
@@ -105,6 +108,8 @@ def detect_pnet(pnet, image, min_face_size, device):
 
         # collect boxes (and offsets, and scores) from different scales
         bounding_boxes = [i for i in bounding_boxes if i is not None]
+        if not bounding_boxes:
+            return np.empty((0, 5))
         bounding_boxes = np.vstack(bounding_boxes)
 
         keep = nms(bounding_boxes[:, 0:5], nms_thresholds)

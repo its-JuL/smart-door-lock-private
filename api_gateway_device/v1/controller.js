@@ -457,9 +457,9 @@ exports.gatewayNodeOnlineUpdate = async (req, res) => {
                 responsesTime: responsesTime.split(",").slice(0, -1),
             };
 
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                "logger.save"
+            MQTTConnection.publish(
+                "logger.save",
+                dataToSend
             );
         }
 

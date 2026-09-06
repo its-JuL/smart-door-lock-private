@@ -622,9 +622,9 @@ exports.update = async (req, res) => {
                     createdAt: new Date(),
                 };
 
-                MQTTConnection.sendMessage(
-                    JSON.stringify(dataToSend),
-                    `doorlock/${targetDeviceId}/command`
+                MQTTConnection.publish(
+                    `doorlock/${targetDeviceId}/command`,
+                    dataToSend
                 );
             }
 
@@ -713,9 +713,9 @@ exports.changePin = async (req, res) => {
                     createdAt: new Date(),
                 };
 
-                MQTTConnection.sendMessage(
-                    JSON.stringify(dataToSend),
-                    `doorlock/${targetDeviceId}/command`
+                MQTTConnection.publish(
+                    `doorlock/${targetDeviceId}/command`,
+                    dataToSend
                 );
             }
 
@@ -859,9 +859,9 @@ exports.unpairUserToCard = async (req, res) => {
                     createdAt: new Date(),
                 };
 
-                MQTTConnection.sendMessage(
-                    JSON.stringify(dataToSend),
-                    `doorlock/${targetDeviceId}/command`
+                MQTTConnection.publish(
+                    `doorlock/${targetDeviceId}/command`,
+                    dataToSend
                 );
             }
 
@@ -994,9 +994,9 @@ exports.addAccessCardToRoom = async (req, res) => {
                 createdAt: new Date(),
             };
 
-            MQTTConnection.sendMessage(
-                JSON.stringify(dataToSend),
-                `doorlock/${targetDeviceId}/command`
+            MQTTConnection.publish(
+                `doorlock/${targetDeviceId}/command`,
+                dataToSend
             );
         }
 
@@ -1090,9 +1090,9 @@ exports.adminModifyCard = async (req, res) => {
                     createdAt: new Date(),
                 };
 
-                MQTTConnection.sendMessage(
-                    JSON.stringify(dataToSend),
-                    `doorlock/${targetDeviceId}/command`
+                MQTTConnection.publish(
+                    `doorlock/${targetDeviceId}/command`,
+                    dataToSend
                 );
             }
 
@@ -1180,9 +1180,9 @@ exports.adminModifyCardPin = async (req, res) => {
                     createdAt: new Date(),
                 };
 
-                MQTTConnection.sendMessage(
-                    JSON.stringify(dataToSend),
-                    `doorlock/${targetDeviceId}/command`
+                MQTTConnection.publish(
+                    `doorlock/${targetDeviceId}/command`,
+                    dataToSend
                 );
             }
 

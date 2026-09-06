@@ -120,9 +120,9 @@ exports.updatePin = async (req, res) => {
                 roomRuid: existingPin.room.ruid
             };
             
-            MQTTConnection.sendMessage(
-                JSON.stringify(payload),
-                `doorlock/${device.device_id}/command` // <-- Pakai topik command
+            MQTTConnection.publish(
+                `doorlock/${device.device_id}/command`, // <-- Pakai topik command
+                payload // <-- Pakai topik command
             );
             console.log(`[MQTT] Sent PIN update command to ${device.device_id}`);
         }
@@ -217,9 +217,9 @@ exports.deletePin = async (req, res) => {
                 roomRuid: existingPin.room.ruid
             };
             
-            MQTTConnection.sendMessage(
-                JSON.stringify(payload),
-                `doorlock/${device.device_id}/command` // <-- Pakai topik command
+            MQTTConnection.publish(
+                `doorlock/${device.device_id}/command`, // <-- Pakai topik command
+                payload
             );
             console.log(`[MQTT] Sent PIN delete command to ${device.device_id}`);
         }
@@ -311,9 +311,9 @@ exports.deletePin = async (req, res) => {
 //                 timestamp: new Date().toISOString()
 //             };
             
-//             MQTTConnection.sendMessage(
-//                 JSON.stringify(payload),
-//                 `access_granted/${device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`
+//             MQTTConnection.publish(
+//                 `access_granted/${device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`,
+//                 payload
 //             );
 //         }
 

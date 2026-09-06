@@ -24,7 +24,6 @@ class MQTTLogger {
           client.subscribe(process.env.TOPIC_AUTH, { qos: 1 });
           client.subscribe(process.env.TOPIC_STATUS, { qos: 1 });
           client.subscribe(process.env.TOPIC_REGISTRATION, { qos: 1 });
-          client.subscribe(process.env.TOPIC_CAM_FRAME_META, { qos: 1 });
 
           // Jangan subscribe TOPIC_CAM_FRAME_BIN
           // karena isinya binary JPEG.
@@ -46,9 +45,6 @@ class MQTTLogger {
                 }
                 else if (topic.includes("/registration")) {
                     await this.handleRegistration(deviceId, payload);
-                }
-                else if (topic.includes("/camera/frame/meta")) {
-                    await this.handleCameraMeta(deviceId, payload, client);
                 }
                 else if (topic.includes("/status")) {
                     await this.handleStatus(deviceId, payload);
@@ -184,44 +180,8 @@ class MQTTLogger {
         }
     }
 
-    // ======================= 3. CAMERA META EVENT =======================
-    static async handleCameraMeta(deviceId, payload, client) {
-        console.log(` [i]: Camera Meta: Type=${payload.type}, Seq=${payload.sequence}`);
-        
-        // --- TEMPAT INTEGRASI FACE RECOGNITION (ML/AI) ---
-        // Secara real, backend harus menunggu binary frame dari /camera/frame, 
-        // memprosesnya dengan ML (FaceAPI/InsightFace), lalu mencari match di DB.
-        
-        // MOCK RESULT (Sementara agar pintu bisa terbuka saat testing)
-        const mockMatch = true; 
-        const mockUserId = "cuid_user_123"; // Ganti dengan query DB real nanti
-        
-        const resultPayload = {
-            type: payload.type, // "recognize" atau "enroll"
-            match: payload.type === "recognize" ? mockMatch : undefined,
-            saved: payload.type === "enroll" ? true : undefined,
-            reason: payload.type === "recognize" ? (mockMatch ? mockUserId : "no_match") : "Face enrolled",
-            session_id: payload.session_id // Pass back session_id jika ada
-        };
-
-        // Balas ke Main ESP32 (Topik result selalu ke device_id utama)
-        const resultTopic = process.env.TOPIC_CAM_RESULT.replace(
-          "{device_id}",
-          "main_esp32_01"
-        );
-        client.publish(
-          resultTopic,
-          JSON.stringify(resultPayload),
-          { qos: 1 },
-          (err) => {
-              if (err) {
-                  console.error(" [e]: Failed to publish camera result:", err);
-              } else {
-                  console.log(` [i]: 📤 Camera result sent to ${resultTopic}`);
-              }
-          }
-        );
-    }
+    // Camera frames are processed only by the Python face-recognition service.
+    // Do not publish an authorization result from camera metadata: it contains no image.
 
     // ======================= 4. STATUS EVENT =======================
     static async handleStatus(deviceId, payload) {
