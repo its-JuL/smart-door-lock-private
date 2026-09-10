@@ -2,6 +2,7 @@ const prisma = require('../../prisma/client');
 const { getUser, hasher } = require('../../services/auth');
 const { resSuccess, resError } = require("../../services/responseHandler");
 const { MQTTConnection } = require("../../connection/mqtt");
+const { sha256Pin } = require("../../services/hardwareRegistration");
 
 exports.registerPin = async (req, res) => {
     const { pin, ruid } = req.body;
@@ -38,6 +39,7 @@ exports.registerPin = async (req, res) => {
                 userId,
                 roomId: room.id,
                 pinHash: hasher(pin),
+                devicePinHash: sha256Pin(pin),
                 isActive: true
             },
             include: {
@@ -103,7 +105,7 @@ exports.updatePin = async (req, res) => {
         // 1. Update di Database
         const updatedPin = await prisma.pinCredential.update({
             where: { id: pinId },
-            data: { pinHash: hasher(newPin) }
+            data: { pinHash: hasher(newPin), devicePinHash: sha256Pin(newPin) }
         });
 
         // 2. Cari Device yang terhubung dengan Room ini
@@ -214,6 +216,7 @@ exports.deletePin = async (req, res) => {
         if (device && device.device_id) {
             const payload = {
                 action: "delete_user_pin",
+                pin_hash: existingPin.devicePinHash,
                 roomRuid: existingPin.room.ruid
             };
             

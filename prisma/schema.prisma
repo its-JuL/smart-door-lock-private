@@ -76,6 +76,7 @@ model Card {
 model PinCredential {
   id        String   @id @default(uuid())
   pinHash   String   @map("pin_hash")
+  devicePinHash String? @unique @map("device_pin_hash")
   userId    String   @unique @map("user_id")
   roomId    String   @map("room_id")
   isActive  Boolean  @default(true) @map("is_active")

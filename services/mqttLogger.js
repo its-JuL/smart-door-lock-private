@@ -1,6 +1,7 @@
 const mqtt = require("mqtt");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { MQTTRegistrationBridge } = require("./mqttRegistrationBridge");
 
 const MQTTSettings = {
     host: process.env.MQTT_HOST,
@@ -24,6 +25,9 @@ class MQTTLogger {
           client.subscribe(process.env.TOPIC_AUTH, { qos: 1 });
           client.subscribe(process.env.TOPIC_STATUS, { qos: 1 });
           client.subscribe(process.env.TOPIC_REGISTRATION, { qos: 1 });
+          client.subscribe("doorlock/+/user/search/request", { qos: 1 });
+          client.subscribe("doorlock/+/user/register/request", { qos: 1 });
+          client.subscribe("doorlock/+/registration/auth/request", { qos: 1 });
 
           // Jangan subscribe TOPIC_CAM_FRAME_BIN
           // karena isinya binary JPEG.
@@ -39,6 +43,8 @@ class MQTTLogger {
                 const deviceId = topicParts[1] || payload.device_id; 
                 
                 console.log(` [d]: 📩 Event on ${topic}:`, payload);
+
+                if (await MQTTRegistrationBridge.handle(client, topic, deviceId, payload)) return;
 
                 if (topic.includes("/auth")) {
                     await this.handleAuth(deviceId, payload);
@@ -112,7 +118,7 @@ class MQTTLogger {
             // C. PIN
             else if (method === "PIN" && pin_hash) {
                 const pin = await prisma.pinCredential.findFirst({
-                    where: { pinHash: pin_hash, isActive: true },
+                    where: { devicePinHash: String(pin_hash).toLowerCase(), isActive: true },
                     include: { room: true }
                 });
                 if (pin) {

@@ -64,6 +64,7 @@ Table Card {
 Table pin_credentials {
   id String [pk]
   pinHash String [not null]
+  devicePinHash String [unique]
   userId String [unique, not null]
   roomId String [not null]
   isActive Boolean [not null, default: true]
