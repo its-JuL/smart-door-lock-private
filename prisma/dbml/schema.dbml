@@ -23,7 +23,8 @@ Table User {
   roleId String [not null]
   profil Profil
   card Card [not null]
-  pinCredential pin_credentials
+  pinCredential pin_credentials [not null]
+  accessRecords Rooms_Records [not null]
   fingerprintMappings fingerprint_mappings [not null]
   faceRecognition face_recognitions
   createdAt DateTime [default: `now()`, not null]
@@ -64,15 +65,18 @@ Table Card {
 Table pin_credentials {
   id String [pk]
   pinHash String [not null]
-  devicePinHash String [unique]
-  userId String [unique, not null]
-  roomId String [not null]
+  devicePinHash String [not null]
+  userId String [not null]
+  deviceId String [not null]
   isActive Boolean [not null, default: true]
   expiresAt DateTime
   user User [not null]
-  room Room [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+
+  indexes {
+    (deviceId, devicePinHash) [unique]
+  }
 }
 
 Table fingerprint_mappings {
@@ -111,7 +115,6 @@ Table Room {
   name String
   isActive Boolean [not null, default: false]
   card Card [not null]
-  pinCredentials pin_credentials [not null]
   fingerprintMappings fingerprint_mappings [not null]
   faceRecognitions face_recognitions [not null]
   records Rooms_Records [not null]
@@ -190,6 +193,8 @@ Table Rooms_Records {
   unregisteredCard String
   room Room
   roomId String
+  user User
+  userId String
   Card Card
   cardId String
   isSuccess Boolean [not null, default: false]
@@ -231,9 +236,7 @@ Ref: Profil.userId - User.id [delete: Cascade]
 
 Ref: Card.userId > User.id
 
-Ref: pin_credentials.userId - User.id [delete: Cascade]
-
-Ref: pin_credentials.roomId > Room.id
+Ref: pin_credentials.userId > User.id [delete: Cascade]
 
 Ref: fingerprint_mappings.userId > User.id [delete: Cascade]
 
@@ -256,5 +259,7 @@ Ref: Room_Request.cardId > Card.id [delete: Cascade]
 Ref: Room_Request.roomId > Room.id [delete: Cascade]
 
 Ref: Rooms_Records.roomId > Room.id [delete: Set Null]
+
+Ref: Rooms_Records.userId > User.id [delete: Set Null]
 
 Ref: Rooms_Records.cardId > Card.id [delete: Set Null]

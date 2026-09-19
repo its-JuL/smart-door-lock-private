@@ -84,12 +84,20 @@ class MQTTConnection {
 
     static async publish(topic, payload) {
         const instance = this.getInstance();
-        if (!instance.isConnected) return false;
-        
-        const finalPayload = typeof payload === 'object' ? JSON.stringify(payload) : payload;
-        instance.client.publish(topic, finalPayload, { qos: 1 }, (err) => {
-            if (err) console.error("❌ Publish error:", err);
-            else console.log(`📤 Sent to ${topic}`);
+        if (!instance.isConnected || !instance.client) {
+            throw new Error("MQTT broker is not connected");
+        }
+        const finalPayload = typeof payload === "object" ? JSON.stringify(payload) : payload;
+        return new Promise((resolve, reject) => {
+            instance.client.publish(topic, finalPayload, { qos: 1 }, (err) => {
+                if (err) {
+                    console.error("❌ Publish error:", err);
+                    reject(err);
+                } else {
+                    console.log(`📤 Sent to ${topic}`);
+                    resolve(true);
+                }
+            });
         });
     }
 }

@@ -22,6 +22,7 @@ const GATEWAY_DEVICE_V1 = require("./api_gateway_device/v1/router");
 // Tambahan
 const PIN_V1 = require("./api_pin/v1/router");
 const FINGERPRINT_V1 = require("./api_fingerprint/v1/router")
+const FACE_V1 = require("./api_face/v1/router")
 
 router.get("*", setUser);
 router.get("/js.cookie.js", function (req, res) {
@@ -31,6 +32,7 @@ router.use(API_V1("role"), ROLE_V1);
 router.use(API_V1("card"), CARD_V1);
 router.use(API_V1("pin"), PIN_V1);
 router.use(API_V1("fingerprint"), FINGERPRINT_V1);
+router.use(API_V1("face"), FACE_V1);
 router.use(API_V1("room"), ROOM_V1);
 router.use(API_V2("room"), ROOM_V2);
 router.use(API_V1("room-record"), ROOM_RECORD_V1);

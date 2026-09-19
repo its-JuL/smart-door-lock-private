@@ -50,7 +50,7 @@ class MQTTLogger {
                     await this.handleAuth(deviceId, payload);
                 }
                 else if (topic.includes("/registration")) {
-                    await this.handleRegistration(deviceId, payload);
+                    await this.handleRegistration(client, deviceId, payload);
                 }
                 else if (topic.includes("/status")) {
                     await this.handleStatus(deviceId, payload);
@@ -152,38 +152,60 @@ class MQTTLogger {
     }
 
     // ======================= 2. REGISTRATION EVENT =======================
-    static async handleRegistration(deviceId, payload) {
-        const { method, result, card_number, finger_id, pin_hash } = payload;
-        console.log(` [i]: Registration Event: ${deviceId} - ${method} - ${result}`);
+    static publishRegistrationResult(client, deviceId, payload) {
+        const topic = `doorlock/${deviceId}/registration/result`;
+        client.publish(topic, JSON.stringify(payload), { qos: 1 });
+    }
 
-        // Hanya sinkronisasi ke DB jika hardware sukses menyimpan ke EEPROM
-        if (result !== "granted") return; 
+    static async handleRegistration(client, deviceId, payload) {
+        const { method, result, card_number, finger_id, user_id, session_id } = payload;
+        const normalizedResult = String(result || "").toLowerCase();
+        const aliases = { card: "rfid", rfid: "rfid", fingerprint: "fingerprint" };
+        const normalizedMethod = aliases[String(method || "").toLowerCase()];
+        const response = { session_id, user_id, method: normalizedMethod || method, success: false };
 
         try {
-            if (method === "rfid" && card_number) {
-                await prisma.card.upsert({
-                    where: { card_number },
-                    update: { card_status: "REGISTER" },
-                    create: { 
-                        card_number, 
-                        card_status: "REGISTER", 
-                        card_name: "Kartu Baru (Sync dari Hardware)" 
-                    }
+            if (normalizedResult !== "granted" && normalizedResult !== "success") throw new Error(payload.detail || "Hardware enrollment failed");
+            if (!normalizedMethod) throw new Error("Unsupported registration method");
+            if (!session_id || !user_id) throw new Error("Missing session_id or user_id; firmware must be flashed with V5 website-enrollment support");
+
+            const device = await prisma.device.findUnique({ where: { device_id: deviceId }, select: { roomId: true } });
+            if (!device?.roomId) throw new Error("Device not found or not assigned to a room");
+            if (!await prisma.user.findUnique({ where: { id: user_id }, select: { id: true } })) throw new Error("Selected user does not exist");
+
+            const pending = MQTTRegistrationBridge.getEnrollment(deviceId, session_id, normalizedMethod, user_id);
+            // Fallback enrollment context: V5 returns signed-in user/session in its event.
+            // Do not reject a valid event merely because nodemon restarted and lost its in-memory map.
+            if (pending && pending.roomId !== device.roomId) throw new Error("Enrollment room does not match device room");
+
+            if (normalizedMethod === "fingerprint") {
+                const fingerId = Number.parseInt(finger_id, 10);
+                if (!Number.isInteger(fingerId) || fingerId < 2) throw new Error("Valid user finger_id is required");
+                await prisma.fingerprintMapping.upsert({
+                    where: { deviceId_fingerId: { deviceId, fingerId } },
+                    update: { userId: user_id, roomId: device.roomId, isActive: true },
+                    create: { deviceId, fingerId, userId: user_id, roomId: device.roomId, isActive: true }
                 });
-                console.log(` [i]: ✅ Card ${card_number} otomatis tersinkronisasi ke DB`);
+                MQTTRegistrationBridge.consumeEnrollment(deviceId, session_id, normalizedMethod, user_id);
+                response.finger_id = fingerId;
+            } else {
+                const cardNumber = String(card_number || "").replaceAll(" ", "").toUpperCase();
+                if (!cardNumber) throw new Error("card_number is required");
+                await prisma.card.upsert({
+                    where: { card_number: cardNumber },
+                    update: { userId: user_id, card_status: "REGISTER", banned: false, room: { connect: { id: device.roomId } } },
+                    create: { card_number: cardNumber, userId: user_id, card_status: "REGISTER", card_name: `RFID ${cardNumber}`, room: { connect: { id: device.roomId } } }
+                });
+                MQTTRegistrationBridge.consumeEnrollment(deviceId, session_id, normalizedMethod, user_id);
+                response.card_number = cardNumber;
             }
-            else if (method === "fingerprint" && finger_id) {
-                console.log(` [i]: ⚠️ Fingerprint ID ${finger_id} enrolled. Perlu mapping User/Room via Admin UI.`);
-            }
-            else if (method === "pin" && pin_hash) {
-                console.log(` [i]: ⚠️ PIN enrolled. Perlu mapping User/Room via Admin UI.`);
-            }
-            else if (method === "face") {
-                console.log(` [i]: ⚠️ Face enrolled. Perlu mapping User/Room via Admin UI.`);
-            }
-        } catch (dbError) {
-            console.error(" [e]: DB Error on handleRegistration:", dbError);
+            response.success = true;
+            response.detail = `${normalizedMethod} mapping stored in database`;
+        } catch (error) {
+            response.detail = error.message;
+            console.error(" [e]: DB Error on handleRegistration:", error.message);
         }
+        this.publishRegistrationResult(client, deviceId, response);
     }
 
     // Camera frames are processed only by the Python face-recognition service.

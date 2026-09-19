@@ -30,6 +30,7 @@ MQTT_PASSWORD = "31750321"
 TOPIC_CAM_FRAME_META = "doorlock/+/camera/frame/meta"
 TOPIC_CAM_FRAME_BIN  = "doorlock/+/camera/frame"
 TOPIC_CAM_RESULT     = "doorlock/{device_id}/camera/result"
+TOPIC_FACE_ENROLL_CONTEXT = "doorlock/+/face/enroll/context"
 
 # Path model
 MODEL_PATH = "Weights/MobileFace_Net"
@@ -72,6 +73,7 @@ logger.info(f"FaceBank loaded with {len(facebank.names)} faces")
 # Menyimpan meta terakhir per device_id agar tahu frame berikutnya tipe apa
 # Format: { "main_esp32_01": {"type": "recognize"/"enroll"} }
 pending_meta = {}
+pending_enroll_context = {}
 
 
 # ==================== CAPTURES ====================
@@ -158,8 +160,12 @@ def handle_frame(client, device_id: str, frame_type: str, img_bytes: bytes):
 
     # === ENROLL ===
     elif frame_type == "enroll":
-        # ESP32 lu nggak kirim "name", jadi auto-generate
-        new_user_name = f"user_{len(facebank.names):03d}"
+        context = pending_enroll_context.pop(device_id, None)
+        if not context or not context.get("user_id"):
+            logger.warning(f"[ENROLL] Missing enrollment context for {device_id}")
+            send_result(client, device_id, "enroll", success=False, reason="missing_enrollment_context")
+            return
+        new_user_name = str(context["user_id"])
         facebank.add_face(new_user_name, embedding)
         # add_face() udah otomatis save ke facebank.pth & names.npy
         logger.info(f"[ENROLL] Registered & Saved: {new_user_name}")
@@ -198,9 +204,11 @@ def on_connect(client, userdata, flags, reason_code, properties=None):
     if reason_code == 0:
         client.subscribe(TOPIC_CAM_FRAME_META, qos=1)
         client.subscribe(TOPIC_CAM_FRAME_BIN, qos=1)
+        client.subscribe(TOPIC_FACE_ENROLL_CONTEXT, qos=1)
         logger.info("Connected to MQTT broker")
         logger.info(f"  Subscribed: {TOPIC_CAM_FRAME_META}")
         logger.info(f"  Subscribed: {TOPIC_CAM_FRAME_BIN}")
+        logger.info(f"  Subscribed: {TOPIC_FACE_ENROLL_CONTEXT}")
     else:
         logger.error(f"Failed to connect, rc={reason_code}")
 
@@ -211,6 +219,17 @@ def on_message(client, userdata, msg):
     # Format: doorlock/<device_id>/camera/frame/meta
     parts = topic.split("/")
     device_id = parts[1] if len(parts) >= 4 else "unknown"
+
+    if topic.endswith("/face/enroll/context"):
+        try:
+            context = json.loads(msg.payload.decode("utf-8"))
+            if not context.get("user_id"):
+                raise ValueError("user_id is required")
+            pending_enroll_context[device_id] = context
+            logger.info(f"[ENROLL CONTEXT] device={device_id} user_id={context['user_id']}")
+        except Exception as e:
+            logger.error(f"[ENROLL CONTEXT] Parse error: {e}")
+        return
 
     # === META (JSON kecil, datang SEBELUM frame biner) ===
     if topic.endswith("/camera/frame/meta"):

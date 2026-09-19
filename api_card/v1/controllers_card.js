@@ -1204,3 +1204,29 @@ exports.adminModifyCardPin = async (req, res) => {
         });
     }
 };
+
+exports.initiateCardEnrollment = async (req, res) => {
+    const { deviceId, targetUserId } = req.body;
+    if (!deviceId || !targetUserId) return resError({ res, title: "deviceId and targetUserId are required", statusCode: 400 });
+    try {
+        const [device, user] = await Promise.all([
+            prisma.device.findUnique({ where: { device_id: deviceId }, select: { device_id: true, roomId: true } }),
+            prisma.user.findUnique({ where: { id: targetUserId }, select: { id: true, username: true } })
+        ]);
+        if (!device) return resError({ res, title: "Device not found", statusCode: 404 });
+        if (!device.roomId) return resError({ res, title: "Device is not assigned to a room", statusCode: 400 });
+        if (!user) return resError({ res, title: "Target user not found", statusCode: 404 });
+        const { createEnrollmentSessionId, buildEnrollmentCommand } = require("../../services/webEnrollment");
+        const { MQTTRegistrationBridge } = require("../../services/mqttRegistrationBridge");
+        const sessionId = createEnrollmentSessionId("rfid");
+        const command = buildEnrollmentCommand({ method: "rfid", deviceId, userId: user.id, username: user.username, sessionId });
+        MQTTRegistrationBridge.trackEnrollment({ deviceId, sessionId, userId: user.id, roomId: device.roomId, method: "rfid" });
+        try {
+            await MQTTConnection.publish(command.topic, command.payload);
+        } catch (publishError) {
+            MQTTRegistrationBridge.consumeEnrollment(deviceId, sessionId, "rfid", user.id);
+            throw publishError;
+        }
+        return resSuccess({ res, title: "RFID enrollment initiated", data: { sessionId, status: "waiting_for_device" } });
+    } catch (error) { return resError({ res, title: "Failed to initiate RFID enrollment", errors: error.message }); }
+};

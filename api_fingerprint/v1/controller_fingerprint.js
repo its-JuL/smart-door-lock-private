@@ -1,63 +1,33 @@
 const prisma = require("../../prisma/client");
 const { getUser } = require("../../services/auth");
 const { resSuccess, resError } = require("../../services/responseHandler");
-const { MQTTConnection } = require("../../connection/mqtt"); 
+const { MQTTConnection } = require("../../connection/mqtt");
 
-// exports.registerFingerprintMapping = async (req, res) => {
-//   const { deviceId, fingerId, ruid, targetUserId } = req.body;
-//   const userId = targetUserId || getUser(req);
-//   try {
-//     const room = await prisma.room.findUnique({
-//       where: { ruid },
-//       select: { id: true, name: true }
-//     });
-//     if (!room) {
-//       return resError({ res, title: "Room not found", statusCode: 404 });
-//     }
-//     const existing = await prisma.fingerprintMapping.findFirst({
-//       where: { deviceId, fingerId }
-//     });
-//     if (existing) {
-//       return resError({
-//         res,
-//         title: "Fingerprint ID already mapped to another user on this device",
-//         statusCode: 409
-//       });
-//     }
-//     const mapping = await prisma.fingerprintMapping.create({
-//       data: {
-//         deviceId,
-//         fingerId: parseInt(fingerId, 10), // Pastikan tipe data Integer
-//         userId,
-//         roomId: room.id,
-//         isActive: true
-//       },
-//       include: {
-//         user: { select: { username: true } },
-//         room: { select: { ruid: true, name: true } }
-//       }
-//     });
-//     return resSuccess({
-//       res,
-//       title: "Fingerprint mapping registered",
-//       data: {
-//         id: mapping.id,
-//         deviceId: mapping.deviceId,
-//         fingerId: mapping.fingerId,
-//         username: mapping.user.username,
-//         roomRuid: mapping.room.ruid,
-//         roomName: mapping.room.name,
-//         isActive: mapping.isActive
-//       }
-//     });
-//   } catch (error) {
-//     return resError({
-//       res,
-//       title: "Failed to register fingerprint mapping",
-//       errors: error.message
-//     });
-//   }
-// };
+exports.registerFingerprintMapping = async (req, res) => {
+  const { deviceId, targetUserId } = req.body;
+  if (!deviceId || !targetUserId) return resError({ res, title: "deviceId and targetUserId are required", statusCode: 400 });
+  try {
+    const [device, user] = await Promise.all([
+      prisma.device.findUnique({ where: { device_id: deviceId }, select: { device_id: true, roomId: true } }),
+      prisma.user.findUnique({ where: { id: targetUserId }, select: { id: true, username: true } })
+    ]);
+    if (!device) return resError({ res, title: "Device not found", statusCode: 404 });
+    if (!device.roomId) return resError({ res, title: "Device is not assigned to a room", statusCode: 400 });
+    if (!user) return resError({ res, title: "Target user not found", statusCode: 404 });
+    const { createEnrollmentSessionId, buildEnrollmentCommand } = require("../../services/webEnrollment");
+    const { MQTTRegistrationBridge } = require("../../services/mqttRegistrationBridge");
+    const sessionId = createEnrollmentSessionId("fingerprint");
+    const command = buildEnrollmentCommand({ method: "fingerprint", deviceId, userId: user.id, username: user.username, sessionId });
+    MQTTRegistrationBridge.trackEnrollment({ deviceId, sessionId, userId: user.id, roomId: device.roomId, method: "fingerprint" });
+    try {
+      await MQTTConnection.publish(command.topic, command.payload);
+    } catch (publishError) {
+      MQTTRegistrationBridge.consumeEnrollment(deviceId, sessionId, "fingerprint", user.id);
+      throw publishError;
+    }
+    return resSuccess({ res, title: "Fingerprint enrollment initiated", data: { sessionId, status: "waiting_for_device" } });
+  } catch (error) { return resError({ res, title: "Failed to initiate fingerprint enrollment", errors: error.message }); }
+};
 
 exports.listFingerprints = async (req, res) => {
   const { deviceId } = req.query;

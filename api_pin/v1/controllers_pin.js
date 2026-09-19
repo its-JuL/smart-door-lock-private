@@ -1,344 +1,53 @@
-const prisma = require('../../prisma/client');
-const { getUser, hasher } = require('../../services/auth');
+const prisma = require("../../prisma/client");
 const { resSuccess, resError } = require("../../services/responseHandler");
 const { MQTTConnection } = require("../../connection/mqtt");
-const { sha256Pin } = require("../../services/hardwareRegistration");
+const { hasher } = require("../../services/auth");
+const { buildPinEnrollmentPlan } = require("../../services/pinEnrollment");
+const crypto = require("crypto");
 
+async function findDeviceAndUser(deviceId, targetUserId) {
+  const [device, user] = await Promise.all([
+    prisma.device.findUnique({ where: { device_id: deviceId }, select: { device_id: true, roomId: true } }),
+    prisma.user.findUnique({ where: { id: targetUserId }, select: { id: true, username: true, profil: { select: { full_name: true } } } }),
+  ]);
+  if (!device) throw new Error("Device not found");
+  if (!user) throw new Error("Target user not found");
+  if (!device.roomId) throw new Error("Device is not assigned to a room");
+  return { device, user };
+}
 exports.registerPin = async (req, res) => {
-    const { pin, ruid } = req.body;
-    const userId = getUser(req);
-    try {
-        const room = await prisma.room.findUnique({
-            where: { ruid },
-            select: { id: true, name: true, ruid: true }
-        });
-        if (!room) {
-            return resError({
-                res,
-                title: "Room not found",
-                statusCode: 404,
-                errors: { ruid: `Room with ruid "${ruid}" does not exist` }
-            });
-        }
-        const existingPin = await prisma.pinCredential.findFirst({
-            where: { 
-                userId, 
-                roomId: room.id
-            }
-        });
-        if (existingPin) {
-            return resError({ 
-                res, 
-                title: "PIN already registered for this room",
-                statusCode: 409,
-                errors: { message: "User already has a PIN for this room. Please update instead." }
-            });
-        }
-        const newPinCredential = await prisma.pinCredential.create({
-            data: {
-                userId,
-                roomId: room.id,
-                pinHash: hasher(pin),
-                devicePinHash: sha256Pin(pin),
-                isActive: true
-            },
-            include: {
-                user: { 
-                    select: { 
-                        username: true,
-                        profil: { select: { full_name: true } }
-                    } 
-                },
-                room: { 
-                    select: { 
-                        name: true, 
-                        ruid: true 
-                    } 
-                }
-            }
-        });
-        return resSuccess({
-            res,
-            title: "Successfully registered standalone PIN",
-            data: {
-                id: newPinCredential.id,
-                pin: newPinCredential.pinHash,
-                userId: newPinCredential.userId,
-                username: newPinCredential.user.username,
-                fullName: newPinCredential.user.profil?.full_name,
-                roomId: newPinCredential.roomId,
-                roomRuid: newPinCredential.room.ruid,
-                roomName: newPinCredential.room.name,
-                isActive: newPinCredential.isActive,
-                createdAt: newPinCredential.createdAt
-            }
-        });
-    } catch (error) {
-        console.error(error);
-
-        return resError({
-            res,
-            title: "Error registering pin",
-            errors: error.message || error
-        });
-    }
+  const { pin, deviceId, targetUserId } = req.body;
+  try {
+    const { device, user } = await findDeviceAndUser(deviceId, targetUserId);
+    const sessionId = `pin_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+    const plan = buildPinEnrollmentPlan({ device, targetUserId: user.id, pin, sessionId });
+    await MQTTConnection.publish(`doorlock/${plan.deviceId}/command`, plan.command);
+    const credential = await prisma.pinCredential.upsert({
+      where: { deviceId_devicePinHash: { deviceId: plan.deviceId, devicePinHash: plan.devicePinHash } },
+      update: { userId: user.id, pinHash: hasher(pin), isActive: true },
+      create: { userId: user.id, deviceId: plan.deviceId, pinHash: hasher(pin), devicePinHash: plan.devicePinHash, isActive: true },
+    });
+    return resSuccess({ res, title: "PIN saved and sent to hardware", data: { id: credential.id, userId: user.id, username: user.username, fullName: user.profil?.full_name || null, deviceId: plan.deviceId, isActive: credential.isActive, createdAt: credential.createdAt, sessionId } });
+  } catch (error) { return resError({ res, title: "Failed to register PIN", errors: error.message }); }
 };
-exports.updatePin = async (req, res) => {
-    const { pinId } = req.params;
-    const { newPin } = req.body;
-    const userId = getUser(req);
-
-    try {
-        const existingPin = await prisma.pinCredential.findFirst({
-            where: { id: pinId, userId: userId },
-            include: { room: { select: { ruid: true, name: true, id: true } } }
-        });
-
-        if (!existingPin) {
-            return resError({
-                res,
-                title: "PIN not found or you don't have permission to update it",
-                statusCode: 404
-            });
-        }
-
-        // 1. Update di Database
-        const updatedPin = await prisma.pinCredential.update({
-            where: { id: pinId },
-            data: { pinHash: hasher(newPin), devicePinHash: sha256Pin(newPin) }
-        });
-
-        // 2. Cari Device yang terhubung dengan Room ini
-        const device = await prisma.device.findFirst({
-            where: { roomId: existingPin.room.id },
-            select: { device_id: true }
-        });
-
-        // 3. Kirim Perintah ke ESP32 agar update memori lokalnya
-        if (device && device.device_id) {
-            const payload = {
-                action: "update_user_pin",
-                newPin: newPin, // Kirim PIN baru dalam bentuk plain text agar ESP32 bisa simpan
-                roomRuid: existingPin.room.ruid
-            };
-            
-            MQTTConnection.publish(
-                `doorlock/${device.device_id}/command`, // <-- Pakai topik command
-                payload // <-- Pakai topik command
-            );
-            console.log(`[MQTT] Sent PIN update command to ${device.device_id}`);
-        }
-
-        return resSuccess({
-            res,
-            title: "Successfully updated PIN",
-            data: {
-                id: updatedPin.id,
-                roomRuid: existingPin.room.ruid,
-                roomName: existingPin.room.name,
-                isActive: updatedPin.isActive,
-                updatedAt: updatedPin.updatedAt
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        return resError({ res, title: "Failed to update PIN", errors: error.message || error });
-    }
+exports.listPins = async (req, res) => {
+  try {
+    const pins = await prisma.pinCredential.findMany({ include: { user: { select: { username: true, profil: { select: { full_name: true } } } } }, orderBy: { createdAt: "desc" } });
+    const devices = await prisma.device.findMany({ where: { device_id: { in: [...new Set(pins.map(p => p.deviceId))] } }, select: { device_id: true, room: { select: { ruid: true, name: true } } } });
+    const map = new Map(devices.map(d => [d.device_id, d]));
+    return resSuccess({ res, title: "PIN credentials retrieved", data: pins.map(p => ({ id:p.id, userId:p.userId, username:p.user.username, fullName:p.user.profil?.full_name || null, deviceId:p.deviceId, roomName:map.get(p.deviceId)?.room?.name || "-", roomRuid:map.get(p.deviceId)?.room?.ruid || null, isActive:p.isActive, createdAt:p.createdAt })) });
+  } catch (error) { return resError({ res, title:"Failed to retrieve PINs", errors:error.message }); }
 };
-exports.listUserPins = async (req, res) => {
-    const userId = getUser(req);
-    try {
-        const pins = await prisma.pinCredential.findMany({
-            where: { userId },
-            select: {
-                id: true,
-                isActive: true,
-                expiresAt: true,
-                room: {
-                    select: {
-                        ruid: true,
-                        name: true
-                    }
-                },
-                createdAt: true
-            },
-            orderBy: { createdAt: 'desc' }
-        });
-        const formattedPins = pins.map(pin => ({
-            id: pin.id,
-            roomRuid: pin.room.ruid,
-            roomName: pin.room.name,
-            isActive: pin.isActive,
-            expiresAt: pin.expiresAt,
-            createdAt: pin.createdAt
-        }));
-        return resSuccess({
-            res,
-            title: "Successfully retrieved user PINs",
-            data: formattedPins
-        });
-    } catch (error) {
-        return resError({
-            res,
-            title: "Failed to retrieve PINs",
-            errors: error.message || error
-        });
-    }
+exports.updatePin = async (req,res) => {
+  try {
+    const existing=await prisma.pinCredential.findUnique({where:{id:req.params.pinId}}); if(!existing) return resError({res,title:"PIN not found",statusCode:404});
+    const {device}=await findDeviceAndUser(existing.deviceId,existing.userId); const plan=buildPinEnrollmentPlan({device,targetUserId:existing.userId,pin:req.body.newPin});
+    await MQTTConnection.publish(`doorlock/${existing.deviceId}/command`,{action:"delete_user_pin",user_id:existing.userId,pin_hash:existing.devicePinHash});
+    await MQTTConnection.publish(`doorlock/${existing.deviceId}/command`,plan.command);
+    const updated=await prisma.pinCredential.update({where:{id:existing.id},data:{pinHash:hasher(req.body.newPin),devicePinHash:plan.devicePinHash,isActive:true}});
+    return resSuccess({res,title:"PIN updated and sent to hardware",data:{id:updated.id,deviceId:updated.deviceId,userId:updated.userId,updatedAt:updated.updatedAt}});
+  } catch(error) { return resError({res,title:"Failed to update PIN",errors:error.message}); }
 };
-exports.deletePin = async (req, res) => {
-    const { pinId } = req.params;
-    const userId = getUser(req);
-
-    try {
-        const existingPin = await prisma.pinCredential.findFirst({
-            where: { id: pinId, userId: userId },
-            include: { room: { select: { ruid: true, id: true } } }
-        });
-
-        if (!existingPin) {
-            return resError({
-                res,
-                title: "PIN not found or you don't have permission to delete it",
-                statusCode: 404
-            });
-        }
-
-        // 1. Hapus dari Database
-        await prisma.pinCredential.delete({ where: { id: pinId } });
-
-        // 2. Cari Device yang terhubung dengan Room ini
-        const device = await prisma.device.findFirst({
-            where: { roomId: existingPin.room.id },
-            select: { device_id: true }
-        });
-
-        // 3. Kirim Perintah ke ESP32 agar menghapus/mengosongkan PIN lokal
-        if (device && device.device_id) {
-            const payload = {
-                action: "delete_user_pin",
-                pin_hash: existingPin.devicePinHash,
-                roomRuid: existingPin.room.ruid
-            };
-            
-            MQTTConnection.publish(
-                `doorlock/${device.device_id}/command`, // <-- Pakai topik command
-                payload
-            );
-            console.log(`[MQTT] Sent PIN delete command to ${device.device_id}`);
-        }
-
-        return resSuccess({ res, title: "Successfully deleted PIN" });
-    } catch (error) {
-        return resError({ res, title: "Failed to delete PIN", errors: error.message || error });
-    }
+exports.deletePin = async (req,res) => {
+  try { const existing=await prisma.pinCredential.findUnique({where:{id:req.params.pinId}}); if(!existing)return resError({res,title:"PIN not found",statusCode:404}); await MQTTConnection.publish(`doorlock/${existing.deviceId}/command`,{action:"delete_user_pin",user_id:existing.userId,pin_hash:existing.devicePinHash}); await prisma.pinCredential.delete({where:{id:existing.id}}); return resSuccess({res,title:"PIN deletion sent to hardware and removed from database"}); } catch(error) { return resError({res,title:"Failed to delete PIN",errors:error.message}); }
 };
-// exports.verifyPinHardware = async (req, res) => {
-//     const { pin, deviceId } = req.body;
-
-//     try {
-//         // Cari room berdasarkan device
-//         const device = await prisma.device.findUnique({
-//             where: { device_id: deviceId },
-//             select: { 
-//                 roomId: true, 
-//                 deviceType: true,
-//                 Gateway_Spot: { 
-//                     select: { 
-//                         gatewayDevice: { 
-//                             select: { gateway_short_id: true } 
-//                         } 
-//                     } 
-//                 }
-//             }
-//         });
-
-//         if (!device || !device.roomId) {
-//             return resError({ 
-//                 res, 
-//                 title: "Device not found or not assigned to any room", 
-//                 statusCode: 404 
-//             });
-//         }
-
-//         // Hash PIN untuk comparison
-//         const inputPinHash = hasher(pin);
-
-//         // Cari credential yang cocok
-//         const credential = await prisma.pinCredential.findFirst({
-//             where: {
-//                 pinHash: inputPinHash,
-//                 roomId: device.roomId,
-//                 isActive: true
-//             },
-//             include: {
-//                 user: {
-//                     select: {
-//                         username: true,
-//                         profil: { select: { full_name: true, photo: true } }
-//                     }
-//                 },
-//                 room: { 
-//                     select: { 
-//                         name: true,
-//                         ruid: true 
-//                     } 
-//                 }
-//             }
-//         });
-
-//         // Log aktivitas
-//         await prisma.rooms_Records.create({
-//             data: {
-//                 roomId: device.roomId,
-//                 cardId: null,
-//                 unregisteredCard: null,
-//                 isSuccess: !!credential
-//             }
-//         });
-
-//         if (!credential) {
-//             return resError({ 
-//                 res, 
-//                 title: "Access Denied: Invalid PIN or no access to this room", 
-//                 statusCode: 403 
-//             });
-//         }
-
-//         // Broadcast ke gateway (jika multi-network)
-//         if (device.deviceType === "MULTI_NETWORK" && device.Gateway_Spot?.gatewayDevice?.gateway_short_id) {
-//             const payload = {
-//                 action: "UNLOCK_GRANTED",
-//                 reason: "STANDALONE_PIN",
-//                 userName: credential.user.profil?.full_name || credential.user.username,
-//                 roomRuid: credential.room.ruid,
-//                 timestamp: new Date().toISOString()
-//             };
-            
-//             MQTTConnection.publish(
-//                 `access_granted/${device.Gateway_Spot.gatewayDevice.gateway_short_id}/gateway`,
-//                 payload
-//             );
-//         }
-
-//         return resSuccess({
-//             res,
-//             title: "Access Granted",
-//             data: {
-//                 userName: credential.user.profil?.full_name || credential.user.username,
-//                 roomName: credential.room.name,
-//                 roomRuid: credential.room.ruid,
-//                 action: "UNLOCK"
-//             }
-//         });
-
-//     } catch (error) {
-//         console.error("=== HARDWARE VERIFICATION ERROR ===");
-//         console.error(error);
-        
-//         return resError({
-//             res,
-//             title: "Hardware verification failed",
-//             errors: error.message || error
-//         });
-//     }
-// }; 

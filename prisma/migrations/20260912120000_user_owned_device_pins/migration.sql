@@ -1,0 +1,14 @@
+ALTER TABLE "pin_credentials" ADD COLUMN "device_id" TEXT;
+UPDATE "pin_credentials" p SET "device_id" = d."device_id" FROM "Device" d WHERE d."roomId" = p."room_id";
+DELETE FROM "pin_credentials" WHERE "device_id" IS NULL;
+ALTER TABLE "pin_credentials" ALTER COLUMN "device_id" SET NOT NULL;
+ALTER TABLE "pin_credentials" DROP CONSTRAINT IF EXISTS "pin_credentials_user_id_key";
+ALTER TABLE "pin_credentials" DROP CONSTRAINT IF EXISTS "pin_credentials_device_pin_hash_key";
+ALTER TABLE "pin_credentials" DROP COLUMN "room_id";
+ALTER TABLE "pin_credentials" ALTER COLUMN "device_pin_hash" SET NOT NULL;
+CREATE UNIQUE INDEX "pin_credentials_device_id_device_pin_hash_key" ON "pin_credentials"("device_id", "device_pin_hash");
+CREATE INDEX "pin_credentials_user_id_idx" ON "pin_credentials"("user_id");
+CREATE INDEX "pin_credentials_device_id_idx" ON "pin_credentials"("device_id");
+ALTER TABLE "Rooms_Records" ADD COLUMN IF NOT EXISTS "userId" TEXT;
+ALTER TABLE "Rooms_Records" DROP CONSTRAINT IF EXISTS "room_records_user_id_fkey";
+ALTER TABLE "Rooms_Records" ADD CONSTRAINT "Rooms_Records_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

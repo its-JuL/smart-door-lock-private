@@ -1,0 +1,10 @@
+require("dotenv").config();
+const mqtt=require("mqtt");
+const fs=require("fs");
+const log="/home/sdl/rfid_fingerprint_capture.log";
+const client=mqtt.connect(`mqtt://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`,{username:process.env.MQTT_USERNAME,password:process.env.MQTT_PASSWORD,clientId:`diagnostic_capture_${Date.now()}`});
+const stamp=()=>new Date().toISOString();
+client.on("connect",()=>{fs.appendFileSync(log,`=== capture started ${stamp()} ===\n`);client.subscribe(["doorlock/main_esp32_01/registration","doorlock/main_esp32_01/auth","doorlock/main_esp32_01/command","doorlock/main_esp32_01/command/result"],{qos:1},(e)=>{if(e) fs.appendFileSync(log,`subscribe error ${e.message}\n`); else fs.appendFileSync(log,`=== subscribed ===\n`);});});
+client.on("message",(topic,msg)=>fs.appendFileSync(log,`${stamp()} ${topic} ${msg.toString()}\n`));
+client.on("error",e=>fs.appendFileSync(log,`mqtt error ${e.message}\n`));
+setTimeout(()=>{fs.appendFileSync(log,`=== capture ended ${stamp()} ===\n`);client.end();},600000);

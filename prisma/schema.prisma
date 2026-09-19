@@ -35,7 +35,8 @@ model User {
   roleId            String
   profil            Profil?
   card              Card[]
-  pinCredential     PinCredential?
+  pinCredential     PinCredential[]
+  accessRecords     Rooms_Records[]
   fingerprintMappings FingerprintMapping[]
   faceRecognition   FaceRecognition?
   createdAt         DateTime   @default(now())
@@ -74,18 +75,19 @@ model Card {
 }
 
 model PinCredential {
-  id        String   @id @default(uuid())
-  pinHash   String   @map("pin_hash")
-  devicePinHash String? @unique @map("device_pin_hash")
-  userId    String   @unique @map("user_id")
-  roomId    String   @map("room_id")
-  isActive  Boolean  @default(true) @map("is_active")
-  expiresAt DateTime? @map("expires_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  room      Room     @relation(fields: [roomId], references: [id])
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
+  id            String   @id @default(uuid())
+  pinHash       String   @map("pin_hash")
+  devicePinHash String   @map("device_pin_hash")
+  userId        String   @map("user_id")
+  deviceId      String   @map("device_id")
+  isActive      Boolean  @default(true) @map("is_active")
+  expiresAt     DateTime? @map("expires_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  @@unique([deviceId, devicePinHash])
+  @@index([userId])
+  @@index([deviceId])
   @@map("pin_credentials")
 }
 
@@ -128,7 +130,6 @@ model Room {
   name        String?
   isActive    Boolean         @default(false)
   card        Card[]
-  pinCredentials   PinCredential[]
   fingerprintMappings FingerprintMapping[]
   faceRecognitions FaceRecognition[]
   records     Rooms_Records[]
@@ -207,6 +208,8 @@ model Rooms_Records {
   unregisteredCard String?
   room             Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
   roomId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId           String?
   Card             Card?    @relation(fields: [cardId], references: [id], onDelete: SetNull)
   cardId           String?
   isSuccess        Boolean  @default(false)
