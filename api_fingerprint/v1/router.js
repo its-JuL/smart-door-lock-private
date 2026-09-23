@@ -3,6 +3,7 @@ const { loginRequired, allowedRole } = require("../../middlewares/authMiddleware
 const { body, param, query } = require("express-validator");
 const { formChacker } = require("../../middlewares/formMiddleware");
 const controller = require("./controller_fingerprint");
+router.post("/sync-existing", loginRequired, allowedRole("ADMIN", "OPERATOR"), body("deviceId").notEmpty().isString(), body("targetUserId").notEmpty().isUUID(), body("fingerId").isInt({ min: 2, max: 127 }), formChacker, controller.syncExistingFingerprint);
 router.post("/register", loginRequired, allowedRole("ADMIN", "OPERATOR"), body("deviceId").notEmpty().isString(), body("targetUserId").notEmpty().isUUID(), formChacker, controller.registerFingerprintMapping);
 router.post("/initiate-enrollment", loginRequired, allowedRole("ADMIN", "OPERATOR"), body("deviceId").notEmpty().isString(), body("targetUserId").notEmpty().isUUID(), formChacker, controller.registerFingerprintMapping);
 router.get("/list", loginRequired, allowedRole("ADMIN", "OPERATOR"), query("deviceId").optional().isString().withMessage("deviceId must be a string"), formChacker, controller.listFingerprints);

@@ -21,6 +21,7 @@ const {
 } = require("../../middlewares/roomMiddlewares");
 
 // CARD ROUTER
+router.post("/sync-existing", loginRequired, allowedRole("ADMIN", "OPERATOR"), body("deviceId").notEmpty().isString(), body("targetUserId").notEmpty().isUUID(), body("cardNumber").notEmpty().isString(), formChacker, card.syncExistingRfid);
 router.post("/initiate-enrollment", loginRequired, allowedRole("ADMIN", "OPERATOR"), body("deviceId").notEmpty().isString(), body("targetUserId").notEmpty().isString(), formChacker, card.initiateCardEnrollment);
 router.get("/u/available", loginRequired, allowedRole("USER"), card.userCards);
 router.get(

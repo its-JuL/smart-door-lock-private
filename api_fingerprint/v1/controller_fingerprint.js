@@ -1,3 +1,19 @@
+exports.syncExistingFingerprint = async (req, res) => {
+  try {
+    const { buildManualCredentialSyncPlan } = require("../../services/hardwareRegistration");
+    const device = await prisma.device.findUnique({ where: { device_id: req.body.deviceId }, select: { device_id: true, roomId: true } });
+    const plan = buildManualCredentialSyncPlan({ device, payload: { method: "fingerprint", targetUserId: req.body.targetUserId, fingerId: req.body.fingerId } });
+    const user = await prisma.user.findUnique({ where: { id: plan.userId }, select: { id: true, username: true } });
+    if (!user) return resError({ res, title: "Target user not found", statusCode: 404 });
+    const mapping = await prisma.fingerprintMapping.upsert({
+      where: { deviceId_fingerId: { deviceId: plan.deviceId, fingerId: plan.fingerId } },
+      update: { userId: plan.userId, roomId: plan.roomId, isActive: true },
+      create: { deviceId: plan.deviceId, fingerId: plan.fingerId, userId: plan.userId, roomId: plan.roomId, isActive: true }
+    });
+    return resSuccess({ res, title: "Existing fingerprint synchronized", data: { id: mapping.id, deviceId: plan.deviceId, fingerId: plan.fingerId, userId: plan.userId, username: user.username } });
+  } catch (error) { return resError({ res, title: "Failed to synchronize existing fingerprint", errors: error.message, statusCode: 400 }); }
+};
+
 const prisma = require("../../prisma/client");
 const { getUser } = require("../../services/auth");
 const { resSuccess, resError } = require("../../services/responseHandler");

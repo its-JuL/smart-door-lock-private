@@ -1,3 +1,19 @@
+exports.syncExistingRfid = async (req, res) => {
+  try {
+    const { buildManualCredentialSyncPlan } = require("../../services/hardwareRegistration");
+    const device = await prisma.device.findUnique({ where: { device_id: req.body.deviceId }, select: { device_id: true, roomId: true } });
+    const plan = buildManualCredentialSyncPlan({ device, payload: { method: "rfid", targetUserId: req.body.targetUserId, cardNumber: req.body.cardNumber } });
+    const user = await prisma.user.findUnique({ where: { id: plan.userId }, select: { id: true, username: true } });
+    if (!user) return resError({ res, title: "Target user not found", statusCode: 404 });
+    const card = await prisma.card.upsert({
+      where: { card_number: plan.cardNumber },
+      update: { userId: plan.userId, card_status: "REGISTER", banned: false, room: { connect: { id: plan.roomId } } },
+      create: { card_number: plan.cardNumber, card_name: `RFID ${plan.cardNumber}`, userId: plan.userId, card_status: "REGISTER", banned: false, room: { connect: { id: plan.roomId } } }
+    });
+    return resSuccess({ res, title: "Existing RFID synchronized", data: { id: card.id, cardNumber: plan.cardNumber, userId: plan.userId, username: user.username } });
+  } catch (error) { return resError({ res, title: "Failed to synchronize existing RFID", errors: error.message, statusCode: 400 }); }
+};
+
 const prisma = require("../../prisma/client");
 const { getUser, hasher } = require("../../services/auth");
 const { resSuccess, resError } = require("../../services/responseHandler");

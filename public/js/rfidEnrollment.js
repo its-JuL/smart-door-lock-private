@@ -29,4 +29,25 @@
       if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalLabel; }
     }
   });
+
+  const syncForm = document.querySelector('#rfid-sync-form');
+  syncForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      const response = await fetch('/api/v1/card/sync-existing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(syncForm))),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) throw new Error(body.message || 'Permintaan gagal');
+      const card = body.data;
+      notify('success', 'RFID disinkronkan', `UID ${card.cardNumber} dipetakan ke ${card.username}. Hardware tidak diubah.`);
+      syncForm.reset();
+      const device = syncForm.querySelector('[name="deviceId"]');
+      if (device) device.value = 'main_esp32_01';
+    } catch (error) {
+      notify('danger', 'Gagal sinkron RFID', error.message);
+    }
+  });
 })();

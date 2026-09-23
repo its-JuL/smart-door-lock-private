@@ -34,4 +34,23 @@ function buildAuthRegistrationPlan({ device, payload }) {
   throw new Error(`Unsupported registration method: ${method || "missing"}`);
 }
 
-module.exports = { sha256Pin, buildUserSearchResult, buildAuthRegistrationPlan };
+function buildManualCredentialSyncPlan({ device, payload }) {
+  if (!device?.device_id || !device?.roomId) throw new Error("Device is not assigned to a room");
+  const userId = String(payload?.targetUserId || "").trim();
+  if (!userId) throw new Error("targetUserId is required");
+  const method = String(payload?.method || "").toLowerCase();
+  const common = { deviceId: device.device_id, roomId: device.roomId, userId };
+  if (method === "fingerprint") {
+    const fingerId = Number.parseInt(payload.fingerId, 10);
+    if (!Number.isInteger(fingerId) || fingerId < 2 || fingerId > 127) throw new Error("Valid user fingerId (2-127) is required");
+    return { kind: "fingerprint", ...common, fingerId };
+  }
+  if (method === "rfid") {
+    const cardNumber = String(payload.cardNumber || "").replaceAll(" ", "").trim().toUpperCase();
+    if (!cardNumber) throw new Error("cardNumber is required");
+    return { kind: "rfid", ...common, cardNumber };
+  }
+  throw new Error(`Unsupported manual sync method: ${method || "missing"}`);
+}
+
+module.exports = { sha256Pin, buildUserSearchResult, buildAuthRegistrationPlan, buildManualCredentialSyncPlan };

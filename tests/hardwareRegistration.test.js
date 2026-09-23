@@ -3,6 +3,7 @@ const {
   sha256Pin,
   buildUserSearchResult,
   buildAuthRegistrationPlan,
+  buildManualCredentialSyncPlan,
 } = require("../services/hardwareRegistration");
 
 (function testSearchKeepsSessionAndLimitsUsers() {
@@ -37,6 +38,31 @@ const {
 (function testRejectsUnknownMethodAndInvalidFingerprint() {
   assert.throws(() => buildAuthRegistrationPlan({ device: { device_id: "d", roomId: "r" }, payload: { method: "face", user_id: "u" } }), /Unsupported/);
   assert.throws(() => buildAuthRegistrationPlan({ device: { device_id: "d", roomId: "r" }, payload: { method: "fingerprint", user_id: "u", finger_id: 0 } }), /finger_id/);
+})();
+
+(function testManualFingerprintSyncUsesDeviceOwnedRoom() {
+  const plan = buildManualCredentialSyncPlan({
+    device: { device_id: "main_esp32_01", roomId: "room-1" },
+    payload: { method: "fingerprint", targetUserId: "user-1", fingerId: "7" }
+  });
+  assert.deepStrictEqual(plan, {
+    kind: "fingerprint", deviceId: "main_esp32_01", roomId: "room-1", userId: "user-1", fingerId: 7
+  });
+})();
+
+(function testManualRfidSyncNormalizesUidWithoutChangingHardware() {
+  const plan = buildManualCredentialSyncPlan({
+    device: { device_id: "main_esp32_01", roomId: "room-1" },
+    payload: { method: "rfid", targetUserId: "user-1", cardNumber: " ab cd 12 " }
+  });
+  assert.deepStrictEqual(plan, {
+    kind: "rfid", deviceId: "main_esp32_01", roomId: "room-1", userId: "user-1", cardNumber: "ABCD12"
+  });
+})();
+
+(function testManualSyncRejectsAdminFingerprintAndMissingUid() {
+  assert.throws(() => buildManualCredentialSyncPlan({ device: { device_id: "d", roomId: "r" }, payload: { method: "fingerprint", targetUserId: "u", fingerId: 1 } }), /fingerId/);
+  assert.throws(() => buildManualCredentialSyncPlan({ device: { device_id: "d", roomId: "r" }, payload: { method: "rfid", targetUserId: "u" } }), /cardNumber/);
 })();
 
 console.log("hardwareRegistration tests: PASS");
