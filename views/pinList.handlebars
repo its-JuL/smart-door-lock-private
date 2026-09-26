@@ -1,5 +1,40 @@
-<section class="credential-page" id="pin-page">
-  <div class="table-action mt-3 d-flex justify-content-between align-items-center"><div><h3 class="fw-bolder text-neutral-2 mb-1">PIN per Pengguna</h3><p class="text-muted mb-0">Pilih UUID pengguna dan device. Satu device/ruangan dapat menyimpan beberapa PIN dari pengguna berbeda.</p></div><button class="btn bg-blue-3 text-white rounded-13" data-bs-toggle="collapse" data-bs-target="#pin-form">Tambah PIN</button></div>
-  <form class="collapse credential-form bg-neutral-6 rounded-13 p-4 mt-4" id="pin-form" autocomplete="off"><div class="row g-3 align-items-end"><div class="col-md-4"><label class="form-label fw-bold">Device ID</label><input class="form-control rounded-13" name="deviceId" value="main_esp32_01" required></div><div class="col-md-4"><label class="form-label fw-bold">UUID User</label><input class="form-control rounded-13" name="targetUserId" required></div><div class="col-md-2"><label class="form-label fw-bold">PIN 6 digit</label><input class="form-control rounded-13" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div><div class="col-md-2 d-grid"><button class="btn bg-blue-3 text-white rounded-13">Simpan</button></div></div></form>
-  <div class="api-list mt-4"><div class="table-header credential-grid pin-grid bg-neutral-7 py-2 rounded-13 mb-3 px-3"><p>User</p><p>Device</p><p>Ruangan device</p><p>Status</p><p>Dibuat</p><p>Aksi</p></div><div class="table-content bg-neutral-7 rounded-13 shadow credential-list" id="pin-list" data-list-endpoint="/api/v1/pin/list" data-create-endpoint="/api/v1/pin/register" data-update-endpoint="/api/v1/pin/update" data-delete-endpoint="/api/v1/pin/delete"><p class="text-center text-muted py-4 mb-0">Memuat data PIN…</p></div></div>
-</section>
+<div class="table-action mt-3 d-flex justify-content-between align-items-center">
+  <h3 class="fw-bolder text-neutral-2">PIN per Pengguna</h3>
+  <button class="btn bg-blue-3 text-white rounded-13" data-bs-toggle="collapse" data-bs-target="#pin-form">Tambah PIN</button>
+</div>
+<p class="text-muted mb-0">Pilih pengguna dan device. Satu device/ruangan dapat menyimpan beberapa PIN dari pengguna berbeda.</p>
+
+<form class="collapse credential-form bg-neutral-6 rounded-13 p-3 mb-3 mt-3" id="pin-form" autocomplete="off">
+  <div class="row g-2">
+    <div class="col-md-4">
+      <label class="form-label">Device ID</label>
+      <input class="form-control" name="deviceId" value="main_esp32_01" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Pengguna</label>
+      <select class="form-select pin-user-select" name="targetUserId" required>
+        <option value="">Memuat pengguna…</option>
+      </select>
+      <small class="text-muted">Pilih pengguna dari database; UUID dikirim otomatis.</small>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">PIN 6 digit</label>
+      <input class="form-control" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
+    </div>
+  </div>
+  <button class="btn bg-blue-3 text-white mt-3" type="submit">Simpan</button>
+</form>
+
+<div class="api-list mt-3">
+  <div class="table-header d-flex justify-content-between bg-neutral-7 py-2 rounded-13 mb-3 px-3">
+    <p class="table-data fw-bold text-center text-neutral-2">User</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Device</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Ruangan device</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Status</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Dibuat</p>
+    <p class="table-data fw-bold text-center text-neutral-2">Aksi</p>
+  </div>
+  <div class="table-content bg-neutral-7 rounded-13 shadow credential-list" id="pin-list" data-list-endpoint="/api/v1/pin/list" data-create-endpoint="/api/v1/pin/register" data-update-endpoint="/api/v1/pin/update" data-delete-endpoint="/api/v1/pin/delete">
+    <p class="text-center text-muted py-4 mb-0">Memuat data PIN…</p>
+  </div>
+</div>

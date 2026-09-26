@@ -1255,6 +1255,7 @@ exports.logs = async (req, res) => {
                     createdAt: "desc",
                 },
                 include: {
+                    user: { select: { id: true, username: true, profil: { select: { full_name: true } } } },
                     Card: {
                         include: {
                             user: true,
@@ -1281,6 +1282,7 @@ exports.logs = async (req, res) => {
                     id: cursor,
                 },
                 include: {
+                    user: { select: { id: true, username: true, profil: { select: { full_name: true } } } },
                     Card: {
                         include: {
                             user: true,

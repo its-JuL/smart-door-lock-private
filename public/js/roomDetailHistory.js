@@ -1,21 +1,26 @@
 const logsBtn = document.querySelector("#logs");
 
-const roomLogsTemplate = ({ Card, id, createdAt, isSuccess }) => {
-    const cardName = Card?.user?.username
-        ? Card?.card_name
-            ? Card.card_name
-            : "not identify"
-        : Card.card_number;
+const authenticationMethodLabels = {
+    RFID: "RFID",
+    FINGERPRINT: "Fingerprint",
+    PIN: "PIN",
+    FACE: "Face Recognition",
+    EXIT_BUTTON: "Tombol Keluar",
+    UNKNOWN: "Tidak diketahui",
+};
+
+const roomLogsTemplate = ({ Card, user, id, createdAt, isSuccess, authenticationMethod }) => {
+    const recordUser = user || Card?.user;
+    const userName = recordUser?.profil?.full_name || recordUser?.username || "Tidak teridentifikasi";
+    const method = authenticationMethodLabels[authenticationMethod] || "Tidak diketahui";
     return `
     <div
         class="room-log d-flex mt-2 flex-column flex-sm-row justify-content-between p-2 bg-neutral-7 rounded-5" data-room-log=${id}>
-        <p href="" class="text-neutral-1">${cardName}@${
-        Card?.user?.username || "not found/not linked ⚠️"
-    }</p>
-        <a href="" class="text-neutral-2">${
-            isSuccess ? "Berhasil " : "Gagal "
-        }Mengakses ruangan pada    ${days(createdAt)}
-        </a>
+        <p class="text-neutral-1 mb-1 mb-sm-0">${userName}</p>
+        <p class="text-neutral-2 mb-1 mb-sm-0">Metode: ${method}</p>
+        <p class="text-neutral-2 mb-0">${
+            isSuccess ? "Berhasil" : "Gagal"
+        } · ${days(createdAt)}</p>
     </div>
     `;
 };

@@ -47,61 +47,61 @@
             </span>
 
             <section class="nav--link mt-5 d-flex flex-column align-items-center">
-                <a href="/dashboard/"
-                    class="nav--link-item {{dashboard}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_dashboard.svg" class="nav--link-icon ms" alt="Logo Dashboard">
-                    <p class="fw-normal ms-2">Dashboard</p>
+            <a href="/dashboard/"
+                class="nav--link-item {{dashboard}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                <img src="/image/icon_dashboard.svg" class="nav--link-icon ms" alt="Logo Dashboard">
+                <p class="fw-normal ms-2">Dashboard</p>
+            </a>
+            
+            <div class="nav-authentication mt-2">
+            <button class="nav--link-item nav-authentication-toggle {{authentication}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center" type="button" aria-expanded="false" aria-controls="authentication-menu">
+                <img src="/image/icon_layers.svg" class="nav--link-icon ms" alt="Logo Autentikasi">
+                <p class="fw-normal ms-2">Autentikasi</p>
+                <span class="nav-authentication-chevron ms-auto me-3" aria-hidden="true">⌄</span>
+            </button>
+                <div class="nav-authentication-menu" id="authentication-menu">
+                <a href="/dashboard/card/list" class="nav-authentication-item {{card}}">
+                    <img src="/image/icon_card.svg" class="nav--link-icon" alt="">
+                    <span class="fw-normal ms-2">Card</span>
                 </a>
-
-                <div class="nav-authentication mt-2">
-                    <button class="nav--link-item nav-authentication-toggle {{authentication}} ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center" type="button" aria-expanded="false" aria-controls="authentication-menu">
-                        <span class="fw-normal">Autentikasi</span>
-                        <span class="nav-authentication-chevron ms-auto me-3" aria-hidden="true">⌄</span>
-                    </button>
-                    <div class="nav-authentication-menu" id="authentication-menu">
-                        <a href="/dashboard/card/list" class="nav-authentication-item {{card}}">Card</a>
-                        <a href="/dashboard/pin/list" class="nav-authentication-item {{pin}}">PIN</a>
-                        <a href="/dashboard/fingerprint/list" class="nav-authentication-item {{fingerprint}}">Fingerprint</a>
-                        <a href="/dashboard/face-recognition" class="nav-authentication-item {{faceRecognition}}">Face Recognition</a>
-                    </div>
+                <a href="/dashboard/pin/list" class="nav-authentication-item {{pin}}">
+                    <img src="/image/icon_hardware.svg" class="nav--link-icon" alt="">
+                    <span class="fw-normal ms-2">PIN</span>
+                </a>
+                <a href="/dashboard/fingerprint/list" class="nav-authentication-item {{fingerprint}}">
+                    <img src="/image/icon_user.svg" class="nav--link-icon" alt="">
+                    <span class="fw-normal ms-2">Fingerprint</span>
+                </a>
+                <a href="/dashboard/face-recognition" class="nav-authentication-item {{faceRecognition}}">
+                    <img src="/image/icon_card_id.svg" class="nav--link-icon" alt="">
+                    <span class="fw-normal ms-2">Face Recognition</span>
+                </a>
                 </div>
-
-                <a href="/dashboard/user/list"
-                    class="nav--link-item {{users}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_user.svg" class="nav--link-icon" alt="Logo Dashboard">
-                    <p class="fw-normal ms-2">User</p>
-                </a>
-
-                <a href="/dashboard/room/list"
-                    class="nav--link-item {{room}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_group.svg" class="nav--link-icon" alt="Logo Dashboard">
-                    <p class="fw-normal ms-2">Room</p>
-                </a>
-
-                <a href="/dashboard/building/list"
-                    class="nav--link-item {{building}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_building.svg" class="nav--link-icon" alt="Logo Building">
-                    <p class="fw-normal ms-2">Building</p>
-                </a>
-
-                {{!-- <a href=""
-                    class="nav--link-item {{log}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_log.svg" class="nav--link-icon" alt="Logo Dashboard">
-                    <p class="fw-normal ms-2">Log</p>
-                </a> --}}
-                <a href="/dashboard/hardware"
-                    class="nav--link-item {{hardware}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_hardware.svg" class="nav--link-icon" alt="Logo Dashboard">
-                    <p class="fw-normal ms-2">HARDWARE</p>
-                </a>
-
-                <a href="/dashboard/api"
-                    class="nav--link-item {{api}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_api.svg" class="nav--link-icon" alt="Logo Dashboard">
-                    <p class="fw-normal ms-2">API Key</p>
-                </a>
-
+            </div>
+            
+            <a href="/dashboard/user/list"
+                class="nav--link-item {{users}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                <img src="/image/icon_user.svg" class="nav--link-icon" alt="Logo User">
+                <p class="fw-normal ms-2">User</p>
+            </a>
+            <a href="/dashboard/room/list"
+                class="nav--link-item {{room}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                <img src="/image/icon_group.svg" class="nav--link-icon" alt="Logo Room">
+                <p class="fw-normal ms-2">Room</p>
+            </a>
+            <a href="/dashboard/building/list"
+                class="nav--link-item {{building}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                <img src="/image/icon_building.svg" class="nav--link-icon" alt="Logo Building">
+                <p class="fw-normal ms-2">Building</p>
+            </a>
+            <a href="/dashboard/hardware"
+                class="nav--link-item {{hardware}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                <img src="/image/icon_hardware.svg" class="nav--link-icon" alt="Logo Hardware">
+                <p class="fw-normal ms-2">HARDWARE</p>
+            </a>
+            <!-- API Key dihapus -->
             </section>
+            
         </nav>
         <main class="main">
             <section class="nav--support p-3 d-flex justify-content-between bg-light d-md-none d-block">

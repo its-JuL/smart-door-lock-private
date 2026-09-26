@@ -38,14 +38,6 @@ const accaptableUserTemplate = ({ card_name, user, id, card_number }) => {
     `;
 };
 
-const formTemplate = () => {
-    return `
-        <form class="d-flex justify-content-between">
-            <input type="text" class="bg-neutral-4 me-3 py-1 px-2 rounded-10" id="searchCard">
-            <button type="button" class="p-1 rounded-10 bg-blue-1 text-center fw-bold" id="addBtn">Add</button>
-        </form>
-    `;
-};
 
 const accaptableUserLoader = (data) => {
     data.forEach((card) => {
@@ -63,7 +55,7 @@ generalDataLoader({
 
 userBtn.addEventListener("click", () => {
     itemContainer.textContent = "";
-    // itemContainer.insertAdjacentHTML("beforeend", formTemplate());
+
     generalDataLoader({
         url: `/api/v1/room/accaptable-user/${ruid}`,
         func: accaptableUserLoader,

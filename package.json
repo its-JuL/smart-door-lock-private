@@ -2,7 +2,7 @@
     "name": "smart_door",
     "version": "1.0.0",
     "description": "IOT Backend server for smart door system",
-    "main": "index.js",
+    "main": "app.js",
     "author": "Dimas Aulia",
     "license": "MIT",
     "dependencies": {

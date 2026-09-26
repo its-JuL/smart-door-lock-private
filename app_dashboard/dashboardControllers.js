@@ -2,18 +2,29 @@ const prisma = require("../prisma/client");
 const { layoutHandler } = require("../services/layout");
 const { getUser } = require("../services/auth");
 const ITEM_LIMIT = Number(process.env.CARD_ITEM_LIMIT) || 10;
-// const ITEM_LIMIT = 5;
 
 exports.dashboard = async (req, res) => {
-    const unRegisterCard = await prisma.card.count({
-        where: { card_status: "UNREGISTER" },
-    });
     const registerCard = await prisma.card.count({
-        where: { card_status: "REGISTER" },
+        where: {
+            card_status: "REGISTER",
+        },
+    });
+    const fingerprintCount = await prisma.fingerprintMapping.count({
+        where: {
+            isActive: true,
+        },
+    });
+    const pinCount = await prisma.pinCredential.count({
+        where: {
+            isActive: true,
+        },
+    });
+    const faceCount = await prisma.faceRecognition.count({
+        where: {
+            isActive: true,
+        },
     });
     const userCount = await prisma.user.count();
-    const roomCount = await prisma.room.count();
-    const roomRecord = await prisma.rooms_Records.count();
     const userUnPair = await prisma.user.findMany({
         include: {
             card: true,
@@ -23,12 +34,18 @@ exports.dashboard = async (req, res) => {
         if (value.card.length === 0) return value;
     }).length;
 
+    const roomCount = await prisma.room.count();
+    const roomRecord = await prisma.rooms_Records.count();
+
     const data = {
         dashboard: "bg-neutral-4",
+
         styles: [],
         scripts: ["/js/dashboard.js"],
-        unRegisterCard,
         registerCard,
+        fingerprintCount,
+        pinCount,
+        faceCount,
         userCount,
         userUnPairCount,
         roomCount,

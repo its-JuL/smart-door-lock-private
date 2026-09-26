@@ -19,10 +19,9 @@ const BUILDING_V1 = require("./api_building/v1/router");
 const GATEWAY_SPOT_V1 = require("./api_gateway_spot/v1/router");
 const GATEWAY_DEVICE_V1 = require("./api_gateway_device/v1/router");
 
-// Tambahan
 const PIN_V1 = require("./api_pin/v1/router");
-const FINGERPRINT_V1 = require("./api_fingerprint/v1/router")
-const FACE_V1 = require("./api_face/v1/router")
+const FINGERPRINT_V1 = require("./api_fingerprint/v1/router");
+const FACE_V1 = require("./api_face/v1/router");
 
 router.get("*", setUser);
 router.get("/js.cookie.js", function (req, res) {

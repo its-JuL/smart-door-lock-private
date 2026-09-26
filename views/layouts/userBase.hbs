@@ -47,12 +47,40 @@
             </section>
 
             <section class="nav--link mt-5 d-flex flex-column align-items-center">
-                <a href="/dashboard/card/list"
-                    class="nav--link-item {{card}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
-                    <img src="/image/icon_card.svg" class="nav--link-icon ms" alt="Logo Dashboard">
-                    <p class="fw-normal ms-2"> Card </p>
+            <a href="/dashboard/card/list"
+                class="nav--link-item {{card}} mt-2 ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center">
+                <img src="/image/icon_card.svg" class="nav--link-icon ms" alt="Logo Dashboard">
+                <p class="fw-normal ms-2"> Card </p>
+            </a>
+            
+            <!-- TAMBAHKAN INI jika User juga perlu akses Autentikasi -->
+            <div class="nav-authentication mt-2">
+                <button class="nav--link-item nav-authentication-toggle {{authentication}} ps-5 py-2 text-blue-3 d-flex justify-content-start align-items-center" type="button" aria-expanded="false" aria-controls="authentication-menu">
+                <img src="/image/icon_authentication.svg" class="nav--link-icon ms" alt="Logo Autentikasi">
+                <p class="fw-normal ms-2">Autentikasi</p>
+                <span class="nav-authentication-chevron ms-auto me-3" aria-hidden="true">⌄</span>
+                </button>
+                <div class="nav-authentication-menu" id="authentication-menu">
+                <a href="/dashboard/card/list" class="nav-authentication-item {{card}}">
+                    <img src="/image/icon_card.svg" class="nav-authentication-icon" alt="Card">
+                    <span>Card</span>
                 </a>
-            </section>
+                <a href="/dashboard/pin/list" class="nav-authentication-item {{pin}}">
+                    <img src="/image/icon_pin.svg" class="nav-authentication-icon" alt="PIN">
+                    <span>PIN</span>
+                </a>
+                <a href="/dashboard/fingerprint/list" class="nav-authentication-item {{fingerprint}}">
+                    <img src="/image/icon_fingerprint.svg" class="nav-authentication-icon" alt="Fingerprint">
+                    <span>Fingerprint</span>
+                </a>
+                <a href="/dashboard/face-recognition" class="nav-authentication-item {{faceRecognition}}">
+                    <img src="/image/icon_face.svg" class="nav-authentication-icon" alt="Face Recognition">
+                    <span>Face Recognition</span>
+                </a>
+                </div>
+            </div>
+            </section>            
+
         </nav>
         <main class="main">
             <section class="nav--support p-3 d-flex justify-content-between bg-light d-md-none d-block">

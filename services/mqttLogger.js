@@ -2,6 +2,7 @@ const mqtt = require("mqtt");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { MQTTRegistrationBridge } = require("./mqttRegistrationBridge");
+const { buildAccessRecordData } = require("./accessRecord");
 
 const MQTTSettings = {
     host: process.env.MQTT_HOST,
@@ -78,6 +79,7 @@ class MQTTLogger {
 
         let cardId = null;
         let roomId = device?.roomId || null;
+        let userId = null;
         let unregisteredCard = null;
         let isSuccess = result === "granted";
 
@@ -90,6 +92,7 @@ class MQTTLogger {
                 });
                 if (card) {
                     cardId = card.id;
+                    userId = card.userId;
                     // Override hasil lokal jika di DB ternyata kartu di-banned / UNREGISTER
                     if (card.banned || card.card_status === "UNREGISTER") isSuccess = false;
                     if (card.room && card.room.length > 0) roomId = card.room[0].id;
@@ -111,6 +114,7 @@ class MQTTLogger {
                 });
                 if (fp && fp.isActive) {
                     roomId = fp.roomId;
+                    userId = fp.userId;
                 } else {
                     isSuccess = false;
                 }
@@ -118,19 +122,23 @@ class MQTTLogger {
             // C. PIN
             else if (method === "PIN" && pin_hash) {
                 const pin = await prisma.pinCredential.findFirst({
-                    where: { devicePinHash: String(pin_hash).toLowerCase(), isActive: true },
-                    include: { room: true }
+                    where: {
+                        deviceId,
+                        devicePinHash: String(pin_hash).toLowerCase(),
+                        isActive: true,
+                    },
                 });
                 if (pin) {
-                    roomId = pin.roomId;
+                    userId = pin.userId;
                 } else {
                     isSuccess = false;
                 }
             }
             // D. Face Recognition
             else if (method === "camera" && user_id) {
-                const user = await prisma.user.findUnique({ where: { id: user_id } });
-                if (!user) isSuccess = false;
+                const user = await prisma.user.findUnique({ where: { id: user_id }, select: { id: true } });
+                if (user) userId = user.id;
+                else isSuccess = false;
             }
             // E. Exit Button / Fallback
             else if (method !== "exit button") {
@@ -138,12 +146,14 @@ class MQTTLogger {
             }
 
             await prisma.rooms_Records.create({
-                data: {
-                    roomId: roomId,
-                    cardId: cardId,
-                    unregisteredCard: unregisteredCard,
-                    isSuccess: isSuccess,
-                },
+                data: buildAccessRecordData({
+                    roomId,
+                    userId,
+                    cardId,
+                    unregisteredCard,
+                    method,
+                    isSuccess,
+                }),
             });
             console.log(` [i]: ✅ Access log saved. Success: ${isSuccess}`);
         } catch (dbError) {

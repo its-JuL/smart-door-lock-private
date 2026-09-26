@@ -68,5 +68,32 @@ class MQTTRegistrationBridge {
       this.publish(client,topic,{success:true,detail:`${plan.kind} mapped`,session_id:plan.sessionId}); return true;
     } catch(error) { this.publish(client,topic,{success:false,detail:error.message,session_id:payload.session_id}); return true; }
   }
+  static async setupSubscriptions() {
+    const { MQTTConnection } = require("../connection/mqtt");
+    
+    const topics = [
+      "doorlock/+/registration/auth/request",
+      "doorlock/+/user/search/request",
+      "doorlock/+/user/register/request"
+    ];
+
+    for (const topic of topics) {
+      await MQTTConnection.subscribe(topic, async (receivedTopic, messageBuffer) => {
+        try {
+          const parts = receivedTopic.split("/");
+          const deviceId = parts[1];
+          const payload = JSON.parse(messageBuffer.toString());
+          const client = MQTTConnection.getInstance().client;
+          
+          console.log(`[MQTT Bridge] Received on ${receivedTopic}`);
+          await this.handle(client, receivedTopic, deviceId, payload);
+        } catch (error) {
+          console.error(`[MQTT Bridge] Error handling ${receivedTopic}:`, error);
+        }
+      });
+    }
+    
+    console.log("✅ MQTTRegistrationBridge subscriptions ready");
+  }
 }
 module.exports={MQTTRegistrationBridge};

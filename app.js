@@ -9,8 +9,6 @@ const options = {
     cert: fs.readFileSync("./ssl/ssl_certificate-pnj.ac.id.crt"),
 };
 const http = require("http").Server(app);
-// const https = require("https").createServer(options, app);
-// const io = require("socket.io")(https);
 const io = require("socket.io")(http);
 const expbs = require("express-handlebars");
 const { urlErrorHandler } = require("./services/responseHandler");
@@ -38,11 +36,9 @@ app.use(cookieParser());
 app.use(cors());
 app.use(express.static("public"));
 app.use("/static", express.static("public"));
-// app.use(
-//     express.session({
-//         secret: "somethingtobesecret",
-//     })
-// );
+
+app.use("/capture", express.static(path.join(__dirname, "capture")));
+
 app.engine(
     "handlebars",
     expbs.engine({ extname: ".hbs", defaultLayout: "base" })
@@ -63,10 +59,36 @@ io.on("connection", (socket) => {
     });
 });
 
-// https.listen(PORT, () => {
-//     console.log(`🤘 SERVER RUNNING IN PORT ${PORT}`);
-// });
 MQTTConnection.createConnection();
+
+const { MQTTRegistrationBridge } = require("./services/mqttRegistrationBridge");
+
+const enrollmentTopics = [
+  "doorlock/+/registration/auth/request",
+  "doorlock/+/user/search/request",
+  "doorlock/+/user/register/request"
+];
+
+enrollmentTopics.forEach(topic => {
+  MQTTConnection.subscribe(topic, async (receivedTopic, messageBuffer) => {
+    try {
+      const parts = receivedTopic.split("/");
+      const deviceId = parts[1];
+      const payload = JSON.parse(messageBuffer.toString());
+      const client = MQTTConnection.getInstance().client;
+      
+      console.log(`[MQTT Bridge] Received on ${receivedTopic} from ${deviceId}`);
+      
+      // Panggil handler yang sudah ada di MQTTRegistrationBridge
+      // Handler ini yang akan menyimpan data ke Prisma (fingerprintMapping / card)
+      await MQTTRegistrationBridge.handle(client, receivedTopic, deviceId, payload);
+    } catch (error) {
+      console.error(`[MQTT Bridge] Error handling ${receivedTopic}:`, error);
+ }
+  });
+});
+// ============================================================
+
 http.listen(PORT, () => {
     console.log(`🤘 SERVER RUNNING IN PORT ${PORT}`);
 });

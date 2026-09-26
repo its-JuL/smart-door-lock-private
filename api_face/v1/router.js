@@ -5,3 +5,5 @@ const { formChacker } = require("../../middlewares/formMiddleware");
 const controller = require("./controller_face");
 router.post("/initiate-enrollment", loginRequired, allowedRole("ADMIN", "OPERATOR"), body("deviceId").notEmpty().isString(), body("targetUserId").notEmpty().isString(), formChacker, controller.initiateFaceEnrollment);
 module.exports = router;
+router.get("/latest-capture", loginRequired, allowedRole("ADMIN", "OPERATOR"), controller.getLatestCapture);
+module.exports = router;

@@ -41,8 +41,34 @@
 .nav-authentication-toggle[aria-expanded="true"] .nav-authentication-chevron { transform: rotate(180deg); }
 .nav-authentication-menu { display: none; margin: .15rem 0 .4rem 4.1rem; }
 .nav-authentication-menu.is-open { display: flex; flex-direction: column; gap: .15rem; }
-.nav-authentication-item { color: var(--blue03); padding: .35rem .75rem; border-radius: 8px; text-decoration: none; }
-.nav-authentication-item:hover, .nav-authentication-item.bg-neutral-4 { background: var(--neutral04); }
+
+.nav-authentication-menu {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+.nav-authentication-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem 0.5rem 3rem !important;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-authentication-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.nav-authentication-toggle {
+  padding-left: 1.5rem !important;
+}
+
+.nav-authentication-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
 
 .nav--link-icon-sm {
     box-sizing: content-box !important;
