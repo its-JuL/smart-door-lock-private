@@ -341,6 +341,39 @@
         }
     };
 
+    // =========================================================
+    // Load Users untuk PIN Dropdown
+    // =========================================================
+
+    const pinUserSelects = document.querySelectorAll('.pin-user-select');
+
+    const loadPinUsers = async () => {
+        if (!pinUserSelects.length) return;
+
+        try {
+            const users = await request('/api/v1/user/list');
+
+            pinUserSelects.forEach(select => {
+                select.innerHTML =
+                    '<option value="">Pilih pengguna</option>' +
+                    users.map(user => `
+                        <option value="${user.id}">
+                            ${user.profil?.full_name || user.username}
+                            — ${user.username}
+                        </option>
+                    `).join('');
+            });
+
+        } catch (error) {
+            pinUserSelects.forEach(select => {
+                select.innerHTML =
+                    '<option value="">Gagal memuat pengguna</option>';
+            });
+
+            toast('danger', 'Gagal memuat pengguna', error.message);
+        }
+    };
+
       // ============================================
       // FACE RECOGNITION PREVIEW
       // ============================================
@@ -583,5 +616,6 @@
     loadFingerprint();
     loadFingerprintUsers();
     loadFaceUsers();
+    loadPinUsers();
 
 }

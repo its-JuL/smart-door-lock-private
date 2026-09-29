@@ -50,4 +50,35 @@
       notify('danger', 'Gagal sinkron RFID', error.message);
     }
   });
+
+  // =========================================================
+  // Load Users untuk Dropdown Card/RFID
+  // =========================================================
+  const cardUserSelects = document.querySelectorAll('.card-user-select');
+  const loadCardUsers = async () => {
+    if (!cardUserSelects.length) return;
+    try {
+      const res = await fetch('/api/v1/user/list');
+      const body = await res.json();
+      if (!res.ok || !body.success) throw new Error(body.message || 'Gagal');
+      const users = body.data;
+
+      cardUserSelects.forEach(select => {
+        select.innerHTML =
+          '<option value="">Pilih pengguna</option>' +
+          users.map(user => `
+            <option value="${user.id}">
+              ${user.profil?.full_name || user.username} — ${user.username}
+            </option>
+          `).join('');
+      });
+    } catch (error) {
+      cardUserSelects.forEach(select => {
+        select.innerHTML = '<option value="">Gagal memuat pengguna</option>';
+      });
+      notify('danger', 'Gagal memuat pengguna', error.message);
+    }
+  };
+  loadCardUsers();
+
 })();
