@@ -1,5 +1,6 @@
 const prisma = require("../../prisma/client");
 const { resSuccess, resError } = require("../../services/responseHandler");
+const { roomWhereForScope } = require("../../services/operatorScope");
 const ITEM_LIMIT = Number(process.env.ITEM_LIMIT) || 10;
 
 /** Fungsi untuk menampilkan seluruh data log atau room record */
@@ -7,12 +8,14 @@ exports.logs = async (req, res) => {
     const { search, cursor } = req.query;
     let roomRecords;
     try {
+        const scopedRoom = roomWhereForScope(req.accessScope);
         if (search) {
             if (!cursor) {
                 roomRecords = await prisma.rooms_Records.findMany({
                     where: {
                         room: {
                             name: { contains: search, mode: "insensitive" },
+                            ...scopedRoom,
                         },
                     },
                     orderBy: {
@@ -27,6 +30,7 @@ exports.logs = async (req, res) => {
                     where: {
                         room: {
                             name: { contains: search, mode: "insensitive" },
+                            ...scopedRoom,
                         },
                     },
                     orderBy: {
@@ -44,6 +48,9 @@ exports.logs = async (req, res) => {
         if (!search) {
             if (!cursor) {
                 roomRecords = await prisma.rooms_Records.findMany({
+                    where: {
+                        room: scopedRoom,
+                    },
                     orderBy: {
                         createdAt: "asc",
                     },
@@ -53,6 +60,9 @@ exports.logs = async (req, res) => {
 
             if (cursor) {
                 roomRecords = await prisma.rooms_Records.findMany({
+                    where: {
+                        room: scopedRoom,
+                    },
                     orderBy: {
                         createdAt: "asc",
                     },

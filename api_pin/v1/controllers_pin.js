@@ -3,6 +3,7 @@ const { resSuccess, resError } = require("../../services/responseHandler");
 const { MQTTConnection } = require("../../connection/mqtt");
 const { hasher } = require("../../services/auth");
 const { buildPinEnrollmentPlan } = require("../../services/pinEnrollment");
+const { deviceWhereForScope } = require("../../services/operatorScope");
 const crypto = require("crypto");
 
 async function findDeviceAndUser(deviceId, targetUserId) {
@@ -32,8 +33,28 @@ exports.registerPin = async (req, res) => {
 };
 exports.listPins = async (req, res) => {
   try {
-    const pins = await prisma.pinCredential.findMany({ include: { user: { select: { username: true, profil: { select: { full_name: true } } } } }, orderBy: { createdAt: "desc" } });
-    const devices = await prisma.device.findMany({ where: { device_id: { in: [...new Set(pins.map(p => p.deviceId))] } }, select: { device_id: true, room: { select: { ruid: true, name: true } } } });
+    const where = deviceWhereForScope(req.accessScope, req.query.deviceId);
+    const pins = await prisma.pinCredential.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            username: true,
+            profil: { select: { full_name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    const devices = await prisma.device.findMany({
+      where: {
+        device_id: { in: [...new Set(pins.map((p) => p.deviceId))] },
+      },
+      select: {
+        device_id: true,
+        room: { select: { ruid: true, name: true } },
+      },
+    });
     const map = new Map(devices.map(d => [d.device_id, d]));
     return resSuccess({ res, title: "PIN credentials retrieved", data: pins.map(p => ({ id:p.id, userId:p.userId, username:p.user.username, fullName:p.user.profil?.full_name || null, deviceId:p.deviceId, roomName:map.get(p.deviceId)?.room?.name || "-", roomRuid:map.get(p.deviceId)?.room?.ruid || null, isActive:p.isActive, createdAt:p.createdAt })) });
   } catch (error) { return resError({ res, title:"Failed to retrieve PINs", errors:error.message }); }

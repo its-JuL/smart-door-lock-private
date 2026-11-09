@@ -18,6 +18,7 @@ const prisma = require("../../prisma/client");
 const { getUser } = require("../../services/auth");
 const { resSuccess, resError } = require("../../services/responseHandler");
 const { MQTTConnection } = require("../../connection/mqtt");
+const { deviceWhereForScope } = require("../../services/operatorScope");
 
 exports.registerFingerprintMapping = async (req, res) => {
   const { deviceId, targetUserId } = req.body;
@@ -48,8 +49,9 @@ exports.registerFingerprintMapping = async (req, res) => {
 exports.listFingerprints = async (req, res) => {
   const { deviceId } = req.query;
   try {
+    const where = deviceWhereForScope(req.accessScope, deviceId);
     const mappings = await prisma.fingerprintMapping.findMany({
-      where: deviceId ? { deviceId } : {},
+      where,
       include: {
         user: { select: { username: true } },
         room: { select: { ruid: true, name: true } }

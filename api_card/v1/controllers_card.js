@@ -22,6 +22,7 @@ const {
     sendEmail,
 } = require("../../services/mailing");
 const { MQTTConnection } = require("../../connection/mqtt");
+const { cardWhereForScope } = require("../../services/operatorScope");
 const ITEM_LIMIT = Number(process.env.CARD_ITEM_LIMIT) || 10;
 // const ITEM_LIMIT = 5;
 
@@ -116,6 +117,7 @@ exports.listOfRegisterCard = async (req, res) => {
     let cardList;
     const { search, cursor } = req.query;
     try {
+        const scopeWhere = cardWhereForScope(req.accessScope);
         if (search) {
             if (!cursor) {
                 cardList = await prisma.card.findMany({
@@ -125,6 +127,7 @@ exports.listOfRegisterCard = async (req, res) => {
                             mode: "insensitive",
                         },
                         card_status: "REGISTER",
+                        ...scopeWhere,
                     },
                     orderBy: {
                         createdAt: "asc",
@@ -144,6 +147,7 @@ exports.listOfRegisterCard = async (req, res) => {
                             mode: "insensitive",
                         },
                         card_status: "REGISTER",
+                        ...scopeWhere,
                     },
                     orderBy: {
                         createdAt: "asc",
@@ -165,6 +169,7 @@ exports.listOfRegisterCard = async (req, res) => {
                 cardList = await prisma.card.findMany({
                     where: {
                         card_status: "REGISTER",
+                        ...scopeWhere,
                     },
                     orderBy: {
                         createdAt: "asc",
@@ -179,6 +184,7 @@ exports.listOfRegisterCard = async (req, res) => {
                 cardList = await prisma.card.findMany({
                     where: {
                         card_status: "REGISTER",
+                        ...scopeWhere,
                     },
                     orderBy: {
                         createdAt: "asc",

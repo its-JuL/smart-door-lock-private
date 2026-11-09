@@ -351,7 +351,7 @@
         if (!pinUserSelects.length) return;
 
         try {
-            const users = await request('/api/v1/user/list');
+            const users = await request('/api/v1/user/autocomplete?term=&role=USER');
 
             pinUserSelects.forEach(select => {
                 select.innerHTML =

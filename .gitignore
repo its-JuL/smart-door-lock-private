@@ -7,3 +7,4 @@ public/storage/
 .VSCodeCounter
 *.log
 # Keep environment variables out of version control
+services/faceRecognition/captures/

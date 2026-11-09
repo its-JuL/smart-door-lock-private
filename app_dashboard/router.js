@@ -122,7 +122,7 @@ router.get(
 router.get(
     "/building/list",
     loginRequired,
-    allowedRole("ADMIN"),
+    allowedRole("ADMIN", "OPERATOR"),
     accountIsVerified,
     dashboard.buildingList
 );
@@ -138,7 +138,7 @@ router.get(
 router.get(
     "/building/detail/:buildingId",
     loginRequired,
-    allowedRole("ADMIN"),
+    allowedRole("ADMIN", "OPERATOR"),
     accountIsVerified,
     dashboard.buildingDetail
 );
