@@ -21,6 +21,11 @@ test("USER navigation exposes Card only once", () => {
   assert.equal(cardLabels.length, 1);
 });
 
+test("USER navigation links to the Room page", () => {
+  assert.match(layout, /href="\/room"/);
+  assert.match(layout, />\s*Room\s*</);
+});
+
 test("ADMIN TEKNIS layout is limited to Building and Room", () => {
   const technicalLayout = fs.readFileSync(
     path.join(__dirname, "../views/layouts/adminteknisBase.hbs"),

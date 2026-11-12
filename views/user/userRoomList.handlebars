@@ -1,0 +1,117 @@
+<h3 class="fw-bolder text-neutral-2 mt-3">Ruangan Saya</h3>
+<p class="text-neutral-2 fw-bold mb-0">Daftar ruangan yang dapat Anda akses dari seluruh kartu.</p>
+
+<div class="bg-neutral-6 shadow-c-1 p-4 px-5 mt-4 rounded-13">
+    <div class="row bg-neutral-7 p-2 rounded-10">
+        <div class="col-1">
+            <p class="text-center fw-bold text-neutral-2 mb-0">No</p>
+        </div>
+        <div class="col-3">
+            <p class="text-center fw-bold text-neutral-2 mb-0">Room ID</p>
+        </div>
+        <div class="col-3">
+            <p class="text-center fw-bold text-neutral-2 mb-0">Room Name</p>
+        </div>
+        <div class="col-2">
+            <p class="text-center fw-bold text-neutral-2 mb-0">Building</p>
+        </div>
+        <div class="col-3">
+            <p class="text-center fw-bold text-neutral-2 mb-0">Card</p>
+        </div>
+    </div>
+
+    {{#if accessible}}
+        {{#each accessible}}
+            <div class="row align-items-center p-2 mt-2 rounded-10 border-bottom">
+                <div class="col-1">
+                    <p class="text-center text-neutral-2 mb-0">{{no}}</p>
+                </div>
+                <div class="col-3">
+                    <p class="text-center text-neutral-2 mb-0">{{ruid}}</p>
+                </div>
+                <div class="col-3">
+                    <p class="text-center text-neutral-2 mb-0">{{name}}</p>
+                </div>
+                <div class="col-2">
+                    <p class="text-center text-neutral-2 mb-0">{{building}}</p>
+                </div>
+                <div class="col-3">
+                    <p class="text-center text-neutral-2 mb-0">{{cards}}</p>
+                </div>
+            </div>
+        {{/each}}
+    {{else}}
+        <p class="text-center text-neutral-2 mt-3 mb-0">
+            Belum ada ruangan yang dapat diakses. Ajukan permintaan pada daftar di bawah.
+        </p>
+    {{/if}}
+</div>
+
+<h2 class="fw-bolder mt-5 text-neutral-2 mb-3">Ruangan Tersedia</h2>
+
+{{#if hasCard}}
+    <div class="d-flex align-items-center mb-3">
+        <label for="request-card" class="fw-bold text-neutral-2 me-2">Ajukan permintaan dengan kartu</label>
+        <select id="request-card" class="rounded-10 border-dark p-2 text-neutral-2">
+            {{#each cards}}
+                <option value="{{card_number}}">{{card_name}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="bg-neutral-6 shadow-c-1 p-4 px-5 rounded-13">
+        <div class="row bg-neutral-7 p-2 rounded-10">
+            <div class="col-1">
+                <p class="text-center fw-bold text-neutral-2 mb-0">No</p>
+            </div>
+            <div class="col-3">
+                <p class="text-center fw-bold text-neutral-2 mb-0">Room ID</p>
+            </div>
+            <div class="col-3">
+                <p class="text-center fw-bold text-neutral-2 mb-0">Room Name</p>
+            </div>
+            <div class="col-2">
+                <p class="text-center fw-bold text-neutral-2 mb-0">Building</p>
+            </div>
+            <div class="col-3">
+                <p class="text-center fw-bold text-neutral-2 mb-0">Action</p>
+            </div>
+        </div>
+
+        {{#if available}}
+            {{#each available}}
+                <div class="row align-items-center p-2 mt-2 rounded-10 border-bottom">
+                    <div class="col-1">
+                        <p class="text-center text-neutral-2 mb-0">{{no}}</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="text-center text-neutral-2 mb-0">{{ruid}}</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="text-center text-neutral-2 mb-0">{{name}}</p>
+                    </div>
+                    <div class="col-2">
+                        <p class="text-center text-neutral-2 mb-0">{{building}}</p>
+                    </div>
+                    <div class="col-3 text-center request-cell">
+                        {{#if pending}}
+                            <p class="text-neutral-2 fst-italic mb-0">Menunggu</p>
+                        {{else}}
+                            <button type="button"
+                                class="request-room-btn bg-blue-4 text-blue-1 fw-bold rounded-10 px-3 py-1 border-0"
+                                data-ruid="{{ruid}}">Request</button>
+                        {{/if}}
+                    </div>
+                </div>
+            {{/each}}
+        {{else}}
+            <p class="text-center text-neutral-2 mt-3 mb-0">
+                Semua ruangan aktif sudah dapat Anda akses.
+            </p>
+        {{/if}}
+    </div>
+{{else}}
+    <p class="text-neutral-2">
+        Anda belum memiliki kartu. Hubungi operator untuk mendaftarkan kartu sebelum mengajukan akses ruangan.
+    </p>
+{{/if}}

@@ -11,6 +11,7 @@ router.use(loginRequired, accountIsVerified); //memastikan user yang sudah aktif
 router.get("/", allowedRole("USER"), user.home);
 router.get("/card/:id", allowedRole("USER"), user.cardLogs);
 router.get("/card/change-pin/:id", allowedRole("USER"), user.cardChangePin);
+router.get("/room", allowedRole("USER"), user.roomList);
 router.get("/room/:card", allowedRole("USER"), user.cardRoom);
 
 module.exports = router;
