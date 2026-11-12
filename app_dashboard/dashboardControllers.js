@@ -417,6 +417,7 @@ exports.buildingList = async (req, res) => {
         building: "bg-neutral-4",
         styles: ["/style/api.css", "/style/buildingList.css"],
         scripts: ["/js/buildingList.js"],
+        layout: await layoutHandler(getUser(req)),
     };
     res.render("buildingList", data);
 };
@@ -436,6 +437,7 @@ exports.buildingCreate = async (req, res) => {
             "https://code.jquery.com/ui/1.13.1/jquery-ui.js",
             "/js/buildingCreate.js",
         ],
+        layout: await layoutHandler(getUser(req)),
     };
     res.render("buildingCreate", data);
 };
@@ -455,6 +457,7 @@ exports.buildingDetail = async (req, res) => {
             "https://code.jquery.com/ui/1.13.1/jquery-ui.js",
             "/js/buildingDetail.js",
         ],
+        layout: await layoutHandler(getUser(req)),
     };
     res.render("buildingDetail", data);
 };

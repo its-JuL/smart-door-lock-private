@@ -108,17 +108,30 @@ const emailDeclineOfAccessRequestsTemplate = ({
  */
 
 const sendEmail = async (user_mail, subject, template) => {
-    if (process.env.NODE_ENV === 'development') {
-        console.log("\n===========================================");
-        console.log(`[DEV MODE] Email seharusnya terkirim ke: ${user_mail}`);
-        console.log(`[DEV MODE] Subject: ${subject}`);
-        // Kita ekstrak URL dari template HTML untuk kemudahan
-        const urlMatch = template.match(/href="([^"]+)"/);
-        if (urlMatch && urlMatch[1]) {
-            console.log(`[DEV MODE] Link Verifikasi: ${urlMatch[1]}`);
+    const mailConfigured = Boolean(
+        process.env.MAIL_SERVER &&
+        process.env.MAIL_USER &&
+        process.env.MAIL_SECRET
+    );
+
+    if (!mailConfigured) {
+        if (process.env.NODE_ENV === "development") {
+            console.log("\n===========================================");
+            console.log(`[DEV MODE] Email seharusnya terkirim ke: ${user_mail}`);
+            console.log(`[DEV MODE] Subject: ${subject}`);
+            // Kita ekstrak URL dari template HTML untuk kemudahan
+            const urlMatch = template.match(/href="([^"]+)"/);
+            if (urlMatch && urlMatch[1]) {
+                console.log(`[DEV MODE] Link Verifikasi: ${urlMatch[1]}`);
+            }
+            console.log("===========================================\n");
+            return; // Keluar dari fungsi, tidak akan menjalankan nodemailer
         }
-        console.log("===========================================\n");
-        return; // Keluar dari fungsi, tidak akan menjalankan nodemailer
+
+        console.error(
+            "❌ Email tidak dikirim: MAIL_SERVER, MAIL_USER, dan MAIL_SECRET belum diatur di .env"
+        );
+        return;
     }
 
     try {
@@ -140,6 +153,8 @@ const sendEmail = async (user_mail, subject, template) => {
         });
 
         console.log("✅ Email berhasil dikirim. Message ID:", info.messageId);
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        if (previewUrl) console.log("🔗 Preview email (Ethereal):", previewUrl);
     } catch (error) {
         console.error("❌ Gagal mengirim email:", error.message);
         console.error("Pastikan variabel MAIL_SERVER, MAIL_PORT, MAIL_USER, dan MAIL_SECRET sudah diatur dengan benar di file .env");

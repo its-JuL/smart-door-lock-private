@@ -18,19 +18,19 @@ router.post("/h/init", apiJWTValidation, gatewayDevice.createGatewayDevice); //H
 router.get(
     "/list",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewayDevice.list
 );
 router.get(
     "/general-information",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewayDevice.generalInformation
 );
 router.get(
     "/detail/:gatewayShortId",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewayShortIdIsExist,
     gatewayDevice.detail
 );
@@ -43,13 +43,13 @@ router.post(
 router.get(
     "/autocomplate",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewayDevice.autocomplate
 );
 router.get(
     "/access-card-for-gateway/:gatewayShortId",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewayShortIdIsExist,
     gatewayDevice.accessCardForGateway
 );
@@ -119,7 +119,7 @@ router.post(
 router.delete(
     "/delete/",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewayShortIdIsExist,
     gatewayDeviceIsNotLinked,
     gatewayDevice.deleteGateway

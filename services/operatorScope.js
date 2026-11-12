@@ -1,4 +1,4 @@
-const ADMIN_ROLES = new Set(["ADMIN", "ADMIN TEKNIS"]);
+const ADMIN_ROLES = new Set(["ADMIN"]);
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];

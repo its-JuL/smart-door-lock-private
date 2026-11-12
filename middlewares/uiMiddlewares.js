@@ -73,12 +73,10 @@ const allowedRole = (...roles) => {
             },
         });
         if (!roles.includes(user.role.name)) {
-            if (
-                user.role.name === "ADMIN" ||
-                user.role.name === "ADMIN TEKNIS" ||
-                user.role.name === "OPERATOR"
-            )
+            if (user.role.name === "ADMIN" || user.role.name === "OPERATOR")
                 return res.redirect("/dashboard");
+            if (user.role.name === "ADMIN TEKNIS")
+                return res.redirect("/dashboard/room/list");
             if (user.role.name === "USER") return res.redirect("/");
         }
 

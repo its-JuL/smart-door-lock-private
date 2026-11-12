@@ -21,10 +21,22 @@ test("USER navigation exposes Card only once", () => {
   assert.equal(cardLabels.length, 1);
 });
 
-test("OPERATOR layout contains Building navigation link", () => {
+test("ADMIN TEKNIS layout is limited to Building and Room", () => {
+  const technicalLayout = fs.readFileSync(
+    path.join(__dirname, "../views/layouts/adminteknisBase.hbs"),
+    "utf8"
+  );
+  assert.match(technicalLayout, /href="\/dashboard\/building\/list"/);
+  assert.match(technicalLayout, /href="\/dashboard\/room\/list"/);
+  assert.doesNotMatch(technicalLayout, /href="\/dashboard\/"/);
+  assert.doesNotMatch(technicalLayout, /href="\/dashboard\/hardware"/);
+  assert.doesNotMatch(technicalLayout, /href="\/dashboard\/api"/);
+});
+
+test("OPERATOR layout does not contain Building navigation", () => {
   const operatorLayout = fs.readFileSync(
     path.join(__dirname, "../views/layouts/operatorBase.hbs"),
     "utf8"
   );
-  assert.match(operatorLayout, /href="\/dashboard\/building\/list"/);
+  assert.doesNotMatch(operatorLayout, /href="\/dashboard\/building\/list"/);
 });

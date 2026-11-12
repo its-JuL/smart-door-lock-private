@@ -11,19 +11,19 @@ const { apiIDIsExist } = require("../../middlewares/apiKeyMiddlewares");
 router.post(
     "/generate",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     api.createApiKey
 );
 router.get(
     "/list",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     api.apiKeyList
 );
 router.delete(
     "/delete/:id",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     param("id").notEmpty(),
     formChacker,
     apiIDIsExist,

@@ -11,7 +11,7 @@ const {
 router.get(
     "/",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS", "OPERATOR"),
+    allowedRole("ADMIN", "OPERATOR"),
     accountIsVerified,
     dashboard.dashboard
 );
@@ -122,7 +122,7 @@ router.get(
 router.get(
     "/building/list",
     loginRequired,
-    allowedRole("ADMIN", "OPERATOR"),
+    allowedRole("ADMIN", "ADMIN TEKNIS"),
     accountIsVerified,
     dashboard.buildingList
 );
@@ -130,7 +130,7 @@ router.get(
 router.get(
     "/building/create",
     loginRequired,
-    allowedRole("ADMIN"),
+    allowedRole("ADMIN", "ADMIN TEKNIS"),
     accountIsVerified,
     dashboard.buildingCreate
 );
@@ -138,7 +138,7 @@ router.get(
 router.get(
     "/building/detail/:buildingId",
     loginRequired,
-    allowedRole("ADMIN", "OPERATOR"),
+    allowedRole("ADMIN", "ADMIN TEKNIS"),
     accountIsVerified,
     dashboard.buildingDetail
 );
@@ -147,7 +147,7 @@ router.get(
 router.get(
     "/api",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     accountIsVerified,
     dashboard.apiList
 );
@@ -156,7 +156,7 @@ router.get(
 router.get(
     "/hardware",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     accountIsVerified,
     dashboard.hardware
 );
@@ -165,26 +165,26 @@ router.get(
 router.get(
     "/gateway/device/list",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     dashboard.gatewayDeviceList
 );
 
 router.get(
     "/gateway/spot/list",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     dashboard.gatewaySpotList
 );
 router.get(
     "/gateway/spot/link-to-device",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     dashboard.gatewaySpotLinkToDevice
 );
 router.get(
     "/gateway/spot/detail/:id",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     dashboard.gatewaySpotDetail
 );
 

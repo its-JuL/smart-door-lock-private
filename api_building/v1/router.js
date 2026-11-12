@@ -15,7 +15,7 @@ const {
 } = require("../../middlewares/authMiddlewares");
 
 router.get("/u/list/", loginRequired, allowedRole("USER"), building.list);
-router.use(loginRequired, allowedRole("ADMIN"));
+router.use(loginRequired, allowedRole("ADMIN", "ADMIN TEKNIS"));
 router.post(
     "/create/",
     body("name").notEmpty().withMessage("Please provide building name"),

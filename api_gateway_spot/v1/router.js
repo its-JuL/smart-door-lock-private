@@ -23,7 +23,7 @@ const {
 router.post(
     "/link-to-device",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     body("name").notEmpty().withMessage("Name form is required"),
     body("gatewayShortId")
         .notEmpty()
@@ -36,20 +36,20 @@ router.post(
 router.get(
     "/detail/:id",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewaySpotIdIsExist,
     gatewaySpot.detail
 );
 router.get(
     "/list/",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewaySpot.list
 );
 router.delete(
     "/delete/",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     body("id").notEmpty().withMessage("ID is required"),
     formChacker,
     gatewaySpotIdIsExist,
@@ -59,7 +59,7 @@ router.delete(
 router.post(
     "/update/",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     body("id").notEmpty().withMessage("Gateway Spot ID is required"),
     body("name").notEmpty().withMessage("Name form is required"),
     body("gatewayShortId")
@@ -78,7 +78,7 @@ router.post(
 router.get(
     "/general-information/",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     gatewaySpot.generalInformation
 );
 

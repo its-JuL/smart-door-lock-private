@@ -50,7 +50,7 @@ router.get(
 router.get(
     "/accaptable-user/:ruid",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS", "OPERATOR"),
+    allowedRole("ADMIN", "OPERATOR"),
     roomIsExist,
     roomHasLinkedBuilding,
     onlyAccessibleByLinkedOperators,
@@ -59,7 +59,7 @@ router.get(
 router.get(
     "/requestUser/:ruid",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS", "OPERATOR"),
+    allowedRole("ADMIN", "OPERATOR"),
     roomIsExist,
     roomHasLinkedBuilding,
     onlyAccessibleByLinkedOperators,
@@ -106,7 +106,7 @@ router.get(
 router.delete(
     "/delete-room-request/",
     loginRequired,
-    allowedRole("ADMIN", "OPERATOR"),
+    allowedRole("ADMIN"),
     query("requestId").notEmpty(),
     formChacker,
     requestIdIsExist,
@@ -131,7 +131,7 @@ router.delete(
 router.post(
     "/pair",
     loginRequired,
-    allowedRole("ADMIN", "OPERATOR"),
+    allowedRole("ADMIN"),
     query("ruid").notEmpty(),
     query("cardNumber").notEmpty(),
     query("requestId").notEmpty(),
@@ -148,7 +148,7 @@ router.post(
 router.post(
     "/unpair",
     loginRequired,
-    allowedRole("ADMIN", "OPERATOR"),
+    allowedRole("ADMIN"),
     body("ruid").notEmpty(),
     body("cardNumber").notEmpty(),
     formChacker,
@@ -161,7 +161,7 @@ router.post(
 router.post(
     "/grantAllAccess/",
     loginRequired,
-    allowedRole("ADMIN", "OPERATOR"),
+    allowedRole("ADMIN"),
     body("ruid").notEmpty(),
     formChacker,
     roomIsExist,

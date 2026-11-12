@@ -82,7 +82,7 @@ router.post(
 router.post(
     "/pair",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN"),
     query("ruid").notEmpty(),
     query("cardNumber").notEmpty(),
     formChacker,
