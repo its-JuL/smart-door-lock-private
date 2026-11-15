@@ -17,6 +17,7 @@ Table User {
   email String [unique, not null]
   emailIsVerified Boolean [not null, default: false]
   password String [not null]
+  googleId String [unique]
   token String [unique]
   tokenExpiredAt DateTime
   role Role [not null]

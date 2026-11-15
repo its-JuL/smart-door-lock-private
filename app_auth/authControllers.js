@@ -1,7 +1,11 @@
+const googleAuth = require("../services/googleAuth");
+
 module.exports.login = (req, res) => {
     const data = {
         styles: ["/style/auth.css"],
-        scripts: ["/js/login.js"],
+        scripts: ["/js/login.js", "/js/googleLogin.js"],
+        googleClientId: googleAuth.clientId,
+        googleEnabled: googleAuth.isEnabled,
         layout: "auth.hbs",
     };
     res.render("login", data);

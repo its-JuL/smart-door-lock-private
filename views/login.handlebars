@@ -30,5 +30,19 @@
                 class="btn bg-blue-3 text-neutral-7 fw-bold px-5 rounded-13 py-2 d-block">Login</button>
             <a href="/auth/forget" class="d-block text-center text-blue-4 mt-2">Forgot your password?</a>
         </div>
+        {{#if googleEnabled}}
+        <div class="d-flex align-items-center my-2">
+            <hr class="flex-grow-1 text-neutral-4">
+            <span class="px-2 text-neutral-4 fs-7">atau</span>
+            <hr class="flex-grow-1 text-neutral-4">
+        </div>
+        <div id="google-button" class="d-flex justify-content-center mb-3"></div>
+        {{/if}}
     </form>
 </div>
+{{#if googleEnabled}}
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+    window.GOOGLE_CLIENT_ID = "{{googleClientId}}";
+</script>
+{{/if}}

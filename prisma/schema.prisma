@@ -29,6 +29,7 @@ model User {
   email               String               @unique
   emailIsVerified     Boolean              @default(false)
   password            String
+  googleId            String?              @unique @map("google_id")
   token               String?              @unique
   tokenExpiredAt      DateTime?
   role                Role                 @relation(fields: [roleId], references: [id])

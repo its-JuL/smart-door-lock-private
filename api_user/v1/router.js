@@ -57,6 +57,7 @@ const {
 
 // USER ROUTER
 router.get("/logout", user.logout);
+router.post("/google-login", user.googleLogin);
 router.get("/detail/:id", loginRequired, allowedRole("ADMIN"), user.detail);
 router.get(
     "/autocomplete",

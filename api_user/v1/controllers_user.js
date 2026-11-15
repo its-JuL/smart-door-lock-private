@@ -16,6 +16,10 @@ const {
 
 const { days } = require("../../services/timeformater");
 const { MQTTConnection } = require("../../connection/mqtt");
+const {
+    isEnabled: googleIsEnabled,
+    verifyGoogleCredential,
+} = require("../../services/googleAuth");
 const crypto = require("crypto");
 const ITEM_LIMIT = Number(process.env.CARD_ITEM_LIMIT) || 10;
 const FS = require("fs");
@@ -71,6 +75,155 @@ exports.login = async (req, res) => {
         });
     } catch (err) {
         return resError({ res, title: "Gagal Login", errors: err, code: 401 });
+    }
+};
+
+/**
+ * Login lewat Google Identity Services (GIS).
+ * Frontend mengirim ID token (credential) hasil tombol Google, backend memverifikasi
+ * signature + audience-nya ke Google, lalu menerbitkan cookie JWT yang sama seperti login biasa.
+ */
+exports.googleLogin = async (req, res) => {
+    const { credential } = req.body;
+
+    try {
+        if (!googleIsEnabled)
+            throw new ErrorException({
+                type: "google",
+                detail: "Google Sign-In belum dikonfigurasi di server ini",
+            });
+
+        if (!credential)
+            throw new ErrorException({
+                type: "google",
+                detail: "Credential Google tidak ditemukan",
+            });
+
+        const payload = await verifyGoogleCredential(credential).catch(() => {
+            throw new ErrorException({
+                type: "google",
+                detail: "Token Google tidak valid atau sudah kedaluwarsa",
+            });
+        });
+        const { sub: googleId, email, email_verified, name, picture } = payload;
+
+        if (!email || !email_verified)
+            throw new ErrorException({
+                type: "email",
+                detail: "Email Google belum terverifikasi",
+            });
+
+        // 1. Sudah pernah login dengan Google?
+        let user = await prisma.user.findUnique({
+            where: { googleId },
+            select: { id: true, username: true, role: { select: { name: true } } },
+        });
+
+        if (!user) {
+            // 2. Sudah punya akun lokal dengan email yang sama? Tautkan, jangan buat duplikat.
+            const existing = await prisma.user.findUnique({
+                where: { email },
+                select: {
+                    id: true,
+                    username: true,
+                    googleId: true,
+                    role: { select: { name: true } },
+                },
+            });
+
+            if (existing) {
+                if (existing.googleId && existing.googleId !== googleId)
+                    throw new ErrorException({
+                        type: "email",
+                        detail: "Email sudah tertaut ke akun Google lain",
+                    });
+
+                // passwordUpdatedAt sengaja tidak diubah supaya sesi lama tetap valid
+                user = await prisma.user.update({
+                    where: { id: existing.id },
+                    data: {
+                        googleId,
+                        emailIsVerified: true,
+                        accountIsVerified: true,
+                        profil: {
+                            upsert: {
+                                create: {
+                                    full_name: name || existing.username,
+                                    photo: picture,
+                                },
+                                update: { photo: picture },
+                            },
+                        },
+                    },
+                    select: {
+                        id: true,
+                        username: true,
+                        role: { select: { name: true } },
+                    },
+                });
+            } else {
+                // 3. User baru: username dari email + angka kalau sudah dipakai
+                const base =
+                    (email.split("@")[0] || "user")
+                        .replace(/[^a-zA-Z0-9]/g, "")
+                        .toLowerCase()
+                        .slice(0, 20) || "user";
+                let username = base;
+
+                while (
+                    await prisma.user.findUnique({
+                        where: { username },
+                        select: { id: true },
+                    })
+                ) {
+                    username = `${base}${Math.floor(1000 + Math.random() * 9000)}`;
+                }
+
+                user = await prisma.user.create({
+                    data: {
+                        username,
+                        email,
+                        googleId,
+                        // password acak: kolom password wajib terisi, tapi tidak bisa dipakai login
+                        password: hasher(crypto.randomBytes(32).toString("hex")),
+                        emailIsVerified: true,
+                        accountIsVerified: true,
+                        // -1000ms agar token tidak langsung dianggap lebih tua dari passwordUpdatedAt
+                        passwordUpdatedAt: new Date(Date.now() - 1000),
+                        role: { connect: { name: "USER" } },
+                        profil: {
+                            create: {
+                                full_name: name || username,
+                                photo: picture,
+                            },
+                        },
+                    },
+                    select: {
+                        id: true,
+                        username: true,
+                        role: { select: { name: true } },
+                    },
+                });
+            }
+        }
+
+        setAuthCookie({ res, uuid: user.id });
+
+        return resSuccess({
+            res,
+            title: "Berhasil login dengan Google",
+            data: {
+                username: user.username,
+                role: user.role.name,
+            },
+        });
+    } catch (err) {
+        return resError({
+            res,
+            title: "Gagal login dengan Google",
+            errors: err,
+            code: 401,
+        });
     }
 };
 
