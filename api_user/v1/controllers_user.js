@@ -231,7 +231,7 @@ exports.register = async (req, res) => {
     const { username, email, password } = req.body;
     try {
         const token = crypto.randomBytes(32).toString("hex");
-        const exp_time = 5;
+        const exp_time = 60;
         const newUser = await prisma.user.create({
             data: {
                 username,
@@ -240,7 +240,7 @@ exports.register = async (req, res) => {
                 role: { connect: { name: "USER" } },
                 passwordUpdatedAt: new Date(Date.now() - 1000),
                 token: crypto.createHash("sha256").update(token).digest("hex"),
-                tokenExpiredAt: new Date(new Date().getTime() + 5 * 60000),
+                tokenExpiredAt: new Date(new Date().getTime() + exp_time * 60000),
                 profil: {
                     create: {
                         full_name: username,
@@ -838,7 +838,7 @@ exports.setUserRole = async (req, res) => {
 exports.sendVerificationEmail = async (req, res) => {
     try {
         const token = crypto.randomBytes(32).toString("hex");
-        const exp_time = 5;
+        const exp_time = 60;
         const secret = await prisma.user.update({
             where: { id: getUser(req) },
             data: {
@@ -878,10 +878,25 @@ exports.sendVerificationEmail = async (req, res) => {
 exports.verifyingEmail = async (req, res) => {
     const { token } = req.query;
     try {
-        const secret = await prisma.user.update({
-            where: {
-                token: crypto.createHash("sha256").update(token).digest("hex"),
-            },
+        if (!token) throw "Token verifikasi tidak ada pada tautan";
+
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
+
+        const pending = await prisma.user.findUnique({
+            where: { token: hashedToken },
+        });
+
+        if (!pending) throw "Tautan verifikasi tidak valid atau sudah pernah dipakai";
+
+        if (pending.tokenExpiredAt && pending.tokenExpiredAt < new Date()) {
+            throw "Tautan verifikasi sudah kedaluwarsa, silakan minta tautan baru";
+        }
+
+        await prisma.user.update({
+            where: { id: pending.id },
             data: {
                 emailIsVerified: true,
                 accountIsVerified: true,

@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const app = express();
+app.set("trust proxy", 1); // agar req.protocol/https benar di belakang nginx
 const fs = require("fs");
 const options = {
     key: fs.readFileSync("./ssl/privatekey-pnj.ac.id.key"),
