@@ -135,18 +135,27 @@ const sendEmail = async (user_mail, subject, template) => {
     }
 
     try {
+        const port = Number(process.env.MAIL_PORT || 587);
+        const secure =
+            port === 465 ||
+            String(process.env.MAIL_SECURE || "").toLowerCase() === "true";
+        const fromAddress =
+            process.env.MAIL_FROM || process.env.MAIL_USER || "no-reply@localhost";
+
         let transporter = nodemailer.createTransport({
             host: process.env.MAIL_SERVER,
-            port: Number(process.env.MAIL_PORT),
-            secure: false, // true for 465, false for other ports
+            port,
+            secure, // 465 -> true, 587/25 -> false (STARTTLS)
             auth: {
-                user: process.env.MAIL_USER, // generated ethereal user
-                pass: process.env.MAIL_SECRET, // generated ethereal password
+                user: process.env.MAIL_USER,
+                pass: /gmail\.com$/i.test(process.env.MAIL_USER || "")
+                    ? String(process.env.MAIL_SECRET).replace(/\s+/g, "")
+                    : process.env.MAIL_SECRET,
             },
         });
 
         let info = await transporter.sendMail({
-            from: '"Smart Room Authentication Service" <no-replay@smartroom.id>', // sender address
+            from: `"Smart Door Lock" <${fromAddress}>`, // sender address
             to: `${user_mail}`, // list of receivers
             subject,
             html: template,
@@ -158,6 +167,11 @@ const sendEmail = async (user_mail, subject, template) => {
     } catch (error) {
         console.error("❌ Gagal mengirim email:", error.message);
         console.error("Pastikan variabel MAIL_SERVER, MAIL_PORT, MAIL_USER, dan MAIL_SECRET sudah diatur dengan benar di file .env");
+        // Cadangan: cetak tautan ke log agar verifikasi tetap bisa diselesaikan manual.
+        const urlMatch = String(template).match(/href="([^"]+)"/);
+        if (urlMatch && urlMatch[1]) {
+            console.error(`🔗 Tautan cadangan untuk ${user_mail}: ${urlMatch[1]}`);
+        }
     }
 };
 
