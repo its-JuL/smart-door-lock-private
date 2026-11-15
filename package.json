@@ -48,6 +48,7 @@
         "db:studio": "yarn prisma studio",
         "db:generate": "yarn prisma generate",
         "db:reset": "yarn prisma migrate reset",
-        "db:seed": "yarn prisma db seed"
+        "db:seed": "yarn prisma db seed",
+        "db:create": "node prisma/createSuperAdmin.js"
     }
 }
