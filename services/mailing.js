@@ -115,14 +115,15 @@ const sendEmail = async (user_mail, subject, template) => {
     );
 
     if (!mailConfigured) {
+        const urlMatch = String(template).match(/href="([^"]+)"/);
+        const fallback = urlMatch && urlMatch[1] ? urlMatch[1] : null;
+
         if (process.env.NODE_ENV === "development") {
             console.log("\n===========================================");
             console.log(`[DEV MODE] Email seharusnya terkirim ke: ${user_mail}`);
             console.log(`[DEV MODE] Subject: ${subject}`);
-            // Kita ekstrak URL dari template HTML untuk kemudahan
-            const urlMatch = template.match(/href="([^"]+)"/);
-            if (urlMatch && urlMatch[1]) {
-                console.log(`[DEV MODE] Link Verifikasi: ${urlMatch[1]}`);
+            if (fallback) {
+                console.log(`[DEV MODE] Link Verifikasi: ${fallback}`);
             }
             console.log("===========================================\n");
             return; // Keluar dari fungsi, tidak akan menjalankan nodemailer
@@ -131,6 +132,10 @@ const sendEmail = async (user_mail, subject, template) => {
         console.error(
             "❌ Email tidak dikirim: MAIL_SERVER, MAIL_USER, dan MAIL_SECRET belum diatur di .env"
         );
+        // Tanpa SMTP, tautan tetap dicetak agar verifikasi bisa diselesaikan manual.
+        if (fallback) {
+            console.error(`🔗 Tautan cadangan untuk ${user_mail}: ${fallback}`);
+        }
         return;
     }
 
