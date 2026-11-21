@@ -10,14 +10,14 @@
     <link rel="shortcut icon" href="/image/icon_small_logo.svg" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link rel="stylesheet" href="/style/three-dots.css">
-    <link rel="stylesheet" href="/style/base.css">
-    <link rel="stylesheet" href="/style/navbar.css">
-    <link rel="stylesheet" href="/style/notify.css">
-    <link rel="stylesheet" href="/style/index.css">
+    <link rel="stylesheet" href="{{assetUrl "/style/three-dots.css"}}">
+    <link rel="stylesheet" href="{{assetUrl "/style/base.css"}}">
+    <link rel="stylesheet" href="{{assetUrl "/style/navbar.css"}}">
+    <link rel="stylesheet" href="{{assetUrl "/style/notify.css"}}">
+    <link rel="stylesheet" href="{{assetUrl "/style/index.css"}}">
     {{#if styles}}
         {{#each styles}}
-            <link rel="stylesheet" href="{{this}}">
+            <link rel="stylesheet" href="{{assetUrl this}}">
         {{/each}}
     {{/if}}
 </head>
@@ -85,17 +85,17 @@
     integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
 </script>
 <script src="/socket.io/socket.io.js"></script>
-<script src="/js.cookie.js"></script>
-<script src="/js/util/flash.js"></script>
-<script src="/js/util/navbar.js"></script>
-<script src="/js/util/loader.js"></script>
-<script src="/js/util/alert.js"></script>
-<script src="/js/util/toast.js"></script>
-<script src="/js/util/fetcher.js"></script>
-<script src="/js/util/timeformater.js"></script>
+<script src="{{assetUrl "/js.cookie.js"}}"></script>
+<script src="{{assetUrl "/js/util/flash.js"}}"></script>
+<script src="{{assetUrl "/js/util/navbar.js"}}"></script>
+<script src="{{assetUrl "/js/util/loader.js"}}"></script>
+<script src="{{assetUrl "/js/util/alert.js"}}"></script>
+<script src="{{assetUrl "/js/util/toast.js"}}"></script>
+<script src="{{assetUrl "/js/util/fetcher.js"}}"></script>
+<script src="{{assetUrl "/js/util/timeformater.js"}}"></script>
 {{#if scripts}}
     {{#each scripts}}
-        <script src="{{this}}"></script>
+        <script src="{{assetUrl this}}"></script>
     {{/each}}
 {{/if}}
 

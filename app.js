@@ -12,6 +12,7 @@ const options = {
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
 const expbs = require("express-handlebars");
+const { assetUrl } = require("./services/assets");
 const { urlErrorHandler } = require("./services/responseHandler");
 const { MQTTConnection } = require("./connection/mqtt");
 app.io = io;
@@ -42,7 +43,11 @@ app.use("/capture", express.static(path.join(__dirname, "capture")));
 
 app.engine(
     "handlebars",
-    expbs.engine({ extname: ".hbs", defaultLayout: "base" })
+    expbs.engine({
+        extname: ".hbs",
+        defaultLayout: "base",
+        helpers: { assetUrl },
+    })
 );
 app.set("views", "views");
 app.set("view engine", "handlebars");
