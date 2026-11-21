@@ -6,14 +6,22 @@ const { buildPinEnrollmentPlan } = require("../../services/pinEnrollment");
 const { deviceWhereForScope } = require("../../services/operatorScope");
 const crypto = require("crypto");
 
+class EnrollmentInputError extends Error {
+  constructor(message, code = 400) {
+    super(message);
+    this.code = code;
+    this.expose = true;
+  }
+}
+
 async function findDeviceAndUser(deviceId, targetUserId) {
   const [device, user] = await Promise.all([
     prisma.device.findUnique({ where: { device_id: deviceId }, select: { device_id: true, roomId: true } }),
     prisma.user.findUnique({ where: { id: targetUserId }, select: { id: true, username: true, profil: { select: { full_name: true } } } }),
   ]);
-  if (!device) throw new Error("Device not found");
-  if (!user) throw new Error("Target user not found");
-  if (!device.roomId) throw new Error("Device is not assigned to a room");
+  if (!device) throw new EnrollmentInputError(`Device "${deviceId}" belum terdaftar di website. Tambahkan dulu lewat menu Hardware.`, 404);
+  if (!user) throw new EnrollmentInputError("Pengguna target tidak ditemukan.", 404);
+  if (!device.roomId) throw new EnrollmentInputError(`Device "${deviceId}" belum dipasangkan ke room mana pun.`, 400);
   return { device, user };
 }
 exports.registerPin = async (req, res) => {
@@ -29,7 +37,10 @@ exports.registerPin = async (req, res) => {
       create: { userId: user.id, deviceId: plan.deviceId, pinHash: hasher(pin), devicePinHash: plan.devicePinHash, isActive: true },
     });
     return resSuccess({ res, title: "PIN saved and sent to hardware", data: { id: credential.id, userId: user.id, username: user.username, fullName: user.profil?.full_name || null, deviceId: plan.deviceId, isActive: credential.isActive, createdAt: credential.createdAt, sessionId } });
-  } catch (error) { return resError({ res, title: "Failed to register PIN", errors: error.message }); }
+  } catch (error) {
+    if (error.expose) return resError({ res, title: error.message, code: error.code });
+    return resError({ res, title: "Failed to register PIN", errors: error.message });
+  }
 };
 exports.listPins = async (req, res) => {
   try {

@@ -153,6 +153,14 @@ test("helper request() memang menolak array polos dari /user/autocomplete", asyn
   assert.strictEqual(d.success, undefined, "array polos tidak punya properti success");
 });
 
+test("enroll PIN memberi pesan actionable saat device belum terdaftar", () => {
+  const src = fs.readFileSync(path.join(ROOT, "api_pin/v1/controllers_pin.js"), "utf8");
+  assert.match(src, /belum terdaftar di website/);
+  assert.match(src, /belum dipasangkan ke room/);
+  assert.match(src, /if \(error\.expose\)/, "pesan validasi harus diteruskan ke klien");
+  assert.doesNotMatch(src, /new Error\("Device not found"\)/);
+});
+
 test("enroll RFID memberi pesan actionable saat device belum terdaftar", () => {
   const src = fs.readFileSync(path.join(ROOT, "api_card/v1/controllers_card.js"), "utf8");
   assert.match(src, /belum terdaftar di website/);
