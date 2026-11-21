@@ -19,12 +19,17 @@ from utils.align_trans import Face_alignment
 from face_model import MobileFaceNet
 from facebank_manager import FaceBankManager
 from detection_validation import select_valid_face
+from face_mqtt_contract import build_auth_event, build_registration_event, capture_directory
 
 # ==================== KONFIGURASI ====================
-MQTT_HOST = "103.197.188.199"
-MQTT_PORT = 1883
-MQTT_USERNAME = "nexaryn"
-MQTT_PASSWORD = "31750321"
+# Sumber tunggal konfigurasi MQTT adalah .env di root proyek (sama dengan website).
+_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(_ENV_FILE)
+
+MQTT_HOST = os.getenv("MQTT_HOST", "127.0.0.1")
+MQTT_PORT = int(os.getenv("MQTT_PORT", "1884"))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
 
 # ✅ TOPIK YANG BENAR
 TOPIC_CAM_FRAME_META = "doorlock/+/camera/frame/meta"
@@ -43,8 +48,8 @@ AUTH_THRESHOLD = 1.2  # L2 distance threshold
 
 # ==================== CAPTURES ====================
 SCRIPT_DIR = Path(__file__).parent
-CAPTURES_DIR = SCRIPT_DIR / "captures"
-CAPTURES_DIR.mkdir(exist_ok=True)
+CAPTURES_DIR = capture_directory(SCRIPT_DIR)
+CAPTURES_DIR.mkdir(parents=True, exist_ok=True)
 
 # ==================== LOGGING ====================
 logging.basicConfig(
@@ -145,7 +150,8 @@ def handle_frame(client, device_id: str, frame_type: str, img_bytes: bytes):
 
     if embedding is None:
         logger.warning(f"[{device_id}] Failed: {error_reason}")
-        send_result(client, device_id, frame_type, success=False, reason=error_reason)
+        context = pending_enroll_context.pop(device_id, {}) if frame_type == "enroll" else None
+        send_result(client, device_id, frame_type, success=False, reason=error_reason, context=context)
         return
 
     # === RECOGNIZE ===
@@ -163,15 +169,15 @@ def handle_frame(client, device_id: str, frame_type: str, img_bytes: bytes):
         context = pending_enroll_context.pop(device_id, None)
         if not context or not context.get("user_id"):
             logger.warning(f"[ENROLL] Missing enrollment context for {device_id}")
-            send_result(client, device_id, "enroll", success=False, reason="missing_enrollment_context")
+            send_result(client, device_id, "enroll", success=False, reason="missing_enrollment_context", context=context)
             return
         new_user_name = str(context["user_id"])
         facebank.add_face(new_user_name, embedding)
         # add_face() udah otomatis save ke facebank.pth & names.npy
         logger.info(f"[ENROLL] Registered & Saved: {new_user_name}")
-        send_result(client, device_id, "enroll", success=True)
+        send_result(client, device_id, "enroll", success=True, context=context)
 
-def send_result(client, device_id: str, frame_type: str, success: bool, user=None, reason=None):
+def send_result(client, device_id: str, frame_type: str, success: bool, user=None, reason=None, context=None):
     """
     Kirim hasil ke ESP32. Format sesuai yang diharapkan firmware:
       Recognize match : {"type":"recognize","match":true,"user":"andi"}
@@ -197,6 +203,18 @@ def send_result(client, device_id: str, frame_type: str, success: bool, user=Non
 
     client.publish(topic, json.dumps(payload), qos=1)
     logger.info(f"[RESULT] -> {topic} : {json.dumps(payload)}")
+
+    # Website logger menerima event terpisah agar akses wajah tercatat
+    # tanpa menunggu perubahan firmware Main ESP32.
+    if frame_type == "recognize":
+        event_topic = f"doorlock/{device_id}/auth"
+        event_payload = build_auth_event(device_id, success, user_id=user, reason=reason)
+    else:
+        event_topic = f"doorlock/{device_id}/registration"
+        event_payload = build_registration_event(device_id, context or {}, success, reason=reason)
+
+    client.publish(event_topic, json.dumps(event_payload), qos=1)
+    logger.info(f"[WEB EVENT] -> {event_topic} : {json.dumps(event_payload)}")
 
 
 # ==================== MQTT CALLBACK ====================

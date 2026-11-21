@@ -27,13 +27,15 @@ class MQTTRegistrationBridge {
     return item;
   }
   static trackFaceEnrollment({ deviceId, sessionId, userId, roomId }) {
-    pendingFaceEnrollments.set(sessionId, { deviceId, userId, roomId, expiresAt: Date.now() + 60000 });
-    setTimeout(() => { const item = pendingFaceEnrollments.get(sessionId); if (item && item.expiresAt <= Date.now()) pendingFaceEnrollments.delete(sessionId); }, 61000).unref();
+    const key = this.enrollmentKey(deviceId, sessionId);
+    pendingFaceEnrollments.set(key, { deviceId, userId, roomId, expiresAt: Date.now() + ENROLLMENT_TTL_MS });
+    setTimeout(() => { const item = pendingFaceEnrollments.get(key); if (item && item.expiresAt <= Date.now()) pendingFaceEnrollments.delete(key); }, ENROLLMENT_TTL_MS + 1000).unref();
   }
   static consumeFaceEnrollment(deviceId, sessionId) {
-    const item = pendingFaceEnrollments.get(sessionId);
-    if (!item || item.deviceId !== deviceId || item.expiresAt <= Date.now()) { if (item) pendingFaceEnrollments.delete(sessionId); return null; }
-    pendingFaceEnrollments.delete(sessionId); return item;
+    const key = this.enrollmentKey(deviceId, sessionId);
+    const item = pendingFaceEnrollments.get(key);
+    if (!item || item.expiresAt <= Date.now()) { if (item) pendingFaceEnrollments.delete(key); return null; }
+    pendingFaceEnrollments.delete(key); return item;
   }
   static async handle(client, topic, deviceId, payload) {
     if (topic.endsWith("/user/search/request")) return this.search(client, deviceId, payload);

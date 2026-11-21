@@ -29,6 +29,32 @@
             : '-';
     };
 
+    const loadManagedDevices = async () => {
+        const inputs = [...document.querySelectorAll('input[name="deviceId"]')];
+        if (!inputs.length) return;
+
+        let datalist = document.querySelector('#managed-device-options');
+        if (!datalist) {
+            datalist = document.createElement('datalist');
+            datalist.id = 'managed-device-options';
+            document.body.appendChild(datalist);
+        }
+        inputs.forEach(input => input.setAttribute('list', datalist.id));
+
+        try {
+            const devices = await request('/api/v2/room/device/list');
+            datalist.innerHTML = devices
+                .map(device => `<option value="${device.device_id}"></option>`)
+                .join('');
+            if (devices.length === 1) {
+                inputs.forEach(input => { if (!input.value) input.value = devices[0].device_id; });
+            }
+        } catch (error) {
+            toast('danger', 'Gagal memuat device', error.message);
+        }
+    };
+
+    loadManagedDevices();
 
     // =========================================================
     // PIN

@@ -11,6 +11,7 @@ const {
     sendEmail,
 } = require("../../services/mailing");
 const { MQTTConnection } = require("../../connection/mqtt");
+const { buildDeviceProvisioningData } = require("../../services/deviceProvisioning");
 const FEATURE_ROOM_NOTIFICATION = process.env.FEATURE_ROOM_NOTIFICATION;
 
 const ITEM_LIMIT = Number(process.env.ITEM_LIMIT) || 10;
@@ -18,6 +19,45 @@ const ITEM_LIMIT = Number(process.env.ITEM_LIMIT) || 10;
 /**
  * Fungsi yang digunakan oleh perangkat keras, fungsi nya adalah membuat perangkat
  */
+exports.registerManagedDevice = async (req, res) => {
+    try {
+        const provisioning = buildDeviceProvisioningData(req.body.deviceId);
+        const exists = await prisma.device.findUnique({
+            where: { device_id: provisioning.doorDeviceId },
+            select: { id: true },
+        });
+        if (exists) {
+            return resError({
+                res,
+                title: "Device ID already registered",
+                errors: "Use a unique logical door ID",
+                code: 409,
+            });
+        }
+
+        const device = await prisma.device.create({
+            data: {
+                device_id: provisioning.doorDeviceId,
+                deviceType: "SINGLE_NETWORK",
+            },
+        });
+
+        return resSuccess({
+            res,
+            title: "Device registered. Apply these IDs to its firmware before flashing.",
+            data: { device, provisioning },
+            code: 201,
+        });
+    } catch (error) {
+        return resError({
+            res,
+            title: "Failed to register device",
+            errors: error.message,
+            code: 400,
+        });
+    }
+};
+
 exports.createDevice = async (req, res) => {
     try {
         let duid = stringGenerator(5);

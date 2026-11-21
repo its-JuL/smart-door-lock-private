@@ -31,6 +31,10 @@ function buildAuthRegistrationPlan({ device, payload }) {
     if (!/^[a-f0-9]{64}$/.test(devicePinHash)) throw new Error("Valid SHA-256 pin_hash is required");
     return { kind: "pin", ...common, devicePinHash };
   }
+  if (method === "face") {
+    if (!payload.session_id) throw new Error("session_id is required for face enrollment");
+    return { kind: "face", ...common };
+  }
   throw new Error(`Unsupported registration method: ${method || "missing"}`);
 }
 

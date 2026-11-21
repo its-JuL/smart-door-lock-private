@@ -170,7 +170,7 @@ class MQTTLogger {
     static async handleRegistration(client, deviceId, payload) {
         const { method, result, card_number, finger_id, user_id, session_id } = payload;
         const normalizedResult = String(result || "").toLowerCase();
-        const aliases = { card: "rfid", rfid: "rfid", fingerprint: "fingerprint" };
+        const aliases = { card: "rfid", rfid: "rfid", fingerprint: "fingerprint", face: "face", camera: "face" };
         const normalizedMethod = aliases[String(method || "").toLowerCase()];
         const response = { session_id, user_id, method: normalizedMethod || method, success: false };
 
@@ -198,6 +198,10 @@ class MQTTLogger {
                 });
                 MQTTRegistrationBridge.consumeEnrollment(deviceId, session_id, normalizedMethod, user_id);
                 response.finger_id = fingerId;
+            } else if (normalizedMethod === "face") {
+                // Embedding wajah sudah disimpan oleh Python ke facebank. Website
+                // cukup mengorelasikan hasil ini dengan sesi enrollment pengguna.
+                MQTTRegistrationBridge.consumeEnrollment(deviceId, session_id, normalizedMethod, user_id);
             } else {
                 const cardNumber = String(card_number || "").replaceAll(" ", "").toUpperCase();
                 if (!cardNumber) throw new Error("card_number is required");
@@ -210,7 +214,9 @@ class MQTTLogger {
                 response.card_number = cardNumber;
             }
             response.success = true;
-            response.detail = `${normalizedMethod} mapping stored in database`;
+            response.detail = normalizedMethod === "face"
+                ? "Face embedding stored and linked to the selected user"
+                : `${normalizedMethod} mapping stored in database`;
         } catch (error) {
             response.detail = error.message;
             console.error(" [e]: DB Error on handleRegistration:", error.message);

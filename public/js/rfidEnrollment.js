@@ -45,7 +45,7 @@
       notify('success', 'RFID disinkronkan', `UID ${card.cardNumber} dipetakan ke ${card.username}. Hardware tidak diubah.`);
       syncForm.reset();
       const device = syncForm.querySelector('[name="deviceId"]');
-      if (device) device.value = 'main_esp32_01';
+      if (device) device.value = '';
     } catch (error) {
       notify('danger', 'Gagal sinkron RFID', error.message);
     }

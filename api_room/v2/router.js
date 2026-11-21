@@ -42,6 +42,14 @@ router.post(
     buildingIsExist,
     room.createRoom
 );
+router.post(
+    "/device/register",
+    loginRequired,
+    allowedRole("ADMIN"),
+    body("deviceId").notEmpty().withMessage("Device ID is required"),
+    formChacker,
+    room.registerManagedDevice
+);
 router.get(
     "/device/list",
     loginRequired,

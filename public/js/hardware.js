@@ -2,6 +2,42 @@ const showMoreBtn = document.querySelector("#showMore");
 const hwForm = document.querySelector("#hw");
 const hwContainer = document.querySelector(".hw-container");
 const searhcBtn = document.querySelector(".input-group-prepend");
+const deviceRegisterForm = document.querySelector("#device-register-form");
+const provisioningResult = document.querySelector("#device-provisioning-result");
+
+if (deviceRegisterForm) {
+    deviceRegisterForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const deviceId = new FormData(form).get("deviceId");
+        startLoader();
+        try {
+            const response = await fetch("/api/v2/room/device/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ deviceId }),
+            });
+            const body = await response.json();
+            if (!response.ok) throw new Error(body?.data?.errors || body.message || "Failed to register device");
+
+            const { provisioning } = body.data;
+            provisioningResult.classList.remove("d-none");
+            provisioningResult.innerHTML = `
+                <div class="alert alert-success mb-0">
+                    <strong>Device berhasil ditambahkan.</strong><br>
+                    Main ESP32: <code>${provisioning.doorDeviceId}</code><br>
+                    ESP32-CAM: <code>${provisioning.cameraDeviceId}</code><br>
+                    Gunakan kedua ID ini pada konfigurasi firmware sebelum flashing.
+                </div>`;
+            showToast({ theme: "success", title: "Device ditambahkan", desc: provisioning.doorDeviceId });
+            setTimeout(() => window.location.reload(), 1500);
+        } catch (error) {
+            showToast({ theme: "danger", title: "Gagal menambah device", desc: error.message });
+        } finally {
+            closeLoader();
+        }
+    });
+}
 
 const del = ({ url, element }) => {
     startLoader();

@@ -8,3 +8,5 @@ public/storage/
 *.log
 # Keep environment variables out of version control
 services/faceRecognition/captures/
+__pycache__/
+*.pyc

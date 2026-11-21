@@ -27,12 +27,14 @@ exports.initiateFaceEnrollment = async (req, res) => {
     const command = buildEnrollmentCommand({ method: "face", deviceId, userId: user.id, username: user.username, sessionId });
     
     MQTTRegistrationBridge.trackFaceEnrollment({ deviceId, sessionId, userId: user.id, roomId: device.roomId });
+    MQTTRegistrationBridge.trackEnrollment({ deviceId, sessionId, userId: user.id, roomId: device.roomId, method: "face" });
     
     try {
       await MQTTConnection.publish(`doorlock/${deviceId}/face/enroll/context`, { ...command.payload, requested_by: getUser(req) });
       await MQTTConnection.publish(command.topic, command.payload);
     } catch (publishError) {
       MQTTRegistrationBridge.consumeFaceEnrollment(deviceId, sessionId);
+      MQTTRegistrationBridge.consumeEnrollment(deviceId, sessionId, "face", user.id);
       throw publishError;
     }
     
