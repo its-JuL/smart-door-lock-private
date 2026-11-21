@@ -1229,15 +1229,15 @@ exports.adminModifyCardPin = async (req, res) => {
 
 exports.initiateCardEnrollment = async (req, res) => {
     const { deviceId, targetUserId } = req.body;
-    if (!deviceId || !targetUserId) return resError({ res, title: "deviceId and targetUserId are required", statusCode: 400 });
+    if (!deviceId || !targetUserId) return resError({ res, title: "deviceId and targetUserId are required", code: 400 });
     try {
         const [device, user] = await Promise.all([
             prisma.device.findUnique({ where: { device_id: deviceId }, select: { device_id: true, roomId: true } }),
             prisma.user.findUnique({ where: { id: targetUserId }, select: { id: true, username: true } })
         ]);
-        if (!device) return resError({ res, title: "Device not found", statusCode: 404 });
-        if (!device.roomId) return resError({ res, title: "Device is not assigned to a room", statusCode: 400 });
-        if (!user) return resError({ res, title: "Target user not found", statusCode: 404 });
+        if (!device) return resError({ res, title: `Device "${deviceId}" belum terdaftar di website. Tambahkan dulu lewat menu Hardware.`, code: 404 });
+        if (!device.roomId) return resError({ res, title: `Device "${deviceId}" belum dipasangkan ke room mana pun.`, code: 400 });
+        if (!user) return resError({ res, title: "Pengguna target tidak ditemukan.", code: 404 });
         const { createEnrollmentSessionId, buildEnrollmentCommand } = require("../../services/webEnrollment");
         const { MQTTRegistrationBridge } = require("../../services/mqttRegistrationBridge");
         const sessionId = createEnrollmentSessionId("rfid");

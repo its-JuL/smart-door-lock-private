@@ -64,13 +64,14 @@
       const users = body.data;
 
       cardUserSelects.forEach(select => {
-        select.innerHTML =
-          '<option value="">Pilih pengguna</option>' +
-          users.map(user => `
+        select.innerHTML = users.length
+          ? '<option value="">Pilih pengguna</option>' +
+            users.map(user => `
             <option value="${user.id}">
               ${user.profil?.full_name || user.username} — ${user.username}
             </option>
-          `).join('');
+          `).join('')
+          : '<option value="">Belum ada pengguna terdaftar</option>';
       });
     } catch (error) {
       cardUserSelects.forEach(select => {

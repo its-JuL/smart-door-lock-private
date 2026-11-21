@@ -377,17 +377,21 @@
         if (!pinUserSelects.length) return;
 
         try {
-            const users = await request('/api/v1/user/autocomplete?term=&role=USER');
+            // Pakai /user/list (selubung {success,data}) seperti halaman
+            // sidik jari, wajah, dan RFID. /user/autocomplete mengembalikan
+            // array polos sehingga selalu gagal di helper request().
+            const users = await request('/api/v1/user/list');
 
             pinUserSelects.forEach(select => {
-                select.innerHTML =
-                    '<option value="">Pilih pengguna</option>' +
-                    users.map(user => `
+                select.innerHTML = users.length
+                    ? '<option value="">Pilih pengguna</option>' +
+                      users.map(user => `
                         <option value="${user.id}">
                             ${user.profil?.full_name || user.username}
                             — ${user.username}
                         </option>
-                    `).join('');
+                    `).join('')
+                    : '<option value="">Belum ada pengguna terdaftar</option>';
             });
 
         } catch (error) {
