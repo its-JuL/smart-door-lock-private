@@ -12,6 +12,7 @@ const {
 } = require("../../services/mailing");
 const { MQTTConnection } = require("../../connection/mqtt");
 const { buildDeviceProvisioningData } = require("../../services/deviceProvisioning");
+const { filterDevicesForScope } = require("../../services/operatorScope");
 const FEATURE_ROOM_NOTIFICATION = process.env.FEATURE_ROOM_NOTIFICATION;
 
 const ITEM_LIMIT = Number(process.env.ITEM_LIMIT) || 10;
@@ -491,7 +492,7 @@ exports.deviceList = async (req, res) => {
         return resSuccess({
             res,
             title: "Success listed available device",
-            data: deviceList,
+            data: filterDevicesForScope(deviceList, req.accessScope),
         });
     } catch (error) {
         return resError({

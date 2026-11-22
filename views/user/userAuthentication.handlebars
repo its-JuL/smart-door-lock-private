@@ -1,0 +1,167 @@
+<h3 class="fw-bolder text-neutral-2 mt-3">Autentikasi Saya</h3>
+<p class="text-neutral-2 fw-bold mb-0">
+    Metode autentikasi yang sudah terdaftar untuk Anda. Halaman ini hanya untuk dilihat; pendaftaran
+    atau perubahan dilakukan oleh operator.
+</p>
+
+<div class="row mt-4">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="bg-neutral-6 shadow-c-1 p-3 rounded-13 text-center">
+            <p class="text-neutral-2 mb-0">Kartu</p>
+            <p class="fw-bolder text-neutral-2 mb-0">{{summary.counts.cards}}</p>
+            <p class="mb-0 {{#if summary.counts.cards}}text-success{{else}}text-danger{{/if}}">
+                {{#if summary.counts.cards}}Terdaftar{{else}}Belum terdaftar{{/if}}
+            </p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <div class="bg-neutral-6 shadow-c-1 p-3 rounded-13 text-center">
+            <p class="text-neutral-2 mb-0">PIN</p>
+            <p class="fw-bolder text-neutral-2 mb-0">{{summary.counts.pins}}</p>
+            <p class="mb-0 {{#if summary.counts.pins}}text-success{{else}}text-danger{{/if}}">
+                {{#if summary.counts.pins}}Terdaftar{{else}}Belum terdaftar{{/if}}
+            </p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <div class="bg-neutral-6 shadow-c-1 p-3 rounded-13 text-center">
+            <p class="text-neutral-2 mb-0">Sidik Jari</p>
+            <p class="fw-bolder text-neutral-2 mb-0">{{summary.counts.fingerprints}}</p>
+            <p class="mb-0 {{#if summary.counts.fingerprints}}text-success{{else}}text-danger{{/if}}">
+                {{#if summary.counts.fingerprints}}Terdaftar{{else}}Belum terdaftar{{/if}}
+            </p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <div class="bg-neutral-6 shadow-c-1 p-3 rounded-13 text-center">
+            <p class="text-neutral-2 mb-0">Wajah</p>
+            <p class="fw-bolder text-neutral-2 mb-0">{{summary.counts.faces}}</p>
+            <p class="mb-0 {{#if summary.counts.faces}}text-success{{else}}text-danger{{/if}}">
+                {{#if summary.counts.faces}}Terdaftar{{else}}Belum terdaftar{{/if}}
+            </p>
+        </div>
+    </div>
+</div>
+
+<h4 class="fw-bolder text-neutral-2 mt-4">Kartu</h4>
+<div class="bg-neutral-6 shadow-c-1 p-4 px-5 mt-2 rounded-13">
+    <div class="row bg-neutral-7 p-2 rounded-10">
+        <div class="col-1"><p class="text-center fw-bold text-neutral-2 mb-0">No</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Nama Kartu</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Nomor</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">Status</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Ruangan</p></div>
+    </div>
+    {{#if summary.cards}}
+        {{#each summary.cards}}
+            <div class="row align-items-center p-2 mt-2 rounded-10 border-bottom">
+                <div class="col-1"><p class="text-center text-neutral-2 mb-0">{{no}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{name}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{number}}</p></div>
+                <div class="col-2"><p class="text-center mb-0 {{#if isRegistered}}text-success{{else}}text-danger{{/if}}">{{status}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{rooms}}</p></div>
+            </div>
+        {{/each}}
+    {{else}}
+        <p class="text-center text-neutral-2 mt-3 mb-0">Belum ada kartu terdaftar untuk akun Anda.</p>
+    {{/if}}
+</div>
+
+<h4 class="fw-bolder text-neutral-2 mt-4">PIN</h4>
+<div class="bg-neutral-6 shadow-c-1 p-4 px-5 mt-2 rounded-13">
+    <div class="row bg-neutral-7 p-2 rounded-10">
+        <div class="col-1"><p class="text-center fw-bold text-neutral-2 mb-0">No</p></div>
+        <div class="col-4"><p class="text-center fw-bold text-neutral-2 mb-0">Device</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Ruangan</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">Status</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">Dibuat</p></div>
+    </div>
+    {{#if summary.pins}}
+        {{#each summary.pins}}
+            <div class="row align-items-center p-2 mt-2 rounded-10 border-bottom">
+                <div class="col-1"><p class="text-center text-neutral-2 mb-0">{{no}}</p></div>
+                <div class="col-4"><p class="text-center text-neutral-2 mb-0">{{deviceId}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{room}}</p></div>
+                <div class="col-2"><p class="text-center mb-0 {{#if isActive}}text-success{{else}}text-danger{{/if}}">{{status}}</p></div>
+                <div class="col-2"><p class="text-center text-neutral-2 mb-0">{{createdAt}}</p></div>
+            </div>
+        {{/each}}
+    {{else}}
+        <p class="text-center text-neutral-2 mt-3 mb-0">Belum ada PIN terdaftar untuk akun Anda.</p>
+    {{/if}}
+</div>
+
+<h4 class="fw-bolder text-neutral-2 mt-4">Sidik Jari</h4>
+<div class="bg-neutral-6 shadow-c-1 p-4 px-5 mt-2 rounded-13">
+    <div class="row bg-neutral-7 p-2 rounded-10">
+        <div class="col-1"><p class="text-center fw-bold text-neutral-2 mb-0">No</p></div>
+        <div class="col-4"><p class="text-center fw-bold text-neutral-2 mb-0">Device</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">ID Jari</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Ruangan</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">Status</p></div>
+    </div>
+    {{#if summary.fingerprints}}
+        {{#each summary.fingerprints}}
+            <div class="row align-items-center p-2 mt-2 rounded-10 border-bottom">
+                <div class="col-1"><p class="text-center text-neutral-2 mb-0">{{no}}</p></div>
+                <div class="col-4"><p class="text-center text-neutral-2 mb-0">{{deviceId}}</p></div>
+                <div class="col-2"><p class="text-center text-neutral-2 mb-0">{{fingerId}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{room}}</p></div>
+                <div class="col-2"><p class="text-center mb-0 {{#if isActive}}text-success{{else}}text-danger{{/if}}">{{status}}</p></div>
+            </div>
+        {{/each}}
+    {{else}}
+        <p class="text-center text-neutral-2 mt-3 mb-0">Belum ada sidik jari terdaftar untuk akun Anda.</p>
+    {{/if}}
+</div>
+
+<h4 class="fw-bolder text-neutral-2 mt-4">Wajah</h4>
+<div class="bg-neutral-6 shadow-c-1 p-4 px-5 mt-2 rounded-13">
+    <div class="row bg-neutral-7 p-2 rounded-10">
+        <div class="col-1"><p class="text-center fw-bold text-neutral-2 mb-0">No</p></div>
+        <div class="col-4"><p class="text-center fw-bold text-neutral-2 mb-0">Ruangan</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Room ID</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">Status</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">Dibuat</p></div>
+    </div>
+    {{#if summary.faces}}
+        {{#each summary.faces}}
+            <div class="row align-items-center p-2 mt-2 rounded-10 border-bottom">
+                <div class="col-1"><p class="text-center text-neutral-2 mb-0">{{no}}</p></div>
+                <div class="col-4"><p class="text-center text-neutral-2 mb-0">{{room}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{roomRuid}}</p></div>
+                <div class="col-2"><p class="text-center mb-0 {{#if isActive}}text-success{{else}}text-danger{{/if}}">{{status}}</p></div>
+                <div class="col-2"><p class="text-center text-neutral-2 mb-0">{{createdAt}}</p></div>
+            </div>
+        {{/each}}
+    {{else}}
+        <p class="text-center text-neutral-2 mt-3 mb-0">Belum ada wajah terdaftar untuk akun Anda.</p>
+    {{/if}}
+</div>
+
+<h4 class="fw-bolder text-neutral-2 mt-5">Riwayat Permintaan Akses</h4>
+<p class="text-neutral-2 mb-0">20 permintaan terakhir ke ruangan, dari metode autentikasi apa pun.</p>
+<div class="bg-neutral-6 shadow-c-1 p-4 px-5 mt-2 rounded-13">
+    <div class="row bg-neutral-7 p-2 rounded-10">
+        <div class="col-1"><p class="text-center fw-bold text-neutral-2 mb-0">No</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Metode</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Ruangan</p></div>
+        <div class="col-3"><p class="text-center fw-bold text-neutral-2 mb-0">Kredensial</p></div>
+        <div class="col-2"><p class="text-center fw-bold text-neutral-2 mb-0">Hasil</p></div>
+    </div>
+    {{#if hasHistory}}
+        {{#each history}}
+            <div class="row align-items-center p-2 mt-2 rounded-10 border-bottom">
+                <div class="col-1"><p class="text-center text-neutral-2 mb-0">{{no}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{methodLabel}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{room}}</p></div>
+                <div class="col-3"><p class="text-center text-neutral-2 mb-0">{{credential}}</p></div>
+                <div class="col-2"><p class="text-center mb-0 {{#if isSuccess}}text-success{{else}}text-danger{{/if}}">{{status}}</p></div>
+            </div>
+        {{/each}}
+    {{else}}
+        <p class="text-center text-neutral-2 mt-3 mb-0">
+            Belum ada permintaan akses yang tercatat untuk akun Anda.
+        </p>
+    {{/if}}
+</div>

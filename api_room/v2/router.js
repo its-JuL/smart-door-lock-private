@@ -24,6 +24,7 @@ const {
     loginRequired,
     allowedRole,
 } = require("../../middlewares/authMiddlewares");
+const { loadAccessScope } = require("../../middlewares/accessScopeMiddlewares");
 const {
     requestIsExist,
 } = require("../../middlewares/requestAccessMiddlewares");
@@ -53,7 +54,8 @@ router.post(
 router.get(
     "/device/list",
     loginRequired,
-    allowedRole("ADMIN", "ADMIN TEKNIS"),
+    allowedRole("ADMIN", "ADMIN TEKNIS", "OPERATOR"),
+    loadAccessScope,
     room.deviceList
 );
 router.get(

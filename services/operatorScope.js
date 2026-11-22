@@ -108,6 +108,15 @@ function cardWhereForScope(scope) {
   };
 }
 
+function filterDevicesForScope(devices, scope) {
+  if (!Array.isArray(devices)) return [];
+  if (scope?.type !== "ASSIGNED") return devices;
+  const allowedRoomIds = new Set(scope.roomIds || []);
+  return devices.filter(
+    (device) => device && device.roomId && allowedRoomIds.has(device.roomId)
+  );
+}
+
 module.exports = {
   createAccessScope,
   canAccessDevice,
@@ -116,4 +125,5 @@ module.exports = {
   deviceWhereForScope,
   roomWhereForScope,
   cardWhereForScope,
+  filterDevicesForScope,
 };

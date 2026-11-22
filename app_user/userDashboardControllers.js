@@ -1,5 +1,9 @@
 const prisma = require("../prisma/client");
 const { getUser } = require("../services/auth");
+const {
+    buildCredentialSummary,
+    buildAccessHistory,
+} = require("../services/credentialSummary");
 
 module.exports.home = (req, res) => {
     const data = {
@@ -50,6 +54,108 @@ module.exports.cardRoom = (req, res) => {
         id,
     };
     res.render("user/userCardRoom", data);
+};
+
+/**
+ * Halaman "Autentikasi Saya" untuk USER (read-only).
+ * User melihat metode autentikasi apa saja yang sudah terdaftar untuk dirinya
+ * (kartu, PIN, sidik jari, wajah) beserta hasil permintaan akses terakhir dari
+ * metode apa pun, tanpa bisa mengubah data.
+ */
+module.exports.authentication = async (req, res) => {
+    const userId = getUser(req);
+    let summary = buildCredentialSummary();
+    let history = [];
+
+    try {
+        const [cards, pins, fingerprints, faces, records] = await Promise.all([
+            prisma.card.findMany({
+                where: { userId },
+                orderBy: { createdAt: "asc" },
+                select: {
+                    card_number: true,
+                    card_name: true,
+                    card_status: true,
+                    banned: true,
+                    createdAt: true,
+                    room: { select: { ruid: true, name: true } },
+                },
+            }),
+            prisma.pinCredential.findMany({
+                where: { userId },
+                orderBy: { createdAt: "desc" },
+                select: {
+                    deviceId: true,
+                    isActive: true,
+                    createdAt: true,
+                },
+            }),
+            prisma.fingerprintMapping.findMany({
+                where: { userId },
+                orderBy: { createdAt: "desc" },
+                select: {
+                    deviceId: true,
+                    fingerId: true,
+                    isActive: true,
+                    createdAt: true,
+                    room: { select: { ruid: true, name: true } },
+                },
+            }),
+            prisma.faceRecognition.findMany({
+                where: { userId },
+                orderBy: { createdAt: "desc" },
+                select: {
+                    isActive: true,
+                    createdAt: true,
+                    room: { select: { ruid: true, name: true } },
+                },
+            }),
+            prisma.rooms_Records.findMany({
+                where: { userId },
+                orderBy: { createdAt: "desc" },
+                take: 20,
+                select: {
+                    authenticationMethod: true,
+                    isSuccess: true,
+                    createdAt: true,
+                    unregisteredCard: true,
+                    room: { select: { ruid: true, name: true } },
+                    Card: { select: { card_name: true, card_number: true } },
+                },
+            }),
+        ]);
+
+        const devices = await prisma.device.findMany({
+            where: { device_id: { in: [...new Set(pins.map((pin) => pin.deviceId))] } },
+            select: { device_id: true, room: { select: { ruid: true, name: true } } },
+        });
+        const roomByDevice = new Map(
+            devices.map((device) => [device.device_id, device.room])
+        );
+
+        summary = buildCredentialSummary({
+            cards,
+            pins: pins.map((pin) => ({
+                ...pin,
+                room: roomByDevice.get(pin.deviceId) || null,
+            })),
+            fingerprints,
+            faces,
+        });
+        history = buildAccessHistory(records);
+    } catch (error) {
+        console.log(error);
+    }
+
+    const data = {
+        layout: "userBase",
+        authentication: "bg-neutral-4",
+        styles: ["/style/buildingList.css", "/style/userCardLogs.css"],
+        summary,
+        history,
+        hasHistory: history.length > 0,
+    };
+    res.render("user/userAuthentication", data);
 };
 
 /**
