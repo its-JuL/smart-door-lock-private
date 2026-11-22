@@ -492,7 +492,9 @@ exports.deviceList = async (req, res) => {
         return resSuccess({
             res,
             title: "Success listed available device",
-            data: filterDevicesForScope(deviceList, req.accessScope),
+            data: filterDevicesForScope(deviceList, req.accessScope).map(
+                ({ pin, ...device }) => device
+            ),
         });
     } catch (error) {
         return resError({

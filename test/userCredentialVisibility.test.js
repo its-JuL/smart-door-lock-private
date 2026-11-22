@@ -138,6 +138,11 @@ test("controller device list memfilter hasil sesuai scope", () => {
   assert.match(source, /filterDevicesForScope\(deviceList, req\.accessScope\)/);
 });
 
+test("hash PIN device tidak ikut terkirim ke klien", () => {
+  const source = fs.readFileSync(path.join(ROOT, "api_room/v2/controllers.js"), "utf8");
+  assert.match(source, /\(\{ pin, \.\.\.device \}\) => device/);
+});
+
 test("rute /authentication tersedia untuk USER", () => {
   const source = fs.readFileSync(path.join(ROOT, "app_user/router.js"), "utf8");
   assert.match(source, /router\.get\("\/authentication", allowedRole\("USER"\), user\.authentication\)/);
