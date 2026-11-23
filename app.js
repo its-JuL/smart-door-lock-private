@@ -1,4 +1,5 @@
-if (process.env.NODE_ENV !== "PRODUCTION") require("dotenv").config();
+const { loadEnvironment } = require("./services/environment");
+loadEnvironment();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
