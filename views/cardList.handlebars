@@ -10,9 +10,10 @@
   </form>
 </div>
 
-<button class="btn bg-blue-3 text-white rounded-13 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#rfid-enroll-form">Mulai Enroll RFID</button>
+<button class="btn bg-blue-3 text-white rounded-13 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#rfid-enroll-form">Buka Form Enroll RFID</button>
 <form class="collapse credential-form bg-neutral-6 rounded-13 p-3 mb-3" id="rfid-enroll-form">
   <h6 class="fw-bold text-blue-3">Enroll RFID dari website</h6>
+  <p class="text-muted small">Isi data lalu tekan tombol kirim. Membuka form ini belum mengirim perintah MQTT.</p>
   <div class="row g-2">
     <div class="col-md-6">
       <label class="form-label">Device ID</label>
@@ -26,7 +27,7 @@
       <small class="text-muted">Pilih pengguna dari database; UUID dikirim otomatis.</small>
     </div>
   </div>
-  <button class="btn bg-blue-3 text-white mt-3" type="submit">Kirim perintah enroll</button>
+  <button class="btn bg-blue-3 text-white mt-3" type="submit">Kirim perintah ke perangkat</button>
 </form>
 
 <button class="btn btn-outline-primary rounded-13 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#rfid-sync-form">Sinkronkan RFID lama</button>

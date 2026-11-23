@@ -455,10 +455,16 @@
             e.preventDefault();
 
             const fingerprintForm = e.currentTarget;
+            const submitButton = fingerprintForm.querySelector('button[type="submit"]');
+            const originalLabel = submitButton?.textContent;
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Mengirim perintah...';
+            }
 
             try {
                 const data = await request(
-                    '/api/v1/fingerprint/register',
+                    '/api/v1/fingerprint/initiate-enrollment',
                     {
                         method: 'POST',
                         headers: {
@@ -474,16 +480,21 @@
 
                 toast(
                     'success',
-                    'Enroll fingerprint dimulai',
-                    `Session ${data.sessionId}. Tempelkan jari pada sensor.`
+                    'Perintah fingerprint terkirim',
+                    `Session ${data.sessionId}. Menunggu respons perangkat; tempelkan jari pada sensor.`
                 );
 
             } catch (err) {
                 toast(
                     'danger',
-                    'Gagal memulai enroll fingerprint',
+                    'Gagal mengirim perintah fingerprint',
                     err.message
                 );
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalLabel;
+                }
             }
         });
 
@@ -532,6 +543,14 @@
         ?.addEventListener('submit', async e => {
             e.preventDefault();
 
+            const faceForm = e.currentTarget;
+            const submitButton = faceForm.querySelector('button[type="submit"]');
+            const originalLabel = submitButton?.textContent;
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Mengirim perintah...';
+            }
+
             try {
                 const data = await request(
                     '/api/v1/face/initiate-enrollment',
@@ -542,7 +561,7 @@
                         },
                         body: JSON.stringify(
                             Object.fromEntries(
-                                new FormData(e.currentTarget)
+                                new FormData(faceForm)
                             )
                         )
                     }
@@ -550,16 +569,21 @@
 
                 toast(
                     'success',
-                    'Enroll wajah dimulai',
-                    `Session ${data.sessionId}. Hadapkan wajah ke kamera.`
+                    'Perintah wajah terkirim',
+                    `Session ${data.sessionId}. Menunggu respons perangkat; hadapkan wajah ke kamera.`
                 );
 
             } catch (err) {
                 toast(
                     'danger',
-                    'Gagal memulai enroll wajah',
+                    'Gagal mengirim perintah wajah',
                     err.message
                 );
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalLabel;
+                }
             }
         });
 

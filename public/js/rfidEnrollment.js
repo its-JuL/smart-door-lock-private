@@ -22,9 +22,9 @@
       });
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.message || body.title || 'Permintaan gagal');
-      notify('success', 'Enroll RFID dimulai', `Session ${body.data.sessionId}. Tempelkan kartu RFID pada reader.`);
+      notify('success', 'Perintah RFID terkirim', `Session ${body.data.sessionId}. Menunggu respons perangkat; tempelkan kartu RFID pada reader.`);
     } catch (error) {
-      notify('danger', 'Gagal memulai enroll RFID', error.message);
+      notify('danger', 'Gagal mengirim perintah RFID', error.message);
     } finally {
       if (submitButton) { submitButton.disabled = false; submitButton.textContent = originalLabel; }
     }
