@@ -6,7 +6,7 @@ def capture_directory(service_dir: Path) -> Path:
     return Path(service_dir).resolve().parents[1] / "capture"
 
 
-def build_auth_event(device_id: str, success: bool, user_id=None, reason=None) -> dict:
+def build_auth_event(device_id: str, success: bool, user_id=None, reason=None, capture_path=None) -> dict:
     payload = {
         "device_id": device_id,
         "method": "camera",
@@ -15,6 +15,8 @@ def build_auth_event(device_id: str, success: bool, user_id=None, reason=None) -
     }
     if success and user_id:
         payload["user_id"] = str(user_id)
+    if capture_path:
+        payload["capture_path"] = f"/capture/{Path(capture_path).name}"
     return payload
 
 

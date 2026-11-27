@@ -19,6 +19,25 @@ test("buildAccessRecordData stores fingerprint method and mapped user", () => {
   );
 });
 
+test("buildAccessRecordData records the source hardware and failure detail", () => {
+  assert.deepEqual(
+    buildAccessRecordData({
+      roomId: "room-1",
+      deviceId: "main_esp32_01",
+      method: "camera",
+      isSuccess: false,
+      detail: "unknown_face",
+    }),
+    {
+      roomId: "room-1",
+      deviceId: "main_esp32_01",
+      authenticationMethod: "FACE",
+      isSuccess: false,
+      detail: "unknown_face",
+    }
+  );
+});
+
 test("buildAccessRecordData preserves known authentication methods", () => {
   assert.equal(buildAccessRecordData({ method: "RFID" }).authenticationMethod, "RFID");
   assert.equal(buildAccessRecordData({ method: "PIN" }).authenticationMethod, "PIN");

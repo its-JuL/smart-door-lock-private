@@ -83,7 +83,7 @@ pending_enroll_context = {}
 
 # ==================== CAPTURES ====================
 def save_capture(img_bytes: bytes, device_id: str, frame_type: str) -> str:
-    """Simpan frame JPEG mentah ke folder captures/"""
+    """Simpan frame JPEG mentah ke folder capture/ yang diekspos web."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     filename = f"{timestamp}_{device_id}_{frame_type}.jpg"
     filepath = CAPTURES_DIR / filename
@@ -142,8 +142,8 @@ def process_face(image_bytes):
 def handle_frame(client, device_id: str, frame_type: str, img_bytes: bytes):
     """Proses frame sesuai tipe (recognize / enroll)."""
 
-    # Simpan capture
-    save_capture(img_bytes, device_id, frame_type)
+    # Simpan capture dan teruskan path publiknya ke access history.
+    capture_path = save_capture(img_bytes, device_id, frame_type)
 
     # ✅ FIX: Kirim img_bytes (BUKAN img_bgr) ke process_face
     embedding, error_reason = process_face(img_bytes)
@@ -151,7 +151,15 @@ def handle_frame(client, device_id: str, frame_type: str, img_bytes: bytes):
     if embedding is None:
         logger.warning(f"[{device_id}] Failed: {error_reason}")
         context = pending_enroll_context.pop(device_id, {}) if frame_type == "enroll" else None
-        send_result(client, device_id, frame_type, success=False, reason=error_reason, context=context)
+        send_result(
+            client,
+            device_id,
+            frame_type,
+            success=False,
+            reason=error_reason,
+            context=context,
+            capture_path=capture_path,
+        )
         return
 
     # === RECOGNIZE ===
@@ -159,10 +167,10 @@ def handle_frame(client, device_id: str, frame_type: str, img_bytes: bytes):
         name, score = facebank.recognize(embedding, threshold=AUTH_THRESHOLD)
         if name and name != "unknown" and name != "":
             logger.info(f"[AUTH] Recognized: {name} (dist={score:.3f})")
-            send_result(client, device_id, "recognize", success=True, user=name)
+            send_result(client, device_id, "recognize", success=True, user=name, capture_path=capture_path)
         else:
             logger.info(f"[AUTH] Not recognized (dist={score:.3f})")
-            send_result(client, device_id, "recognize", success=False, reason="unknown_face")
+            send_result(client, device_id, "recognize", success=False, reason="unknown_face", capture_path=capture_path)
 
     # === ENROLL ===
     elif frame_type == "enroll":
@@ -175,9 +183,9 @@ def handle_frame(client, device_id: str, frame_type: str, img_bytes: bytes):
         facebank.add_face(new_user_name, embedding)
         # add_face() udah otomatis save ke facebank.pth & names.npy
         logger.info(f"[ENROLL] Registered & Saved: {new_user_name}")
-        send_result(client, device_id, "enroll", success=True, context=context)
+        send_result(client, device_id, "enroll", success=True, context=context, capture_path=capture_path)
 
-def send_result(client, device_id: str, frame_type: str, success: bool, user=None, reason=None, context=None):
+def send_result(client, device_id: str, frame_type: str, success: bool, user=None, reason=None, context=None, capture_path=None):
     """
     Kirim hasil ke ESP32. Format sesuai yang diharapkan firmware:
       Recognize match : {"type":"recognize","match":true,"user":"andi"}
@@ -208,7 +216,13 @@ def send_result(client, device_id: str, frame_type: str, success: bool, user=Non
     # tanpa menunggu perubahan firmware Main ESP32.
     if frame_type == "recognize":
         event_topic = f"doorlock/{device_id}/auth"
-        event_payload = build_auth_event(device_id, success, user_id=user, reason=reason)
+        event_payload = build_auth_event(
+            device_id,
+            success,
+            user_id=user,
+            reason=reason,
+            capture_path=capture_path,
+        )
     else:
         event_topic = f"doorlock/{device_id}/registration"
         event_payload = build_registration_event(device_id, context or {}, success, reason=reason)

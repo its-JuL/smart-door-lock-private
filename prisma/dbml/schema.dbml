@@ -150,6 +150,7 @@ Table Device {
   room Room
   Gateway_Spot Gateway_Spot
   gateway_SpotId String
+  accessRecords Rooms_Records [not null]
 }
 
 Table Gateway_Device {
@@ -194,12 +195,16 @@ Table Rooms_Records {
   unregisteredCard String
   room Room
   roomId String
+  device Device
+  deviceId String
   user User
   userId String
   Card Card
   cardId String
   authenticationMethod AUTHENTICATION_METHOD [not null, default: 'UNKNOWN']
   isSuccess Boolean [not null, default: false]
+  detail String
+  capturePath String
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
 }
@@ -270,6 +275,8 @@ Ref: Room_Request.cardId > Card.id [delete: Cascade]
 Ref: Room_Request.roomId > Room.id [delete: Cascade]
 
 Ref: Rooms_Records.roomId > Room.id [delete: Set Null]
+
+Ref: Rooms_Records.deviceId > Device.device_id [delete: Set Null]
 
 Ref: Rooms_Records.userId > User.id [delete: Set Null]
 

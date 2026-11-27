@@ -413,10 +413,20 @@
         const img = document.getElementById('face-preview-image');
         const placeholder = document.getElementById('face-preview-placeholder');
         const info = document.getElementById('face-preview-info');
-        if (!img || !placeholder) return;
+        const deviceInput = document.getElementById('face-preview-device');
+        if (!img || !placeholder || !deviceInput) return;
+
+        const deviceId = deviceInput.value.trim();
+        if (!deviceId) {
+          img.style.display = 'none';
+          placeholder.style.display = 'block';
+          placeholder.textContent = 'Pilih perangkat untuk menampilkan capture';
+          if (info) info.textContent = '';
+          return;
+        }
 
         try {
-          const data = await request('/api/v1/face/latest-capture');
+          const data = await request(`/api/v1/face/latest-capture/${encodeURIComponent(deviceId)}`);
           if (data && data.path) {
             img.src = data.path + '?t=' + Date.now();
             img.style.display = 'block';
@@ -425,11 +435,14 @@
           } else {
             img.style.display = 'none';
             placeholder.style.display = 'block';
+            placeholder.textContent = `Belum ada capture dari ${deviceId}`;
             if (info) info.textContent = '';
           }
         } catch (e) {
           img.style.display = 'none';
           placeholder.style.display = 'block';
+          placeholder.textContent = `Preview gagal dimuat: ${e.message}`;
+          if (info) info.textContent = '';
         }
       };
 
@@ -439,9 +452,9 @@
         window.addEventListener('beforeunload', () => clearInterval(facePreviewInterval));
       }
 
+      document.getElementById('face-preview-device')?.addEventListener('change', loadLatestFaceCapture);
       document.getElementById('refresh-capture-btn')?.addEventListener('click', () => {
         loadLatestFaceCapture();
-        toast('success', 'Refreshed', 'Preview diperbarui');
       });
 
 

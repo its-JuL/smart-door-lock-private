@@ -411,6 +411,15 @@ const authenticationPage = async (req, res, view, active) => {
 exports.pinList = async (req, res) => authenticationPage(req, res, "pinList", "pin");
 exports.fingerprintList = async (req, res) => authenticationPage(req, res, "fingerprintList", "fingerprint");
 exports.faceRecognition = async (req, res) => authenticationPage(req, res, "faceRecognition", "faceRecognition");
+exports.authenticationHistory = async (req, res) => {
+    res.render("authenticationHistory", {
+        authentication: "bg-neutral-4",
+        authenticationHistory: "bg-neutral-4",
+        styles: ["/style/credentials.css"],
+        scripts: ["/js/credentials.js", "/js/authenticationHistory.js"],
+        layout: await layoutHandler(getUser(req)),
+    });
+};
 
 exports.buildingList = async (req, res) => {
     const data = {

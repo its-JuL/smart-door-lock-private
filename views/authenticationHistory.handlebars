@@ -1,0 +1,59 @@
+<section class="credential-page p-3 p-md-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h3 class="fw-bold text-blue-3 mb-1">Riwayat Autentikasi</h3>
+      <p class="text-muted mb-0">Percobaan berhasil dan gagal dari seluruh metode serta perangkat.</p>
+    </div>
+  </div>
+
+  <form id="authentication-history-filter" class="credential-form bg-neutral-7 rounded-13 p-3 mb-3">
+    <div class="row g-2">
+      <div class="col-12 col-lg-4">
+        <label class="form-label" for="history-search">Cari</label>
+        <input class="form-control" id="history-search" name="search" placeholder="User, room, device, atau detail">
+      </div>
+      <div class="col-12 col-md-4 col-lg-3">
+        <label class="form-label" for="history-device">Hardware</label>
+        <input class="form-control" id="history-device" name="deviceId" list="managed-device-options" placeholder="Semua perangkat">
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <label class="form-label" for="history-method">Metode</label>
+        <select class="form-select" id="history-method" name="authenticationMethod">
+          <option value="">Semua</option>
+          <option value="RFID">RFID</option>
+          <option value="FINGERPRINT">Fingerprint</option>
+          <option value="PIN">PIN</option>
+          <option value="FACE">Face</option>
+          <option value="EXIT_BUTTON">Exit Button</option>
+          <option value="UNKNOWN">Unknown</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <label class="form-label" for="history-result">Hasil</label>
+        <select class="form-select" id="history-result" name="isSuccess">
+          <option value="">Semua</option>
+          <option value="true">Berhasil</option>
+          <option value="false">Gagal</option>
+        </select>
+      </div>
+      <div class="col-12 col-lg-1 d-flex align-items-end">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+      </div>
+    </div>
+  </form>
+
+  <section class="bg-neutral-7 rounded-13 shadow overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 history-table">
+        <thead>
+          <tr>
+            <th>Waktu</th><th>User</th><th>Room</th><th>Hardware</th><th>Metode</th><th>Hasil</th><th>Detail / Bukti</th>
+          </tr>
+        </thead>
+        <tbody id="authentication-history-list" data-list-endpoint="/api/v1/room-record/logs">
+          <tr><td colspan="7" class="text-center text-muted py-4">Memuat riwayat...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

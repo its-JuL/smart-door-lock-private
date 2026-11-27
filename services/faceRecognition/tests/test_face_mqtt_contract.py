@@ -34,6 +34,15 @@ class FaceMqttContractTests(unittest.TestCase):
             },
         )
 
+    def test_auth_event_exposes_capture_evidence_as_web_path(self):
+        event = build_auth_event(
+            "main_esp32_01",
+            success=False,
+            reason="unknown_face",
+            capture_path="C:/app/capture/frame.jpg",
+        )
+        self.assertEqual(event["capture_path"], "/capture/frame.jpg")
+
     def test_enrollment_event_keeps_web_session_and_user(self):
         context = {"session_id": "face-session", "user_id": "user-123"}
         self.assertEqual(

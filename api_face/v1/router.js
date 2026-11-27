@@ -17,5 +17,10 @@ router.post(
   requireAssignedDevice,
   controller.initiateFaceEnrollment
 );
-router.get("/latest-capture", ...manager, controller.getLatestCapture);
+router.get(
+  "/latest-capture/:deviceId",
+  ...manager,
+  requireAssignedDevice,
+  controller.getLatestCapture
+);
 module.exports = router;

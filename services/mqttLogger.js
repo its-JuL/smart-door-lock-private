@@ -69,7 +69,16 @@ class MQTTLogger {
 
     // ======================= 1. AUTH EVENT =======================
     static async handleAuth(deviceId, payload) {
-        const { method, result, card_number, finger_id, pin_hash, user_id } = payload;
+        const {
+            method,
+            result,
+            card_number,
+            finger_id,
+            pin_hash,
+            user_id,
+            detail,
+            capture_path,
+        } = payload;
         console.log(` [i]: Auth Event: ${deviceId} - ${method} - ${result}`);
         
         const device = await prisma.device.findUnique({
@@ -148,11 +157,14 @@ class MQTTLogger {
             await prisma.rooms_Records.create({
                 data: buildAccessRecordData({
                     roomId,
+                    deviceId,
                     userId,
                     cardId,
                     unregisteredCard,
                     method,
                     isSuccess,
+                    detail,
+                    capturePath: capture_path,
                 }),
             });
             console.log(` [i]: ✅ Access log saved. Success: ${isSuccess}`);

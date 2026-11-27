@@ -26,9 +26,14 @@
 <div class="row mt-4">
   <div class="col-12">
     <section class="bg-neutral-7 rounded-13 shadow p-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold text-blue-3 mb-0">Preview capture</h5>
-        <button class="btn btn-sm btn-outline-primary" id="refresh-capture-btn">Refresh</button>
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+        <div>
+          <h5 class="fw-bold text-blue-3 mb-1">Preview capture per perangkat</h5>
+          <label class="form-label small mb-1" for="face-preview-device">Hardware kamera</label>
+          <input class="form-control" id="face-preview-device" name="deviceId" list="managed-device-options" placeholder="Cari atau pilih Device ID" autocomplete="off">
+          <small class="text-muted">Preview hanya menampilkan capture dari perangkat yang dipilih.</small>
+        </div>
+        <button class="btn btn-sm btn-outline-primary" id="refresh-capture-btn" type="button">Refresh</button>
       </div>
       <div class="text-center" id="face-preview-container">
         <img id="face-preview-image" src="" alt="Face capture preview" style="max-width:100%;max-height:400px;display:none;border-radius:13px;">

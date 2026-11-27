@@ -45,6 +45,7 @@ exports.initiateFaceEnrollment = async (req, res) => {
 };
 
 exports.getLatestCapture = async (req, res) => {
+  const deviceId = req.params.deviceId;
   try {
     if (!fs.existsSync(CAPTURE_DIR)) {
       fs.mkdirSync(CAPTURE_DIR, { recursive: true });
@@ -56,6 +57,7 @@ exports.getLatestCapture = async (req, res) => {
     // Baca semua file gambar
     const files = fs.readdirSync(CAPTURE_DIR)
       .filter(file => /\.(jpg|jpeg|png)$/i.test(file))
+      .filter(file => file.includes(`_${deviceId}_`))
       .map(file => {
         const filePath = path.join(CAPTURE_DIR, file);
         const stats = fs.statSync(filePath);
@@ -85,8 +87,9 @@ exports.getLatestCapture = async (req, res) => {
       return resSuccess({ res, title: "No captures found", data: null });
     }
 
-    // Return foto terbaru (sudah di-sort)
-    return resSuccess({ res, title: "Latest capture retrieved", data: files[0] });
+    // Jangan expose absolute filesystem path ke browser.
+    const { fullPath, ...latestCapture } = files[0];
+    return resSuccess({ res, title: "Latest capture retrieved", data: latestCapture });
   } catch (error) {
     return resError({ res, title: "Failed to get latest capture", errors: error.message });
   }

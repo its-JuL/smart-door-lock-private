@@ -6,7 +6,7 @@ generator client {
 }
 
 generator dbml {
-  provider = "prisma-dbml-generator"
+  provider = "node ./node_modules/prisma-dbml-generator/dist/generator.js"
 }
 
 datasource db {
@@ -164,8 +164,9 @@ model Device {
   updatedAt         DateTime      @updatedAt
   roomId            String?       @unique
   room              Room?         @relation(fields: [roomId], references: [id], onDelete: SetNull)
-  Gateway_Spot      Gateway_Spot? @relation(fields: [gateway_SpotId], references: [id])
+  Gateway_Spot      Gateway_Spot?    @relation(fields: [gateway_SpotId], references: [id])
   gateway_SpotId    String?
+  accessRecords     Rooms_Records[]
 }
 
 model Gateway_Device {
@@ -210,14 +211,21 @@ model Rooms_Records {
   unregisteredCard     String?
   room                 Room?                 @relation(fields: [roomId], references: [id], onDelete: SetNull)
   roomId               String?
+  device               Device?               @relation(fields: [deviceId], references: [device_id], onDelete: SetNull)
+  deviceId             String?
   user                 User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
   userId               String?
   Card                 Card?                 @relation(fields: [cardId], references: [id], onDelete: SetNull)
   cardId               String?
   authenticationMethod AUTHENTICATION_METHOD @default(UNKNOWN)
   isSuccess            Boolean               @default(false)
+  detail               String?
+  capturePath          String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
+
+  @@index([deviceId, createdAt])
+  @@index([authenticationMethod, isSuccess, createdAt])
 }
 
 enum AUTHENTICATION_METHOD {

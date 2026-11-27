@@ -73,6 +73,13 @@ router.get(
     dashboard.faceRecognition
 );
 router.get(
+    "/authentication/history",
+    loginRequired,
+    allowedRole("ADMIN", "OPERATOR"),
+    accountIsVerified,
+    dashboard.authenticationHistory
+);
+router.get(
     "/user/list",
     loginRequired,
     allowedRole("ADMIN", "OPERATOR"),
