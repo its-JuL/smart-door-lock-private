@@ -12,6 +12,7 @@ Login sebagai **Admin** atau **Operator**, buka Dashboard, lalu tekan menu **Aut
 | PIN | `/dashboard/pin/list` | `views/pinList.handlebars` |
 | Fingerprint | `/dashboard/fingerprint/list` | `views/fingerprintList.handlebars` |
 | Face Recognition | `/dashboard/face-recognition` | `views/faceRecognition.handlebars` |
+| Riwayat | `/dashboard/authentication/history` | `views/authenticationHistory.handlebars` |
 
 ## Lokasi kode
 

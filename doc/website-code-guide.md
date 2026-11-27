@@ -40,7 +40,7 @@ Halaman detail ruang adalah contoh pembagian kode yang sengaja dipertahankan. Co
 
 Keempat file dapat berbagi elemen DOM dan variabel global berdasarkan urutan tersebut. Jangan menggabungkan atau memecahnya kembali kecuali dependensi halaman sudah diperiksa.
 
-Halaman PIN, fingerprint, dan face recognition memakai helper `authenticationPage` dalam `app_dashboard/dashboardControllers.js`. Ketiganya menggunakan `views/pinList.handlebars`, `views/fingerprintList.handlebars`, atau `views/faceRecognition.handlebars`, serta frontend bersama `/js/credentials.js`.
+Halaman PIN, fingerprint, dan face recognition memakai helper `authenticationPage` dalam `app_dashboard/dashboardControllers.js`. Ketiganya menggunakan `views/pinList.handlebars`, `views/fingerprintList.handlebars`, atau `views/faceRecognition.handlebars`, serta frontend bersama `/js/credentials.js`. Halaman face recognition menyertakan pemilih perangkat kamera (`#face-preview-device`), dan halaman riwayat autentikasi terpadu (`views/authenticationHistory.handlebars` serta `/js/authenticationHistory.js`) melacak rekaman autentikasi lintas perangkat dan metode.
 
 ## Konvensi Perubahan Aman
 

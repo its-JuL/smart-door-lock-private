@@ -1,85 +1,157 @@
-> # SMART DOOR LOCK
+# Smart Door Lock - Panduan Menjalankan Sistem Lokal
 
-Sistem backend dan fronted untuk sistem smart door lock. Dokumentasi ini diharapkan bisa menjadi panduan untuk pengembangan aplikasi dimasa depan.
+Dokumentasi ini menjelaskan arsitektur sistem dan langkah lengkap untuk menjalankan aplikasi Smart Door Lock di lingkungan lokal (Node.js, PostgreSQL/Prisma, MQTT broker, dan service Face Recognition Python).
 
 ---
 
-Dokumentasi ini akan membahasa beberapa hal diantaranya teknologi inti yang digunakan. Penjelasan arsitekutur sistem dan sistem routing serta file, cara menjalankan server dan masih banyak lagi.
+## 1. Prasyarat Sistem
 
-## Daftar Isi
+Pastikan perangkat lokal sudah terpasang:
+- **Node.js** (rekomendasi LTS / v20+) dan **yarn**
+- **PostgreSQL** (default port 5432)
+- **Python** (v3.10 - 3.12 untuk service face recognition)
+- **MQTT Broker** (misal Eclipse Mosquitto pada port 1883/1884 jika ingin menguji komunikasi hardware/sensor live)
 
-1. [Arsitektur Sistem](#arsitektur-sistem)
-2. [Menjalankan Server](#menjalankan-server)
+---
 
-## Arsitektur Sistem
+## 2. Struktur Arsitektur Singkat
 
-Sistem beckend **Smart Door Lock** mengikuti arsitektur MVC (Model - View - Controler). Arsitektur ini dipilih karena akan memudahkan separasi fungsi yang nantinya akan memudahkan pengembangan aplikasi dan memudahkan proses pembacaan kode. Adapun gambaran struktur MVC yang digunakan pada sistem kali ini adalah.
+Aplikasi ini menggunakan pola layered MVC dengan integrasi IoT:
+- **`app.js`**: Entry point Express, Socket.IO, session, aset statis, dan inisialisasi koneksi MQTT logger.
+- **`router.js`**: Router utama aplikasi yang membagi lalu lintas ke:
+  - UI Dashboards (`/dashboard`, `/auth`, `/profile`, `/`)
+  - REST API (`/api/v1/*`, `/api/v2/*`)
+- **`prisma/`**: Schema ORM (`schema.prisma`), migrasi PostgreSQL, wrapper client, dan script bootstrap akun superadmin (`createSuperAdmin.js`).
+- **`services/`**: Normalisasi access record, logger MQTT, layout selector, email transporter, dan operator scope.
+- **`services/faceRecognition/`**: Worker Python independen untuk deteksi (MTCNN) dan inferensi wajah via MQTT.
+- **`capture/`**: Penyimpanan foto tangkapan kamera untuk verifikasi autentikasi wajah (diekspos secara web-relative via `/capture/<filename>`).
 
+---
+
+## 3. Konfigurasi Environment (`.env`)
+
+Buat atau sesuaikan file `.env` di root folder proyek:
+
+```env
+PORT=8000
+NODE_ENV=development
+SECRET=kunci_rahasia_jwt_session_lokal_anda
+
+# Koneksi PostgreSQL Lokal
+DATABASE_URL="postgresql://postgres:password_anda@localhost:5432/doorlock_db?schema=public"
+
+# Koneksi MQTT Broker (sesuaikan dengan broker lokal atau VPS development)
+MQTT_HOST=127.0.0.1
+MQTT_PORT=1883
+MQTT_USERNAME=smart-doorlock
+MQTT_PASSWORD=password_broker_anda
+
+# Konfigurasi Mailer (opsional di dev, fallback ke mock/console)
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_SECURE=false
+MAIL_USER=email_anda@gmail.com
+MAIL_SECRET=app_password_anda
+MAIL_FROM=email_anda@gmail.com
 ```
-project
-│   app.js
-│   router.js
-└───api
-|   |   controler.js
-|   |   router.js
-└───prisma (database)
-|   |   schema
-```
 
-Setiap service/layanan yang dibuat nantinya akan di tempatkan dalam sebuah folder yang diawali dengan kata `api` atau `app` dan diikuti dengan nama yang mewakili fungsi atau layanan didalamnya. Seperti `api_user` yang akan memuat fungsi-fungsi terkait dengan sistem user (cth: login, register, logout). Di dalam folder tersebut akan dua file yang befungsi sebagi pengatur **view** dan **controler**. **controler** merupakan sebuah url dispatcher atau pengatur rute ketika user memasukan alamat tertentu, pada sistem kali ini **controler** akan direpresentasikan oleh file `router.js`. Sedangkan **view** merupakan sekumpulan fungsi yang akan menampilkan suatu hasil yang bisa dimengerti oleh user. Pada sistem kali ini **view** akan direpresentasikan oleh file `controller.js`.
+---
 
-File [`app.js`](app.js) merupakan file utama yang menampung fungsi-fungsi utama untuk menjalankan server.
+## 4. Langkah Menjalankan Aplikasi Secara Lokal
 
-File [`router.js`](router.js) merupakan file yang akan menampung semua fungsi router dari setiap service.
-
-Folder [`prisma`](prisma) merupakan folder model atau database, di dalamnya terdapat sebuah file penting bernama [`scheme.primsa`](prisma/schema.prisma) yang merepresentasikan struktur database yang digunakan. Untuk versi 1.0 versi database yang digunakan sebagai berikut.
-
-![struktur database](doc/Smart%20Door%20AIO.png)
-
-Selain folder dan file-file utama yang telah disebutkan sebelumnya terdapat beberapa file pendukung seperti:
-
-## Menjalankan Server
-
-Hal pertama yang harus dilakukan untuk mengembangkan sistem ini adalah melakukan clonning dari repositori smart door lock. Setelah berhasil melakukan cloning repositori terdapat beberapa library yang harus diinstal terlebih dahulu. Instalasi program tersebut dapat dilakukan dengan npm atau yarn. Dalam dokumentasi sistem ini semua interaksi dengan command line akan menggunkan yarn. Lihat tata cara instalasi dan penggunaan yarn [disini](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable). Setelah menginstal yarn proses berikutnya adalah menginstal library. Library yang diperlukan dapat diinstal dengan perintah.
-
-```shell
+### Langkah 1: Install Dependensi Node.js
+```bash
 yarn install
 ```
 
-Setelah semua library terinstal, hal berikutnya yang perlu dilakukan adalah migrasi database. Pastikan database server sudah menyala dan siap digunakan. Atur cridential untuk menghubungkan database pada variable `DATBASE_URL` yang terletak pada file [.env](.env). Atur tipe database yang digunakan diikuti dengan username, password, port yang digunakan dan nama database yang akan dibuat atau digunakan. Setelah pengaturan `DATBASE_URL` selesai proses berikutnya adalah melakukan mighrasi. Migrasi dapat dilakukan dengan menggunakan perintah berikut ini:
+### Langkah 2: Setup Database & Prisma
+Pastikan service database PostgreSQL aktif dan database `doorlock_db` sudah dibuat, lalu jalankan:
 
-```shell
-yarn db:migrate
-```
+```bash
+# Validasi schema prisma
+yarn prisma validate
 
-Perintah di atas hanya digunakan ketika proses development berlangsung. Jika proses development sudah selesai dan sudah memasuki mode deployment maka command yang digunakan adalah:
-
-```shell
+# Terapkan migrasi terbaru ke database lokal
 yarn db:deploy
+
+# Generate Prisma Client & DBML
+yarn db:generate
 ```
 
-Atau dapat menggunakan berbagai macam command yang telah disedeiakan _prisma_. Referensi seluruh command dapat dilihat melalui [tautan berikut ini](https://www.prisma.io/docs/reference/api-reference/command-reference). Untuk melihat tampilan database dengan user interface dapat menggunakan command berikut ini:
-
-```shell
-yarn db:studio
+*Catatan:* Jika database masih baru/kosong dan memerlukan inisialisasi akun Superadmin default:
+```bash
+yarn db:create
 ```
 
-Setelah migrasi berhasil, hal yang perlu diperhatiikan adalah proses seeding, atau membuat data dummy untuk superadmin ketika server pertama kali di jalankan. Ingat proses ini hanya perlu dilakukan sekali saja. Untuk melakukan seeding command yang digunakan adalah:
+### Langkah 3: Menjalankan Backend Node.js
+Gunakan salah satu perintah berikut:
 
-```shell
-yarn prisma db seed
-```
-
-Setelah migrasi dan seeding sukses dilakukan, proses berikutnya adalah menjalankan server di development mode. Command yang digunakan adalah:
-
-```shell
+```bash
+# Mode development dengan hot-reload
 yarn dev
-```
 
-or
-
-```shell
+# Mode watch (backend + aset template)
 yarn watch
-```
 
-Perintah `yarn dev` hanya akan merefresh backend server ketika terjadi perubahan. Sedangkan `yarn watch` akan melakukan refresh pada backend server beserta dengan user interface.
+# Mode produksi langsung
+yarn start
+```
+Server akan berjalan di `http://localhost:8000`.
+
+---
+
+## 5. Menjalankan Service Face Recognition (Python)
+
+Jika ingin menguji alur autentikasi dan registrasi wajah:
+
+1. Buka terminal baru dan masuk ke direktori service:
+   ```bash
+   cd services/faceRecognition
+   ```
+2. Buat dan aktifkan virtual environment (opsional tetapi direkomendasikan):
+   ```bash
+   python -m venv venv
+   # Di Windows:
+   venv\Scripts\activate
+   # Di Linux/macOS:
+   source venv/bin/activate
+   ```
+3. Install dependensi Python:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Jalankan service:
+   ```bash
+   python face_recognition_service.py
+   ```
+
+Service ini akan berlangganan ke topik MQTT kamera, memproses frame capture, menyimpan bukti tangkapan ke folder `capture/`, dan mempublikasikan status hasil autentikasi.
+
+---
+
+## 6. Fitur Baru: Riwayat Autentikasi & Seleksi Kamera
+
+1. **Riwayat Terpadu:**
+   - Halaman: `/dashboard/authentication/history`
+   - Hanya dapat diakses oleh role **SUPERADMIN (ADMIN)** dan **OPERATOR**.
+   - Menampilkan catatan autentikasi berhasil maupun gagal untuk seluruh metode (RFID, PIN, Fingerprint, Face).
+   - Mendukung filter waktu, metode autentikasi, status (berhasil/gagal), dan identitas hardware.
+   - Menyertakan detail alasan (misal `unknown_face`, `invalid_pin`) dan tautan bukti capture wajah bila tersedia.
+
+2. **Dropdown / Search Hardware Kamera:**
+   - Pada halaman `/dashboard/face-recognition`, preview foto mewajibkan pemilihan hardware aktif terlebih dahulu.
+   - Endpoint capture bersifat aman dan terisolasi per perangkat: `/api/v1/face/latest-capture/:deviceId`.
+
+---
+
+## 7. Pengujian (Testing)
+
+Sebelum melakukan commit atau deployment, selalu jalankan pengujian:
+
+```bash
+# Full test suite Node.js
+node --test test/*.test.js
+
+# Test kontrak Face Recognition (Python)
+python -m unittest services/faceRecognition/tests/test_face_mqtt_contract.py
+```
